@@ -79,41 +79,80 @@ const Cie10Modal = ({ cie10Info, open, onOpenChange, isLoading }: { cie10Info: C
   );
 };
 
-const ProceduresDetailModal = ({ open, onOpenChange, procedures }: { open: boolean, onOpenChange: (open: boolean) => void, procedures: any[] }) => {
+interface ProceduresDetail {
+  all: any[];
+  topUsers: { userId: string; count: number }[];
+}
+
+const ProceduresDetailModal = ({ open, onOpenChange, proceduresDetail }: { open: boolean, onOpenChange: (open: boolean) => void, proceduresDetail: ProceduresDetail | null }) => {
+  if (!proceduresDetail) return null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Detalle de Procedimientos</DialogTitle>
         </DialogHeader>
-        <div className="flex-grow overflow-hidden">
-          <ScrollArea className="h-full">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Usuario</TableHead>
-                  <TableHead>Cod. Procedimiento</TableHead>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead className="text-right">Valor</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {procedures.map((p, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{p.userId}</TableCell>
-                    <TableCell>{p.codProcedimiento}</TableCell>
-                    <TableCell>{new Date(p.fechaInicioAtencion).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-right">{`$${p.vrServicio.toLocaleString()}`}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </ScrollArea>
-        </div>
-        <DialogFooter>
-          <Button variant="secondary" onClick={() => handleDownloadXls(procedures, 'detalle_procedimientos.xls')}>
+        <Tabs defaultValue="detail" className="flex-grow flex flex-col overflow-hidden">
+            <TabsList className="shrink-0">
+                <TabsTrigger value="detail">Detalle Completo ({proceduresDetail.all.length})</TabsTrigger>
+                <TabsTrigger value="top-users">Top Usuarios ({proceduresDetail.topUsers.length})</TabsTrigger>
+            </TabsList>
+            <TabsContent value="detail" className="flex-grow overflow-hidden">
+                 <ScrollArea className="h-full">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Usuario</TableHead>
+                          <TableHead>Cod. Procedimiento</TableHead>
+                          <TableHead>Fecha</TableHead>
+                          <TableHead className="text-right">Valor</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {proceduresDetail.all.map((p, index) => (
+                          <TableRow key={index}>
+                            <TableCell>{p.userId}</TableCell>
+                            <TableCell>{p.codProcedimiento}</TableCell>
+                            <TableCell>{new Date(p.fechaInicioAtencion).toLocaleDateString()}</TableCell>
+                            <TableCell className="text-right">{`$${p.vrServicio.toLocaleString()}`}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </ScrollArea>
+            </TabsContent>
+             <TabsContent value="top-users" className="flex-grow overflow-hidden">
+                  <ScrollArea className="h-full">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>#</TableHead>
+                          <TableHead>ID Usuario</TableHead>
+                          <TableHead className="text-right">Cantidad de Procedimientos</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {proceduresDetail.topUsers.map((user, index) => (
+                          <TableRow key={user.userId}>
+                            <TableCell>{index + 1}</TableCell>
+                            <TableCell>{user.userId}</TableCell>
+                            <TableCell className="text-right font-bold">{user.count}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </ScrollArea>
+             </TabsContent>
+        </Tabs>
+        <DialogFooter className="mt-4">
+           <Button variant="secondary" onClick={() => handleDownloadXls(proceduresDetail.all, 'detalle_procedimientos.xls')}>
             <Download className="mr-2 h-4 w-4"/>
-            Descargar
+            Descargar Detalle
+          </Button>
+           <Button variant="secondary" onClick={() => handleDownloadXls(proceduresDetail.topUsers, 'top_usuarios_procedimientos.xls')}>
+            <Download className="mr-2 h-4 w-4"/>
+            Descargar Top Usuarios
           </Button>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cerrar</Button>
         </DialogFooter>
@@ -265,7 +304,7 @@ export default function DataVisualizer({ data }: DataVisualizerProps) {
   const [cie10Info, setCie10Info] = useState<Cie10Description | null>(null);
   const [isCie10ModalOpen, setIsCie10ModalOpen] = useState(false);
   const [isCie10Loading, setIsCie10Loading] = useState(false);
-  const [proceduresDetail, setProceduresDetail] = useState<any[]>([]);
+  const [proceduresDetail, setProceduresDetail] = useState<ProceduresDetail | null>(null);
   const [isProceduresModalOpen, setIsProceduresModalOpen] = useState(false);
 
 
@@ -294,16 +333,33 @@ export default function DataVisualizer({ data }: DataVisualizerProps) {
 
   const handleProceduresDoubleClick = () => {
     if (!data || !data.usuarios) return;
+    
     const allProcedures: any[] = [];
+    const userProcedureCounts: Record<string, number> = {};
+
     data.usuarios.forEach((user: any) => {
       const userId = `${user.tipoDocumentoIdentificacion}-${user.numDocumentoIdentificacion}`;
+      const proceduresCount = user.servicios?.procedimientos?.length || 0;
+      
+      if (proceduresCount > 0) {
+          userProcedureCounts[userId] = (userProcedureCounts[userId] || 0) + proceduresCount;
+      }
+
       if (user.servicios?.procedimientos) {
         user.servicios.procedimientos.forEach((proc: any) => {
           allProcedures.push({ ...proc, userId });
         });
       }
     });
-    setProceduresDetail(allProcedures);
+
+    const topUsers = Object.entries(userProcedureCounts)
+        .map(([userId, count]) => ({ userId, count }))
+        .sort((a, b) => b.count - a.count);
+
+    setProceduresDetail({
+        all: allProcedures,
+        topUsers: topUsers
+    });
     setIsProceduresModalOpen(true);
   };
 
@@ -394,10 +450,12 @@ export default function DataVisualizer({ data }: DataVisualizerProps) {
         <ProceduresDetailModal 
             open={isProceduresModalOpen}
             onOpenChange={setIsProceduresModalOpen}
-            procedures={proceduresDetail}
+            proceduresDetail={proceduresDetail}
         />
     </div>
   );
 }
+
+    
 
     
