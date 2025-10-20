@@ -149,46 +149,44 @@ export const calculateCupCounts = (jsonData: any): CupCountsMap => {
         const userId = `${user.tipoDocumentoIdentificacion}-${user.numDocumentoIdentificacion}`;
         if (!userId || userId === '-') return;
 
-        // De-duplicate procedures for this user
-        const uniqueProcedures = new Set<string>();
-        const deDupedProcedures: any[] = [];
-        if (user.servicios?.procedimientos) {
-            user.servicios.procedimientos.forEach((proc: any) => {
-                const uniqueKey = `${proc.codProcedimiento}|${proc.fechaInicioAtencion}`;
-                if (!uniqueProcedures.has(uniqueKey)) {
-                    uniqueProcedures.add(uniqueKey);
-                    deDupedProcedures.push({...proc, __is_deduped: true, __quantity: 1});
-                } else {
-                    // Still add it for value calculation, but mark it to not count towards frequency
-                    deDupedProcedures.push({...proc, __is_deduped: false, __quantity: 0});
-                }
-            });
-        }
-        
-        const processServices = (services: any[], codeField: string, diagField: string, qtyField?: string, valueField: string = 'vrServicio', unitValueField?: string) => {
+        const processServices = (services: any[], codeField: string, diagField: string, isProcedure = false, qtyField?: string, valueField: string = 'vrServicio', unitValueField?: string) => {
             if (!services) return;
+
+            const uniqueProceduresForUser = new Set<string>();
+
             services.forEach(service => {
                 const code = service[codeField];
                 if (!code) return;
 
-                if (!counts.has(code)) {
-                    counts.set(code, { total: 0, diagnoses: new Map(), totalValue: 0, uniqueUsers: new Set() });
-                }
-                const cupData = counts.get(code)!;
-                
-                // Use pre-calculated quantity for de-duplicated procedures, otherwise use qtyField or default to 1.
-                const quantity = service.__quantity !== undefined ? service.__quantity : (qtyField ? getNumericValue(service[qtyField]) : 1);
-                
+                let quantity = 1;
                 let value = 0;
-                // For de-duplicated items, always calculate value, even if quantity is 0
-                const valueQuantity = qtyField ? getNumericValue(service[qtyField]) : 1;
+
+                if (isProcedure) {
+                    const uniqueKey = `${service.codProcedimiento}|${service.fechaInicioAtencion}`;
+                    if (uniqueProceduresForUser.has(uniqueKey)) {
+                        quantity = 0; // Don't count frequency for duplicates
+                    } else {
+                        uniqueProceduresForUser.add(uniqueKey);
+                        quantity = 1; // Count frequency for the first time
+                    }
+                } else if (qtyField) {
+                     quantity = getNumericValue(service[qtyField]);
+                }
                 
+                // Always calculate value based on original quantity
+                const valueQuantity = qtyField ? getNumericValue(service[qtyField]) : 1;
                 if (unitValueField) {
                     value = valueQuantity * getNumericValue(service[unitValueField]);
                 } else {
                     value = getNumericValue(service[valueField]);
                 }
 
+
+                if (!counts.has(code)) {
+                    counts.set(code, { total: 0, diagnoses: new Map(), totalValue: 0, uniqueUsers: new Set() });
+                }
+                const cupData = counts.get(code)!;
+                
                 cupData.total += quantity;
                 cupData.totalValue += value;
                 cupData.uniqueUsers.add(userId);
@@ -201,10 +199,10 @@ export const calculateCupCounts = (jsonData: any): CupCountsMap => {
         };
 
         if (user.servicios) {
-            processServices(user.servicios.consultas, 'codConsulta', 'codDiagnosticoPrincipal');
-            processServices(deDupedProcedures, 'codProcedimiento', 'codDiagnosticoPrincipal'); // Use de-duplicated list
-            processServices(user.servicios.medicamentos, 'codTecnologiaSalud', 'codDiagnosticoPrincipal', 'cantidadMedicamento', undefined, 'vrUnitarioMedicamento');
-            processServices(user.servicios.otrosServicios, 'codTecnologiaSalud', 'codDiagnosticoPrincipal', 'cantidadOS', 'vrServicio');
+            processServices(user.servicios.consultas, 'codConsulta', 'codDiagnosticoPrincipal', false);
+            processServices(user.servicios.procedimientos, 'codProcedimiento', 'codDiagnosticoPrincipal', true);
+            processServices(user.servicios.medicamentos, 'codTecnologiaSalud', 'codDiagnosticoPrincipal', false, 'cantidadMedicamento', undefined, 'vrUnitarioMedicamento');
+            processServices(user.servicios.otrosServicios, 'codTecnologiaSalud', 'codDiagnosticoPrincipal', false, 'cantidadOS', 'vrServicio');
         }
     });
 
