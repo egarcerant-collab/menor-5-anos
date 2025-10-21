@@ -304,19 +304,43 @@ const ValorizadoDetailModal = ({ open, onOpenChange, data, executionDataByMonth 
     const tableData = useMemo(() => data.filter(row => row.Cantidad_Ejecutada > 0), [data]);
     
     const generateDownloadData = () => {
-        const dataToDownload = tableData.map(row => {
+        // Find the maximum number of users for any single CUPS to determine columns
+        let maxUsers = 0;
+        const usersPerCup: { [cup: string]: string[] } = {};
+
+        tableData.forEach(row => {
             const users = new Set<string>();
             executionDataByMonth.forEach(monthData => {
                 monthData.cupCounts.get(row.CUPS)?.uniqueUsers.forEach(user => {
                     users.add(user);
                 });
             });
-
-            return {
-                ...row,
-                Usuarios_Atendidos: Array.from(users).join(', ')
-            };
+            const userArray = Array.from(users);
+            usersPerCup[row.CUPS] = userArray;
+            if (userArray.length > maxUsers) {
+                maxUsers = userArray.length;
+            }
         });
+
+        // Generate the data for download
+        const dataToDownload = tableData.map(row => {
+            const baseData = {
+                CUPS: row.CUPS,
+                Descripcion: row.Descripcion,
+                Cantidad_Ejecutada: row.Cantidad_Ejecutada,
+                Valor_Unitario_NT: row.Valor_Unitario,
+                Valor_Ejecutado: row.Valor_Ejecutado,
+            };
+
+            const userColumns: { [key: string]: string } = {};
+            const users = usersPerCup[row.CUPS] || [];
+            for (let i = 0; i < maxUsers; i++) {
+                userColumns[`Usuario_${i + 1}`] = users[i] || '';
+            }
+
+            return { ...baseData, ...userColumns };
+        });
+
         return dataToDownload;
     };
 
@@ -1191,6 +1215,7 @@ export default PgPsearchForm;
     
 
     
+
 
 
 
