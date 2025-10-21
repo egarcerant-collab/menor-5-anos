@@ -289,30 +289,31 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({ data, executionDataByMo
         setComments(prev => ({ ...prev, [currentCupForComment]: comment }));
       }
     };
-
+    
+    // KPIs Calculations based on filtered data
     const totalEjecutadoBruto = useMemo(() => {
-        return data.reduce((sum, row) => sum + row.Valor_Ejecutado, 0);
-    }, [data]);
+        return filteredData.reduce((sum, row) => sum + row.Valor_Ejecutado, 0);
+    }, [filteredData]);
     
     const totalEjecutadoAjustado = useMemo(() => {
-      return data.reduce((sum, row) => {
+      return filteredData.reduce((sum, row) => {
         const validatedQuantity = adjustedQuantities[row.CUPS] ?? row.Cantidad_Ejecutada;
         return sum + validatedQuantity * row.Valor_Unitario;
       }, 0);
-    }, [data, adjustedQuantities]);
+    }, [filteredData, adjustedQuantities]);
 
     const descuentoAplicado = useMemo(() => {
-        const totalDiscount = data.reduce((sum, row) => {
+        const totalDiscount = filteredData.reduce((sum, row) => {
             if (selectedRows[row.CUPS]) {
-                const validatedQuantity = adjustedQuantities[row.CUPS] ?? row.Cantidad_Ejecutada;
-                const recalculatedValorReconocer = validatedQuantity * row.Valor_Unitario;
-                const discountValue = row.Valor_Ejecutado - recalculatedValorReconocer;
-                return sum + (discountValue > 0 ? discountValue : 0);
+                 const validatedQuantity = adjustedQuantities[row.CUPS] ?? row.Cantidad_Ejecutada;
+                 const recalculatedValorReconocer = validatedQuantity * row.Valor_Unitario;
+                 const discountValue = row.Valor_Ejecutado - recalculatedValorReconocer;
+                 return sum + (discountValue > 0 ? discountValue : 0);
             }
             return sum;
         }, 0);
         return totalDiscount;
-    }, [data, selectedRows, adjustedQuantities]);
+    }, [filteredData, selectedRows, adjustedQuantities]);
     
     const valorNetoFinal = useMemo(() => totalEjecutadoBruto - descuentoAplicado, [totalEjecutadoBruto, descuentoAplicado]);
 
@@ -558,6 +559,7 @@ export default DiscountMatrix;
     
 
     
+
 
 
 
