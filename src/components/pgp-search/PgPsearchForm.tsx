@@ -300,9 +300,18 @@ const handleDownloadXls = (data: any[], filename: string) => {
 };
 
 
-const ValorizadoDetailModal = ({ open, onOpenChange, data, executionDataByMonth }: { open: boolean, onOpenChange: (open: boolean) => void, data: MatrizEjecucionRow[], executionDataByMonth: ExecutionDataByMonth }) => {
+const ValorizadoDetailModal = ({ open, onOpenChange, data, executionDataByMonth, pgpData }: { open: boolean, onOpenChange: (open: boolean) => void, data: MatrizEjecucionRow[], executionDataByMonth: ExecutionDataByMonth, pgpData: PgpRow[] }) => {
     const tableData = useMemo(() => data.filter(row => row.Cantidad_Ejecutada > 0), [data]);
     
+    const pgpCupsMap = useMemo(() => {
+        const map = new Map<string, PgpRow>();
+        pgpData.forEach(row => {
+            const cup = findColumnValue(row, ['cup/cum', 'cups']);
+            if(cup) map.set(String(cup), row);
+        });
+        return map;
+    }, [pgpData]);
+
     const generateDownloadData = () => {
         const dataToDownload: any[] = [];
 
@@ -316,21 +325,32 @@ const ValorizadoDetailModal = ({ open, onOpenChange, data, executionDataByMonth 
                 const processServicesForDownload = (services: any[], type: string, codeField: string, valueField: string, unitValueField?: string, qtyField?: string) => {
                     if (!services) return;
                     services.forEach((service: any) => {
-                        let serviceValue = 0;
+                        const cupCode = service[codeField];
+                        if (!cupCode) return;
+
+                        const pgpRow = pgpCupsMap.get(cupCode);
+                        const valorUnitarioNT = pgpRow ? getNumericValue(findColumnValue(pgpRow, ['valor unitario'])) : 0;
+                        const cantidadEjecutada = qtyField ? getNumericValue(service[qtyField]) : 1;
+                        const valorEjecutadoNT = cantidadEjecutada * valorUnitarioNT;
+                        
+                        let serviceValueFromJson = 0;
                         if (unitValueField && qtyField) {
-                            serviceValue = getNumericValue(service[unitValueField]) * getNumericValue(service[qtyField]);
+                            serviceValueFromJson = getNumericValue(service[unitValueField]) * getNumericValue(service[qtyField]);
                         } else {
-                            serviceValue = getNumericValue(service[valueField]);
+                            serviceValueFromJson = getNumericValue(service[valueField]);
                         }
 
                         dataToDownload.push({
                             Mes: monthName,
                             ID_Usuario: userId,
                             Tipo_Servicio: type,
-                            CUPS: service[codeField],
+                            CUPS: cupCode,
                             Fecha_Atencion: service.fechaInicioAtencion ? new Date(service.fechaInicioAtencion).toLocaleDateString() : 'N/A',
                             Diagnostico_Principal: service.codDiagnosticoPrincipal,
-                            Valor_Servicio: serviceValue
+                            Valor_Servicio_JSON: serviceValueFromJson,
+                            Cantidad_Ejecutada: cantidadEjecutada,
+                            Valor_Unitario_NT: valorUnitarioNT,
+                            Valor_Ejecutado_NT: valorEjecutadoNT
                         });
                     });
                 };
@@ -1205,6 +1225,7 @@ const PgPsearchForm: React.FC<PgPsearchFormProps> = ({ executionDataByMonth, jso
                 onOpenChange={setIsValorizadoModalOpen}
                 data={comparisonSummary.Matriz_Ejecucion_vs_Esperado}
                 executionDataByMonth={executionDataByMonth}
+                pgpData={pgpData}
             />
         )}
       </CardContent>
@@ -1218,6 +1239,7 @@ export default PgPsearchForm;
     
 
     
+
 
 
 
