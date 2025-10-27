@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useMemo, useState, useRef, useEffect } from "react";
@@ -23,7 +22,7 @@ import {
 } from "recharts";
 import { descargarInformePDF, type InformeDatos, generarURLInformePDF } from "@/lib/pdf-definitions";
 import type { DeviatedCupInfo, ComparisonSummary, UnexpectedCupInfo, AdjustedData } from "@/components/pgp-search/PgPsearchForm";
-import { generateReportAnalysis } from "@/ai/flows/generate-report-analysis-flow";
+import { generateReportAnalysis, type ReportAnalysisInput } from "@/ai/flows/generate-report-analysis-flow";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
@@ -62,6 +61,7 @@ export interface ReportData {
     anticipos: number;
     totalPagar: number;
     totalFinal: number;
+    descuentoAplicado: number;
   };
   overExecutedCups?: DeviatedCupInfo[];
   underExecutedCups?: DeviatedCupInfo[];
@@ -70,24 +70,6 @@ export interface ReportData {
   adjustedData?: AdjustedData;
 }
 
-interface ReportAnalysisInput {
-    sumaMensual: number;
-    valorNotaTecnica: number;
-    diffVsNota: number;
-    porcentajeEjecucion: number;
-    totalCups: number;
-    unitAvg: number;
-    overExecutedCount: number;
-    unexpectedCount: number;
-    overExecutedCups: (DeviatedCupInfo & { comment?: string })[];
-    underExecutedCups: DeviatedCupInfo[];
-    missingCups: DeviatedCupInfo[];
-    unexpectedCups: UnexpectedCupInfo[];
-    valorNetoFinal: number; 
-    descuentoAplicado: number;
-    additionalConclusions?: string;
-    additionalRecommendations?: string;
-}
 
 interface ReportAnalysisOutput {
   financialAnalysis: string;
@@ -203,10 +185,7 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
   const sumaMensual = useMemo(() => data?.months.reduce((acc, m) => acc + m.valueCOP, 0) ?? 0, [data?.months]);
   const totalCups = useMemo(() => data?.months.reduce((a, m) => a + m.cups, 0) ?? 0, [data?.months]);
   
-  const descuentoAplicadoTotal = useMemo(() => {
-    if (!data || !data.adjustedData) return 0;
-    return Object.values(data.adjustedData.adjustedValues || {}).reduce((sum, val) => sum + val, 0);
-  }, [data]);
+  const descuentoAplicadoTotal = useMemo(() => data?.notaTecnica?.descuentoAplicado ?? 0, [data?.notaTecnica]);
   
   const valorNetoFinalAuditoria = useMemo(() => data?.notaTecnica?.totalPagar ?? 0, [data]);
 
@@ -478,6 +457,9 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
                   <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `$${new Intl.NumberFormat("es-CO", { notation: "compact" }).format(v as number)}`} />
                   <Tooltip formatter={(value) => formatCOP(value as number)} />
                   <Bar dataKey="Valor" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                   {valorNotaTecnica > 0 && data && data.months.length > 0 && (
+                     <ReferenceLine y={valorNotaTecnica / data.months.length} label="NT Promedio" stroke="red" strokeDasharray="3 3" />
+                   )}
                 </BarChart>
               </ResponsiveContainer>
             </div>
