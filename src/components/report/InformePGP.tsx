@@ -21,7 +21,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { descargarInformePDF, type InformeDatos, generarURLInformePDF } from "@/lib/pdf-definitions";
-import type { DeviatedCupInfo, UnexpectedCupInfo, AdjustedData } from "@/components/pgp-search/PgPsearchForm";
+import type { DeviatedCupInfo, UnexpectedCupInfo, AdjustedData, ReportData as ReportDataType } from "@/components/pgp-search/PgPsearchForm";
 import { generateReportAnalysis, type ReportAnalysisInput } from "@/ai/flows/generate-report-analysis-flow";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "../ui/textarea";
@@ -51,24 +51,7 @@ export interface ReportHeader {
   responsable3?: { nombre: string; cargo: string };
 }
 
-export interface ReportData {
-  header: ReportHeader;
-  months: MonthExecution[];
-  notaTecnica?: {
-    min90: number;
-    valor3m: number;
-    max110: number;
-    anticipos: number;
-    totalPagar: number;
-    totalFinal: number;
-    descuentoAplicado: number;
-  };
-  overExecutedCups?: DeviatedCupInfo[];
-  underExecutedCups?: DeviatedCupInfo[];
-  missingCups?: DeviatedCupInfo[];
-  unexpectedCups?: UnexpectedCupInfo[];
-  adjustedData?: AdjustedData;
-}
+export interface ReportData extends ReportDataType {}
 
 interface ReportAnalysisOutput {
   financialAnalysis: string;
