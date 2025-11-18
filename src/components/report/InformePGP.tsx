@@ -22,7 +22,7 @@ import {
 } from "recharts";
 import { descargarInformePDF, type InformeDatos, generarURLInformePDF } from "@/lib/pdf-definitions";
 import type { DeviatedCupInfo, UnexpectedCupInfo, AdjustedData, ReportData as ReportDataType } from "@/components/pgp-search/PgPsearchForm";
-import { generateReportAnalysis, type ReportAnalysisInput } from "@/ai/flows/generate-report-analysis-flow";
+import { generateReportAnalysis, type ReportAnalysisInput, ReportAnalysisOutput } from "@/ai/flows/generate-report-analysis-flow";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
@@ -53,12 +53,7 @@ export interface ReportHeader {
 
 export interface ReportData extends ReportDataType {}
 
-interface ReportAnalysisOutput {
-  financialAnalysis: string;
-  epidemiologicalAnalysis: string;
-  deviationAnalysis: string;
-  clinicalAnalysis: string;
-}
+
 
 const EditableTextsModal = ({
     open,
@@ -465,3 +460,5 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
     </div>
   );
 }
+
+    
