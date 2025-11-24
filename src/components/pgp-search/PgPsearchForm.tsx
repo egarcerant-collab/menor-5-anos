@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, TrendingUp, TrendingDown, Target, FileText, Calendar, ChevronDown, Building, BrainCircuit, AlertTriangle, TableIcon, Download, Filter, Search, Users, Wallet, AlertCircle } from "lucide-react";
+import { Loader2, TrendingUp, TrendingDown, Target, FileText, Calendar, ChevronDown, Building, BrainCircuit, AlertTriangle, TableIcon, Download, Filter, Search, Users, Wallet, AlertCircle, Save } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { analyzePgpData } from '@/ai/flows/analyze-pgp-flow';
 import { Separator } from "@/components/ui/separator";
@@ -300,9 +300,7 @@ const handleDownloadXls = (data: any[], filename: string) => {
 };
 
 
-const ValorizadoDetailModal = ({ open, onOpenChange, data, executionDataByMonth, pgpData }: { open: boolean, onOpenChange: (open: boolean) => void, data: MatrizEjecucionRow[], executionDataByMonth: ExecutionDataByMonth, pgpData: PgpRow[] }) => {
-    const tableData = useMemo(() => data.filter(row => row.Cantidad_Ejecutada > 0), [data]);
-    
+const ValorizadoDetailModal = ({ open, onOpenChange, executionDataByMonth, pgpData }: { open: boolean, onOpenChange: (open: boolean) => void, executionDataByMonth: ExecutionDataByMonth, pgpData: PgpRow[] }) => {
     const pgpCupsMap = useMemo(() => {
         const map = new Map<string, PgpRow>();
         pgpData.forEach(row => {
@@ -379,28 +377,11 @@ const ValorizadoDetailModal = ({ open, onOpenChange, data, executionDataByMonth,
                 </DialogHeader>
                 <div className="flex-grow overflow-hidden">
                     <ScrollArea className="h-full">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>CUPS</TableHead>
-                                    <TableHead>Descripción</TableHead>
-                                    <TableHead className="text-center">Cant. Ejecutada</TableHead>
-                                    <TableHead className="text-right">Valor Unitario (NT)</TableHead>
-                                    <TableHead className="text-right">Valor Ejecutado</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {tableData.map((row, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell className="font-mono text-xs">{row.CUPS}</TableCell>
-                                        <TableCell className="text-xs max-w-sm truncate">{row.Descripcion}</TableCell>
-                                        <TableCell className="text-center">{row.Cantidad_Ejecutada}</TableCell>
-                                        <TableCell className="text-right font-mono text-xs">{formatCurrency(row.Valor_Unitario)}</TableCell>
-                                        <TableCell className="text-right font-semibold">{formatCurrency(row.Valor_Ejecutado)}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                       {/* El contenido visual se eliminó para simplificar, la funcionalidad principal es la descarga */}
+                       <div className="p-8 text-center text-muted-foreground">
+                            <p>Esta ventana ahora se utiliza principalmente para generar el informe detallado de descarga.</p>
+                            <p className="mt-2">Haga clic en el botón "Descargar" para obtener el archivo XLS con la ejecución lineal.</p>
+                       </div>
                     </ScrollArea>
                 </div>
                 <DialogFooter>
@@ -575,11 +556,12 @@ const calculateComparison = (pgpData: PgpRow[], executionDataByMonth: ExecutionD
       const totalExpectedFrequency = expectedFrequencyPerMonth * executionDataByMonth.size;
       const unitValue = getNumericValue(findColumnValue(pgpRow, ['valor unitario']));
       const sameDayInfo = calculateSameDayDetections(cup, executionDataByMonth, unitValue);
+      const totalValue = totalRealFrequency * unitValue;
 
       if (totalRealFrequency > 0 || totalExpectedFrequency > 0) {
         const deviation = totalRealFrequency - totalExpectedFrequency;
         const percentage = totalExpectedFrequency > 0 ? (totalRealFrequency / totalExpectedFrequency) : Infinity;
-        const totalValue = totalRealFrequency * unitValue;
+        
         
         let valorReconocer = totalValue;
         let clasificacion = "Ejecución Normal";
@@ -905,6 +887,7 @@ const PgPsearchForm: React.FC<PgPsearchFormProps> = ({ executionDataByMonth, jso
   const [isLookupModalOpen, setIsLookupModalOpen] = useState(false);
   const [isLookupLoading, setIsLookupLoading] = useState(false);
   const [isAnalysisModalOpen, setIsAnalysisModalOpen] = useState(false);
+  const [isGeneratingFinalReport, setIsGeneratingFinalReport] = useState(false);
   const [cie10Info, setCie10Info] = useState<Cie10Description | null>(null);
   const [isCie10ModalOpen, setIsCie10ModalOpen] = useState(false);
   const [isCie10Loading, setIsCie10Loading] = useState(false);
@@ -1080,6 +1063,21 @@ const PgPsearchForm: React.FC<PgPsearchFormProps> = ({ executionDataByMonth, jso
     if (prestadorToLoad) performLoadPrestador(prestadorToLoad);
   };
 
+  const handleGenerateAndSaveReport = () => {
+    // This will trigger the InformePGP component to generate the PDF
+    // We find the button inside the InformePGP component and click it programmatically
+    const generateButton = document.getElementById('generate-pdf-report-button');
+    if (generateButton) {
+      generateButton.click();
+    } else {
+      toast({
+        title: "Error",
+        description: "No se pudo encontrar el botón para generar el informe. Asegúrese de que todos los datos estén cargados.",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     if (!isClient) return;
     const fetchPrestadores = async () => {
@@ -1194,6 +1192,8 @@ const PgPsearchForm: React.FC<PgPsearchFormProps> = ({ executionDataByMonth, jso
                   pgpData={pgpData}
                   onAdjustmentsChange={setAdjustedData}
                   storageKey={localStorageKey}
+                  onGenerateReport={handleGenerateAndSaveReport}
+                  isGeneratingReport={isGeneratingFinalReport}
                 />
 
                 {reportData && <InformePGP data={reportData} />}
@@ -1219,11 +1219,10 @@ const PgPsearchForm: React.FC<PgPsearchFormProps> = ({ executionDataByMonth, jso
             </AlertDialogContent>
         </AlertDialog>
         <AnalysisModal analysis={analysis} isLoading={loadingAnalysis} open={isAnalysisModalOpen} onOpenChange={setIsAnalysisModalOpen} />
-         {comparisonSummary && (
+         {showComparison && comparisonSummary && (
             <ValorizadoDetailModal 
                 open={isValorizadoModalOpen}
                 onOpenChange={setIsValorizadoModalOpen}
-                data={comparisonSummary.Matriz_Ejecucion_vs_Esperado}
                 executionDataByMonth={executionDataByMonth}
                 pgpData={pgpData}
             />
@@ -1239,6 +1238,7 @@ export default PgPsearchForm;
     
 
     
+
 
 
 

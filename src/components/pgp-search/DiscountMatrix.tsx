@@ -7,7 +7,7 @@ import Papa from 'papaparse';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileDown, DollarSign, Filter, Stethoscope, Microscope, Pill, Syringe, WalletCards, TrendingDown, CheckCircle, MessageSquarePlus, Download, Eraser, Wallet } from "lucide-react";
+import { FileDown, DollarSign, Filter, Stethoscope, Microscope, Pill, Syringe, WalletCards, TrendingDown, CheckCircle, MessageSquarePlus, Download, Eraser, Wallet, Save, Loader2 } from "lucide-react";
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from './PgPsearchForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
@@ -61,6 +61,8 @@ interface DiscountMatrixProps {
   pgpData: any[]; // PgpRow[]
   onAdjustmentsChange: (adjustments: AdjustedData) => void;
   storageKey: string; // Unique key for localStorage
+  onGenerateReport: () => void;
+  isGeneratingReport: boolean;
 }
 
 const handleDownloadXls = (data: any[], filename: string) => {
@@ -137,7 +139,7 @@ const CommentModal = ({ open, onOpenChange, onSave, initialComment }: {
 };
 
 
-const DiscountMatrix: React.FC<DiscountMatrixProps> = ({ data, executionDataByMonth, pgpData, onAdjustmentsChange, storageKey }) => {
+const DiscountMatrix: React.FC<DiscountMatrixProps> = ({ data, executionDataByMonth, pgpData, onAdjustmentsChange, storageKey, onGenerateReport, isGeneratingReport }) => {
     const [selectedCupForDetail, setSelectedCupForDetail] = useState<DeviatedCupInfo | null>(null);
     const [isCupModalOpen, setIsCupModalOpen] = useState(false);
     const [executionDetails, setExecutionDetails] = useState<any[]>([]);
@@ -465,6 +467,10 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({ data, executionDataByMo
                             </CardDescription>
                         </div>
                          <div className="flex items-center gap-2">
+                            <Button onClick={onGenerateReport} disabled={isGeneratingReport || !data.length} variant="default" size="sm" className="h-8">
+                                {isGeneratingReport ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                Generar y Guardar Informe
+                            </Button>
                              <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                      <Button variant="outline" size="sm" className="h-8">
@@ -559,6 +565,7 @@ export default DiscountMatrix;
     
 
     
+
 
 
 
