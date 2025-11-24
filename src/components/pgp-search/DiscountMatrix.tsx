@@ -447,27 +447,76 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
     };
     
     const generateDownloadData = () => {
-        return filteredData.map(r => {
-            const validatedQuantity = adjustedQuantities[r.CUPS] ?? r.Cantidad_Ejecutada;
-            const recalculatedValorReconocer = validatedQuantity * r.Valor_Unitario;
-            const discountValue = r.Valor_Ejecutado - recalculatedValorReconocer;
+        const discountedServices: any[] = [];
 
-            return {
-                CUPS: r.CUPS,
-                Descripcion: r.Descripcion,
-                Tipo_Servicio: r.Tipo_Servicio,
-                Clasificacion: r.Clasificacion,
-                Cantidad_Esperada: r.expectedFrequency,
-                Cantidad_Ejecutada: r.Cantidad_Ejecutada,
-                Cantidad_Validada: validatedQuantity,
-                Valor_Unitario: r.Valor_Unitario,
-                Valor_Ejecutado: r.Valor_Ejecutado,
-                Valor_a_Reconocer_Ajustado: recalculatedValorReconocer,
-                Valor_a_Descontar_Ajustado: discountValue > 0 ? discountValue : 0,
-                Seleccionado_Para_Descuento: selectedRows[r.CUPS] || false,
-                Comentario_Glosa: comments[r.CUPS] || '',
+        // 1. Determine which CUPS have discounts applied
+        const discountedCups = new Set<string>();
+        filteredData.forEach(row => {
+            if (selectedRows[row.CUPS]) {
+                const executedQty = row.Cantidad_Ejecutada;
+                const validatedQty = adjustedQuantities[row.CUPS] ?? executedQty;
+                if (validatedQty < executedQty) {
+                    discountedCups.add(row.CUPS);
+                }
             }
         });
+        
+        if (discountedCups.size === 0) {
+            toast({
+                title: "Sin descuentos para descargar",
+                description: "Ajusta la 'Cantidad Validada' y selecciona las filas para generar el desglose.",
+            });
+            return [];
+        }
+
+        // 2. Iterate through all raw services to find the ones to be discounted
+        executionDataByMonth.forEach((monthData) => {
+            monthData.rawJsonData.usuarios?.forEach((user: any) => {
+                const userId = `${user.tipoDocumentoIdentificacion}-${user.numDocumentoIdentificacion}`;
+
+                const processServicesForDiscount = (services: any[], codeField: string) => {
+                    if (!services) return;
+                    services.forEach((service: any) => {
+                        const cupCode = service[codeField];
+                        if (discountedCups.has(cupCode)) {
+                             const matrixRow = data.find(r => r.CUPS === cupCode);
+                             if (!matrixRow) return;
+
+                             // This logic assumes discount is applied proportionally, which is a simplification.
+                             // A more complex logic might "not recognize" the last N services.
+                             // For now, we calculate a per-service discount.
+                             const executedQty = matrixRow.Cantidad_Ejecutada;
+                             const validatedQty = adjustedQuantities[cupCode] ?? executedQty;
+                             const discountRatio = (executedQty - validatedQty) / executedQty;
+                             
+                             const originalServiceValue = getNumericValue(service.vrServicio);
+                             const discountAmount = originalServiceValue * discountRatio;
+                             const recognizedValue = originalServiceValue - discountAmount;
+                             
+                             if (discountAmount > 0) {
+                                discountedServices.push({
+                                    'ID Usuario': userId,
+                                    'CUPS': cupCode,
+                                    'Descripción': matrixRow.Descripcion,
+                                    'Fecha Atención': service.fechaInicioAtencion ? new Date(service.fechaInicioAtencion).toLocaleDateString() : 'N/A',
+                                    'Diagnóstico Principal': service.codDiagnosticoPrincipal,
+                                    'Valor Original Servicio': originalServiceValue,
+                                    'Valor a Descontar': discountAmount,
+                                    'Valor Final Reconocido': recognizedValue,
+                                    'Comentario de Glosa': comments[cupCode] || ''
+                                });
+                            }
+                        }
+                    });
+                };
+                
+                processServicesForDiscount(user.servicios?.consultas, 'codConsulta');
+                processServicesForDiscount(user.servicios?.procedimientos, 'codProcedimiento');
+                // Note: Discount logic for 'medicamentos' and 'otros' might need different value calculations
+            });
+        });
+        
+        return discountedServices;
     };
     
     const renderTable = (tableData: DiscountMatrixRow[]) => (
@@ -608,7 +657,12 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
                                     </AlertDialogContent>
                                 </AlertDialog>
 
-                                <Button onClick={() => handleDownloadXls(generateDownloadData(), 'matriz_descuentos_ajustada.xls')} variant="outline" size="sm" className="h-8">
+                                <Button onClick={() => {
+                                    const downloadData = generateDownloadData();
+                                    if(downloadData.length > 0) {
+                                      handleDownloadXls(downloadData, 'desglose_descuentos_aplicados.xls');
+                                    }
+                                  }} variant="outline" size="sm" className="h-8">
                                     <Download className="mr-2 h-4 w-4" />
                                     Descargar
                                 </Button>
