@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useImperativeHandle, forwardRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -26,7 +26,7 @@ import { describeCie10, Cie10Description } from '@/ai/flows/describe-cie10-flow'
 import InformeDesviaciones, { LookedUpCupModal } from '../report/InformeDesviaciones';
 import InformePGP from '../report/InformePGP';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { getNumericValue } from '../app/JsonAnalyzerPage';
+import { getNumericValue, type SavedAuditData } from '../app/JsonAnalyzerPage';
 import { findColumnValue } from '@/lib/matriz-helpers';
 import DiscountMatrix, { type DiscountMatrixRow, type ServiceType, type AdjustedData } from './DiscountMatrix';
 
@@ -139,6 +139,7 @@ interface PgPsearchFormProps {
   executionDataByMonth: ExecutionDataByMonth;
   jsonPrestadorCode: string | null;
   uniqueUserCount: number;
+  initialAuditData: SavedAuditData | null;
 }
 
 const PRESTADORES_SHEET_URL = "https://docs.google.com/spreadsheets/d/10Icu1DO4llbolO60VsdFcN5vxuYap1vBZs6foZ-XD04/edit?gid=0#gid=0";
@@ -874,7 +875,7 @@ const MatrizEjecucionCard = ({ matrizData, onCupClick, onCie10Click, executionDa
 };
 
 
-const PgPsearchForm: React.FC<PgPsearchFormProps> = ({ executionDataByMonth, jsonPrestadorCode, uniqueUserCount }) => {
+const PgPsearchForm: React.FC<PgPsearchFormProps> = ({ executionDataByMonth, jsonPrestadorCode, uniqueUserCount, initialAuditData }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingAnalysis, setLoadingAnalysis] = useState<boolean>(false);
   const [loadingPrestadores, setLoadingPrestadores] = useState<boolean>(true);
@@ -1069,7 +1070,7 @@ const PgPsearchForm: React.FC<PgPsearchFormProps> = ({ executionDataByMonth, jso
     if (prestadorToLoad) performLoadPrestador(prestadorToLoad);
   };
 
-  const handleGenerateAndSaveReport = () => {
+  const handleGenerateReport = () => {
     // This will trigger the InformePGP component to generate the PDF
     // We find the button inside the InformePGP component and click it programmatically
     const generateButton = document.getElementById('generate-pdf-report-button');
@@ -1116,6 +1117,17 @@ const PgPsearchForm: React.FC<PgPsearchFormProps> = ({ executionDataByMonth, jso
       handleSelectPrestador(matchById);
     }
   }, [jsonPrestadorCode, prestadores, loading, selectedPrestador, handleSelectPrestador, toast]);
+  
+  useEffect(() => {
+    if (initialAuditData) {
+      setAdjustedData({
+        adjustedQuantities: initialAuditData.adjustedQuantities,
+        adjustedValues: {}, // Will be recalculated
+        comments: initialAuditData.comments
+      });
+    }
+  }, [initialAuditData]);
+
 
   const population = selectedPrestador?.POBLACION ?? 0;
   const coveragePercentage = population > 0 ? (uniqueUserCount / population) * 100 : 0;
@@ -1198,9 +1210,10 @@ const PgPsearchForm: React.FC<PgPsearchFormProps> = ({ executionDataByMonth, jso
                   pgpData={pgpData}
                   onAdjustmentsChange={setAdjustedData}
                   storageKey={localStorageKey}
-                  onGenerateReport={handleGenerateAndSaveReport}
+                  onGenerateReport={handleGenerateReport}
                   isGeneratingReport={isGeneratingFinalReport}
                   selectedPrestador={selectedPrestador}
+                  initialAuditData={initialAuditData}
                 />
 
                 {reportData && <InformePGP data={reportData} />}

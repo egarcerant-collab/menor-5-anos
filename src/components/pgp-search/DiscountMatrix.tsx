@@ -7,7 +7,7 @@ import Papa from 'papaparse';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileDown, DollarSign, Filter, Stethoscope, Microscope, Pill, Syringe, WalletCards, TrendingDown, CheckCircle, MessageSquarePlus, Download, Eraser, Wallet, Save, Loader2 } from "lucide-react";
+import { FileDown, DollarSign, Filter, Stethoscope, Microscope, Pill, Syringe, WalletCards, TrendingDown, CheckCircle, MessageSquarePlus, Download, Eraser, Wallet, Save, Loader2, Play } from "lucide-react";
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from './PgPsearchForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
@@ -19,7 +19,7 @@ import { ExecutionDataByMonth } from '@/app/page';
 import { CupDetailsModal } from '../report/InformeDesviaciones';
 import type { DeviatedCupInfo, Prestador } from './PgPsearchForm';
 import { Textarea } from '../ui/textarea';
-import { getNumericValue } from '../app/JsonAnalyzerPage';
+import { getNumericValue, SavedAuditData } from '../app/JsonAnalyzerPage';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -65,6 +65,7 @@ interface DiscountMatrixProps {
   onGenerateReport: () => void;
   isGeneratingReport: boolean;
   selectedPrestador: Prestador | null;
+  initialAuditData: SavedAuditData | null;
 }
 
 const handleDownloadXls = (data: any[], filename: string) => {
@@ -149,7 +150,8 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
     storageKey, 
     onGenerateReport, 
     isGeneratingReport,
-    selectedPrestador
+    selectedPrestador,
+    initialAuditData
 }) => {
     const [selectedCupForDetail, setSelectedCupForDetail] = useState<DeviatedCupInfo | null>(null);
     const [isCupModalOpen, setIsCupModalOpen] = useState(false);
@@ -170,36 +172,52 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
     const [isSaving, setIsSaving] = useState(false);
 
 
-     // Load initial state from localStorage
+     // Load initial state from localStorage or initialAuditData
     const initializeStateFromData = useCallback(() => {
         const initialQuantities: Record<string, number> = {};
-        
         data.forEach(row => {
             initialQuantities[row.CUPS] = row.Cantidad_Ejecutada;
         });
 
-        setAdjustedQuantities(initialQuantities);
-        setComments({});
-        setSelectedRows({});
-    }, [data]);
+        if (initialAuditData) {
+            setAdjustedQuantities(initialAuditData.adjustedQuantities);
+            setComments(initialAuditData.comments);
+            setSelectedRows(initialAuditData.selectedRows);
+             toast({
+                title: "Auditoría Guardada Cargada",
+                description: "Se restauró el progreso de la auditoría seleccionada.",
+            });
+        } else {
+             try {
+                if (!storageKey) {
+                    setAdjustedQuantities(initialQuantities);
+                    setComments({});
+                    setSelectedRows({});
+                    return;
+                };
+                const savedState = localStorage.getItem(storageKey);
+                if (savedState) {
+                    const { adjustedQuantities: sq, comments: sc, selectedRows: sr } = JSON.parse(savedState);
+                    if(sq) setAdjustedQuantities(sq);
+                    if(sc) setComments(sc);
+                    if(sr) setSelectedRows(sr);
+                } else {
+                     setAdjustedQuantities(initialQuantities);
+                     setComments({});
+                     setSelectedRows({});
+                }
+            } catch (error) {
+                console.error("Error loading state from localStorage", error);
+                setAdjustedQuantities(initialQuantities);
+                setComments({});
+                setSelectedRows({});
+            }
+        }
+    }, [data, storageKey, initialAuditData, toast]);
 
     useEffect(() => {
-        if (!storageKey) return;
-        try {
-            const savedState = localStorage.getItem(storageKey);
-            if (savedState) {
-                const { adjustedQuantities: sq, comments: sc, selectedRows: sr } = JSON.parse(savedState);
-                if(sq) setAdjustedQuantities(sq);
-                if(sc) setComments(sc);
-                if(sr) setSelectedRows(sr);
-            } else {
-                 initializeStateFromData();
-            }
-        } catch (error) {
-            console.error("Error loading state from localStorage", error);
-            initializeStateFromData();
-        }
-    }, [storageKey, initializeStateFromData]);
+        initializeStateFromData();
+    }, [initializeStateFromData]);
     
     // This effect now passes data up, but doesn't save to localStorage
     useEffect(() => {
@@ -213,7 +231,7 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
       onAdjustmentsChange({ adjustedQuantities, adjustedValues, comments });
     }, [adjustedQuantities, comments, data, onAdjustmentsChange]);
     
-    const handleSaveState = async () => {
+    const handleSaveStateToServer = async () => {
         if (!selectedPrestador || executionDataByMonth.size === 0) {
             toast({
                 title: "No se puede guardar",
@@ -261,7 +279,7 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
             
             toast({
                 title: "Auditoría Guardada Exitosamente",
-                description: `El archivo se ha guardado en el servidor.`,
+                description: `El archivo se ha guardado en el servidor para ${selectedPrestador.PRESTADOR}.`,
             });
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Error desconocido";
@@ -275,10 +293,40 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
             setIsSaving(false);
         }
     };
+
+    const handleSaveStateToLocal = () => {
+        if (!storageKey) return;
+        try {
+            const stateToSave = {
+                adjustedQuantities,
+                comments,
+                selectedRows,
+            };
+            localStorage.setItem(storageKey, JSON.stringify(stateToSave));
+            toast({
+                title: "Progreso Guardado",
+                description: "El progreso de la auditoría se ha guardado en tu navegador.",
+            });
+        } catch (error) {
+            console.error("Error saving state to localStorage", error);
+            toast({
+                title: "Error al Guardar",
+                description: "No se pudo guardar el progreso en el navegador.",
+                variant: "destructive",
+            });
+        }
+    };
     
     const handleClearAdjustments = () => {
         if (storageKey) localStorage.removeItem(storageKey);
-        initializeStateFromData();
+        // Reset state to initial from props, not to empty
+        const initialQuantities: Record<string, number> = {};
+        data.forEach(row => {
+            initialQuantities[row.CUPS] = row.Cantidad_Ejecutada;
+        });
+        setAdjustedQuantities(initialQuantities);
+        setComments({});
+        setSelectedRows({});
     };
 
     const filteredData = useMemo(() => {
@@ -529,13 +577,17 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
                         </div>
                          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
                              <div className="flex items-center gap-2">
-                                <Button onClick={handleSaveState} variant="outline" size="sm" className="h-8" disabled={isSaving}>
-                                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                <Button onClick={handleSaveStateToLocal} variant="outline" size="sm" className="h-8">
+                                    <Save className="mr-2 h-4 w-4" />
+                                    Guardar Progreso
+                                </Button>
+                                <Button onClick={handleSaveStateToServer} variant="default" size="sm" className="h-8" disabled={isSaving}>
+                                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
                                     Guardar Auditoría
                                 </Button>
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button variant="outline" size="sm" className="h-8">
+                                        <Button variant="destructive" size="sm" className="h-8">
                                             <Eraser className="mr-2 h-4 w-4" />
                                             Limpiar
                                         </Button>
@@ -559,8 +611,8 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
                                     Descargar
                                 </Button>
                             </div>
-                             <Button onClick={onGenerateReport} disabled={isGeneratingReport || !data.length} variant="default" size="sm" className="h-8 mt-2 sm:mt-0">
-                                {isGeneratingReport ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                             <Button onClick={onGenerateReport} disabled={isGeneratingReport || !data.length} variant="secondary" size="sm" className="h-8 mt-2 sm:mt-0">
+                                {isGeneratingReport ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
                                 Generar Informe Final
                             </Button>
                         </div>

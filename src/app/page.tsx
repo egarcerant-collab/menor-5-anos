@@ -1,10 +1,13 @@
 
 "use client";
 
-import { useState } from "react";
-import type { MonthlyExecutionData } from "@/components/app/JsonAnalyzerPage";
+import { useState, useRef } from "react";
+import type { MonthlyExecutionData, SavedAuditData } from "@/components/app/JsonAnalyzerPage";
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
+import SavedAuditsPage from "@/components/app/SavedAuditsPage";
+import { Separator } from "@/components/ui/separator";
+
 
 const JsonAnalyzerPage = dynamic(
   () => import("@/components/app/JsonAnalyzerPage"),
@@ -33,11 +36,25 @@ export type CupCountInfo = {
 export type CupCountsMap = Map<string, CupCountInfo>;
 export type ExecutionDataByMonth = Map<string, MonthlyExecutionData>;
 
+interface PgpSearchPageHandle {
+  handleSelectPrestador: (prestador: any) => void;
+}
 
 export default function Home() {
   const [executionData, setExecutionData] = useState<ExecutionDataByMonth>(new Map());
   const [jsonPrestadorCode, setJsonPrestadorCode] = useState<string | null>(null);
   const [uniqueUserCount, setUniqueUserCount] = useState<number>(0);
+  const [savedAuditData, setSavedAuditData] = useState<SavedAuditData | null>(null);
+
+  const pgpSearchRef = useRef<PgpSearchPageHandle>(null);
+
+  const handleAuditLoad = (auditData: SavedAuditData, prestadorName: string, month: string) => {
+    setSavedAuditData(auditData);
+    if(pgpSearchRef.current?.handleSelectPrestador) {
+       // This is a bit of a hack, but we need to trigger the load in the child
+      pgpSearchRef.current.handleSelectPrestador({ PRESTADOR: prestadorName, WEB: '' }); // Pass a mock prestador
+    }
+  };
 
 
   return (
@@ -52,10 +69,19 @@ export default function Home() {
           </p>
         </header>
 
+        {/* Cargar Auditoría Guardada */}
+        <SavedAuditsPage onAuditLoad={handleAuditLoad} />
+        
+        <Separator className="my-8" />
+        
+        <h2 className="text-3xl font-semibold text-center text-foreground">
+          O Iniciar una Nueva Auditoría
+        </h2>
+
         <div className="grid grid-cols-1 gap-8 items-start">
           {/* Columna Izquierda: Analizador JSON */}
           <div className="space-y-6">
-             <h2 className="text-2xl font-semibold text-center">Análisis de Datos Reales (JSON)</h2>
+             <h2 className="text-2xl font-semibold text-center">Paso 1: Análisis de Datos Reales (JSON)</h2>
              <JsonAnalyzerPage 
                 setExecutionData={setExecutionData} 
                 setJsonPrestadorCode={setJsonPrestadorCode}
@@ -65,11 +91,13 @@ export default function Home() {
 
           {/* Columna Derecha: Buscador PGP */}
           <div className="space-y-6">
-             <h2 className="text-2xl font-semibold text-center">Análisis de Nota Técnica (PGP)</h2>
+             <h2 className="text-2xl font-semibold text-center">Paso 2: Análisis de Nota Técnica (PGP)</h2>
              <PgpSearchPage 
+                ref={pgpSearchRef}
                 executionDataByMonth={executionData}
                 jsonPrestadorCode={jsonPrestadorCode}
                 uniqueUserCount={uniqueUserCount}
+                initialAuditData={savedAuditData}
               />
           </div>
         </div>
