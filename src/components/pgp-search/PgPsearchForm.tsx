@@ -875,7 +875,10 @@ const MatrizEjecucionCard = ({ matrizData, onCupClick, onCie10Click, executionDa
 };
 
 
-const PgPsearchForm: React.FC<PgPsearchFormProps> = ({ executionDataByMonth, jsonPrestadorCode, uniqueUserCount, initialAuditData }) => {
+const PgPsearchForm = forwardRef<
+  { handleSelectPrestador: (prestador: Prestador | { PRESTADOR: string; WEB: string }) => void },
+  PgPsearchFormProps
+>(({ executionDataByMonth, jsonPrestadorCode, uniqueUserCount, initialAuditData }, ref) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingAnalysis, setLoadingAnalysis] = useState<boolean>(false);
   const [loadingPrestadores, setLoadingPrestadores] = useState<boolean>(true);
@@ -1053,21 +1056,44 @@ const PgPsearchForm: React.FC<PgPsearchFormProps> = ({ executionDataByMonth, jso
     }
   }, [toast]);
 
-  const handleSelectPrestador = useCallback((prestador: Prestador) => {
+  const handleSelectPrestador = useCallback((prestador: Prestador | { PRESTADOR: string }) => {
     setMismatchWarning(null);
     setIsDataLoaded(false);
-    setPrestadorToLoad(prestador);
-    const pgpZoneId = prestador['ID DE ZONA'] ? normalizeDigits(prestador['ID DE ZONA']) : null;
+    
+    // Find the full prestador info from the loaded list
+    const fullPrestadorInfo = prestadores.find(p => p.PRESTADOR === prestador.PRESTADOR);
+    
+    if (!fullPrestadorInfo) {
+        // This can happen when a mock prestador is passed from the parent
+        toast({ title: "Buscando prestador...", description: `Intentando cargar la nota técnica para ${prestador.PRESTADOR}`});
+        // We still set it to load, the effect will pick it up
+        setPrestadorToLoad(prestador as Prestador);
+        return;
+    }
+
+    setPrestadorToLoad(fullPrestadorInfo);
+    const pgpZoneId = fullPrestadorInfo['ID DE ZONA'] ? normalizeDigits(fullPrestadorInfo['ID DE ZONA']) : null;
     const jsonId = jsonPrestadorCode ? normalizeDigits(jsonPrestadorCode) : null;
     if (jsonId && pgpZoneId && jsonId !== pgpZoneId) {
       setMismatchWarning(`¡Advertencia! El código del JSON (${jsonId}) no coincide con el ID de la nota técnica (${pgpZoneId}). Los datos podrían no ser comparables.`);
     } else {
-      performLoadPrestador(prestador);
+      performLoadPrestador(fullPrestadorInfo);
     }
-  }, [jsonPrestadorCode, performLoadPrestador]);
+  }, [jsonPrestadorCode, performLoadPrestador, prestadores, toast]);
+  
+  useImperativeHandle(ref, () => ({
+    handleSelectPrestador
+  }));
 
   const handleForceLoad = () => {
-    if (prestadorToLoad) performLoadPrestador(prestadorToLoad);
+    if (prestadorToLoad) {
+      const fullPrestadorInfo = prestadores.find(p => p.PRESTADOR === prestadorToLoad.PRESTADOR);
+       if (fullPrestadorInfo) {
+          performLoadPrestador(fullPrestadorInfo);
+      } else {
+          toast({ title: "Error", description: `No se encontró información completa para ${prestadorToLoad.PRESTADOR}`, variant: "destructive" });
+      }
+    }
   };
 
   const handleGenerateReport = () => {
@@ -1108,6 +1134,7 @@ const PgPsearchForm: React.FC<PgPsearchFormProps> = ({ executionDataByMonth, jso
     fetchPrestadores();
   }, [isClient, toast]);
 
+  // Effect to auto-load prestador if a matching JSON is loaded
   useEffect(() => {
     if (!jsonPrestadorCode || prestadores.length === 0 || loading || selectedPrestador) return;
     const normalizedJsonCode = normalizeDigits(jsonPrestadorCode);
@@ -1117,6 +1144,16 @@ const PgPsearchForm: React.FC<PgPsearchFormProps> = ({ executionDataByMonth, jso
       handleSelectPrestador(matchById);
     }
   }, [jsonPrestadorCode, prestadores, loading, selectedPrestador, handleSelectPrestador, toast]);
+  
+  // Effect to load a prestador when `prestadorToLoad` is set, e.g., from a restored session
+  useEffect(() => {
+    if (prestadorToLoad && prestadores.length > 0) {
+       const fullPrestadorInfo = prestadores.find(p => p.PRESTADOR === prestadorToLoad.PRESTADOR);
+       if (fullPrestadorInfo) {
+           handleSelectPrestador(fullPrestadorInfo);
+       }
+    }
+  }, [prestadorToLoad, prestadores, handleSelectPrestador]);
   
   useEffect(() => {
     if (initialAuditData) {
@@ -1250,6 +1287,7 @@ const PgPsearchForm: React.FC<PgPsearchFormProps> = ({ executionDataByMonth, jso
       </CardContent>
     </Card>
   );
-};
+});
+PgPsearchForm.displayName = 'PgPsearchForm';
 
 export default PgPsearchForm;

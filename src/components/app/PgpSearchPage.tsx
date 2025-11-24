@@ -1,7 +1,7 @@
 
 "use client";
 
-import { forwardRef, useImperativeHandle } from 'react';
+import { forwardRef, useImperativeHandle, useRef } from 'react';
 import PgPsearchForm from '@/components/pgp-search/PgPsearchForm';
 import { ExecutionDataByMonth } from '@/app/page';
 import { SavedAuditData } from './JsonAnalyzerPage';
@@ -15,26 +15,28 @@ interface PgpSearchPageProps {
 }
 
 interface PgpSearchPageHandle {
-  handleSelectPrestador: (prestador: any) => void;
+  handleSelectPrestador: (prestador: { PRESTADOR: string; WEB: string }) => void;
 }
 
 const PgpSearchPage = forwardRef<PgpSearchPageHandle, PgpSearchPageProps>(
   ({ executionDataByMonth, jsonPrestadorCode, uniqueUserCount, initialAuditData }, ref) => {
     
-    // This is a dummy implementation for the ref. 
-    // The actual logic is inside PgPsearchForm.
-    // This could be improved by lifting state up.
+    // Create a ref for the child component PgPsearchForm
+    const pgpFormRef = useRef<{ handleSelectPrestador: (prestador: any) => void }>(null);
+
+    // Expose the child's handleSelectPrestador function through this component's ref
     useImperativeHandle(ref, () => ({
-      handleSelectPrestador: (prestador: any) => {
-        // This is a bit of a workaround. Ideally the state would be managed higher up.
-        // We're just logging it here to show the function is callable.
-        console.log("Prestador selection triggered from parent:", prestador.PRESTADOR);
+      handleSelectPrestador: (prestador: { PRESTADOR: string; WEB: string }) => {
+        if (pgpFormRef.current) {
+          pgpFormRef.current.handleSelectPrestador(prestador);
+        }
       },
     }));
 
     return (
       <div className="w-full space-y-8 mt-4">
         <PgPsearchForm 
+          ref={pgpFormRef}
           executionDataByMonth={executionDataByMonth}
           jsonPrestadorCode={jsonPrestadorCode} 
           uniqueUserCount={uniqueUserCount}

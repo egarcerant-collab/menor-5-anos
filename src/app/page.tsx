@@ -46,13 +46,19 @@ export default function Home() {
   const [uniqueUserCount, setUniqueUserCount] = useState<number>(0);
   const [savedAuditData, setSavedAuditData] = useState<SavedAuditData | null>(null);
 
-  const pgpSearchRef = useRef<PgpSearchPageHandle>(null);
+  const pgpSearchRef = useRef<{ handleSelectPrestador: (prestador: { PRESTADOR: string; WEB: string }) => void } | null>(null);
 
   const handleAuditLoad = (auditData: SavedAuditData, prestadorName: string, month: string) => {
+    // 1. Set the loaded audit data to be passed to PgpSearchPage
     setSavedAuditData(auditData);
+    
+    // 2. Trigger the prestador selection in the child PgpSearchPage component
+    // This will load the corresponding technical note (Nota Técnica)
     if(pgpSearchRef.current?.handleSelectPrestador) {
-       // This is a bit of a hack, but we need to trigger the load in the child
-      pgpSearchRef.current.handleSelectPrestador({ PRESTADOR: prestadorName, WEB: '' }); // Pass a mock prestador
+       // We create a mock prestador object. The WEB property is not essential for this
+       // re-loading mechanism as the core logic relies on the PRESTADOR name.
+       // The handleSelectPrestador function in the child will find the full prestador info.
+      pgpSearchRef.current.handleSelectPrestador({ PRESTADOR: prestadorName, WEB: '' }); 
     }
   };
 

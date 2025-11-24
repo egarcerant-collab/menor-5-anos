@@ -94,7 +94,7 @@ export default function AuditSearch({ onAuditLoad }: AuditSearchProps) {
             // We need to extract the prestador and month from the path for the onAuditLoad function
             const pathParts = selectedAuditPath.split('/');
             const month = pathParts[pathParts.length - 2];
-            const prestadorName = pathParts[pathParts.length - 1].replace('.json', '');
+            const prestadorName = pathParts[pathParts.length - 1].replace('.json', '').replace(/_/g, ' ');
 
 
             if (auditData && prestadorName && month) {
@@ -137,7 +137,7 @@ export default function AuditSearch({ onAuditLoad }: AuditSearchProps) {
                                 <SelectLabel>{month}</SelectLabel>
                                 {files.map((file) => (
                                     <SelectItem key={file.path} value={`/informes/${file.month}/${file.prestador}.json`}>
-                                        {file.prestador}
+                                        {file.prestador.replace(/_/g, ' ')}
                                     </SelectItem>
                                 ))}
                             </SelectGroup>
