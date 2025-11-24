@@ -20,6 +20,7 @@ import { CupDetailsModal } from '../report/InformeDesviaciones';
 import type { DeviatedCupInfo } from './PgPsearchForm';
 import { Textarea } from '../ui/textarea';
 import { getNumericValue } from '../app/JsonAnalyzerPage';
+import { useToast } from '@/hooks/use-toast';
 
 
 export type ServiceType = "Consulta" | "Procedimiento" | "Medicamento" | "Otro Servicio" | "Desconocido";
@@ -155,6 +156,7 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({ data, executionDataByMo
     
     // Filters
     const [serviceTypeFilter, setServiceTypeFilter] = useState<ServiceType | 'all'>('all');
+    const { toast } = useToast();
 
 
      // Load initial state from localStorage
@@ -188,22 +190,7 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({ data, executionDataByMo
         }
     }, [storageKey, initializeStateFromData]);
     
-    // Save state to localStorage whenever it changes
-    useEffect(() => {
-        if (!storageKey) return;
-        try {
-            const stateToSave = {
-                adjustedQuantities,
-                comments,
-                selectedRows
-            };
-            localStorage.setItem(storageKey, JSON.stringify(stateToSave));
-        } catch (error) {
-            console.error("Error saving state to localStorage", error);
-        }
-    }, [adjustedQuantities, comments, selectedRows, storageKey]);
-
-
+    // This effect now passes data up, but doesn't save to localStorage
     useEffect(() => {
         const adjustedValues: Record<string, number> = {};
         data.forEach(row => {
@@ -214,6 +201,29 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({ data, executionDataByMo
         });
       onAdjustmentsChange({ adjustedQuantities, adjustedValues, comments });
     }, [adjustedQuantities, comments, data, onAdjustmentsChange]);
+    
+    const handleSaveState = () => {
+        if (!storageKey) return;
+        try {
+            const stateToSave = {
+                adjustedQuantities,
+                comments,
+                selectedRows
+            };
+            localStorage.setItem(storageKey, JSON.stringify(stateToSave));
+            toast({
+                title: "Progreso Guardado",
+                description: "El progreso de la auditoría ha sido guardado en este navegador.",
+            });
+        } catch (error) {
+            console.error("Error saving state to localStorage", error);
+            toast({
+                title: "Error al Guardar",
+                description: "No se pudo guardar el progreso de la auditoría.",
+                variant: "destructive",
+            });
+        }
+    };
     
     const handleClearAdjustments = () => {
         if (storageKey) localStorage.removeItem(storageKey);
@@ -466,35 +476,41 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({ data, executionDataByMo
                                Análisis financiero interactivo para calcular los descuentos por sobre-ejecución e imprevistos.
                             </CardDescription>
                         </div>
-                         <div className="flex items-center gap-2">
-                            <Button onClick={onGenerateReport} disabled={isGeneratingReport || !data.length} variant="default" size="sm" className="h-8">
-                                {isGeneratingReport ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                Generar y Guardar Informe
-                            </Button>
-                             <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                     <Button variant="outline" size="sm" className="h-8">
-                                        <Eraser className="mr-2 h-4 w-4" />
-                                        Limpiar Ajustes
-                                    </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            Esta acción eliminará permanentemente todos los ajustes (cantidades, valores y comentarios) que has realizado en esta matriz. Se perderá el progreso guardado.
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction onClick={handleClearAdjustments}>Sí, Limpiar</AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
+                         <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+                             <div className="flex items-center gap-2">
+                                <Button onClick={handleSaveState} variant="outline" size="sm" className="h-8">
+                                    <Save className="mr-2 h-4 w-4" />
+                                    Guardar Auditoría
+                                </Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="outline" size="sm" className="h-8">
+                                            <Eraser className="mr-2 h-4 w-4" />
+                                            Limpiar
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Esta acción eliminará permanentemente todos los ajustes (cantidades, valores y comentarios) que has realizado en esta matriz. Se perderá el progreso guardado.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleClearAdjustments}>Sí, Limpiar</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
 
-                            <Button onClick={() => handleDownloadXls(generateDownloadData(), 'matriz_descuentos_ajustada.xls')} variant="outline" size="sm" className="h-8">
-                                <Download className="mr-2 h-4 w-4" />
-                                Descargar XLS
+                                <Button onClick={() => handleDownloadXls(generateDownloadData(), 'matriz_descuentos_ajustada.xls')} variant="outline" size="sm" className="h-8">
+                                    <Download className="mr-2 h-4 w-4" />
+                                    Descargar
+                                </Button>
+                            </div>
+                             <Button onClick={onGenerateReport} disabled={isGeneratingReport || !data.length} variant="default" size="sm" className="h-8 mt-2 sm:mt-0">
+                                {isGeneratingReport ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                                Generar Informe Final
                             </Button>
                         </div>
                     </div>
@@ -565,6 +581,7 @@ export default DiscountMatrix;
     
 
     
+
 
 
 
