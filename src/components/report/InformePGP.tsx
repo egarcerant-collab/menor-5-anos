@@ -214,7 +214,6 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
 
 
     const kpis = [
-        { label: 'Nota Técnica (Presupuesto)', value: formatCOP(valorNotaTecnica) },
         { label: 'Valor Ejecutado (Bruto)', value: formatCOP(sumaMensual) },
         { label: 'Descuento Aplicado (Auditoría)', value: formatCOP(descuentoAplicadoTotal), color: 'red' },
         { label: 'Valor Final a Pagar (Post-Auditoría)', value: formatCOP(valorNetoFinalAuditoria), bold: true },
@@ -222,6 +221,7 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
         { label: 'Porcentaje de Ejecución Final', value: `${porcentajeEjecucion.toFixed(2)}%` },
         { label: 'Total CUPS Ejecutados', value: totalCups.toLocaleString('es-CO') },
         { label: 'Costo Unitario Promedio (Post-Auditoría)', value: formatCOP(unitAvg) },
+        { label: 'Nota Técnica (Presupuesto)', value: formatCOP(valorNotaTecnica) },
     ];
     
     const topOverExecuted = (reportData.overExecutedCups ?? [])
@@ -443,7 +443,7 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
           <section ref={financialChartRef}>
              <h3 className="text-center font-semibold text-sm mb-2">Ejecución Financiera Mensual</h3>
             <div className="h-60">
-              <ChartContainer config={chartConfig}>
+              <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Tooltip
@@ -485,5 +485,3 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
     </div>
   );
 }
-
-    
