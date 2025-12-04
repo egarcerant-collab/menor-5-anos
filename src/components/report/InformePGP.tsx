@@ -384,6 +384,13 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
         return acc;
     }, {} as any)
   } satisfies React.ComponentProps<typeof ChartContainer>["config"];
+  
+  const cupsChartConfig = {
+      CUPS: {
+          label: "CUPS",
+          color: "hsl(var(--accent))",
+      },
+  } satisfies React.ComponentProps<typeof ChartContainer>["config"];
 
   return (
     <div className="space-y-6">
@@ -406,6 +413,55 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
         </CardContent>
       </Card>
       
+      <Card>
+            <CardHeader>
+                <CardTitle>Resumen Gráfico del Periodo</CardTitle>
+            </CardHeader>
+            <CardContent className="grid md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                    <h3 className="text-center font-semibold text-sm">Ejecución Financiera Mensual</h3>
+                     <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
+                        <ResponsiveContainer width="100%" height={250}>
+                             <PieChart>
+                                <Tooltip
+                                    formatter={(value) => formatCOP(value as number)}
+                                    content={<ChartTooltipContent nameKey="name" />}
+                                />
+                                <Pie
+                                    data={pieData}
+                                    dataKey="value"
+                                    labelLine={false}
+                                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                    nameKey="name"
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={80}
+                                />
+                                <Legend />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </ChartContainer>
+                </div>
+                 <div className="space-y-2">
+                    <h3 className="text-center font-semibold text-sm">Volumen de CUPS Mensual</h3>
+                    <ChartContainer config={cupsChartConfig} className="min-h-[250px] w-full">
+                        <ResponsiveContainer width="100%" height={250}>
+                             <BarChart data={cupsData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                <XAxis dataKey="Mes" fontSize={12} tickLine={false} axisLine={false} />
+                                <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => value.toLocaleString('es-CO')} />
+                                <Tooltip
+                                    cursor={{ fill: 'hsl(var(--muted))' }}
+                                    formatter={(value) => `${(value as number).toLocaleString('es-CO')} CUPS`}
+                                    content={<ChartTooltipContent />}
+                                />
+                                <Bar dataKey="CUPS" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </ChartContainer>
+                </div>
+            </CardContent>
+        </Card>
 
        <Dialog open={!!pdfPreviewUrl} onOpenChange={(isOpen) => !isOpen && setPdfPreviewUrl(null)}>
         <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
@@ -485,3 +541,5 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
     </div>
   );
 }
+
+    
