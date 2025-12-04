@@ -19,6 +19,9 @@ import {
   Legend,
   ResponsiveContainer,
   ReferenceLine,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
 import { descargarInformePDF, type InformeDatos, generarURLInformePDF } from "@/lib/pdf-definitions";
 import type { DeviatedCupInfo, UnexpectedCupInfo, AdjustedData, ReportData as ReportDataType } from "@/components/pgp-search/PgPsearchForm";
@@ -201,7 +204,7 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
 
 
   // Series para gráficas
-  const barData = useMemo(() => data?.months.map((m) => ({ Mes: m.month, Valor: m.valueCOP })) ?? [], [data?.months]);
+  const pieData = useMemo(() => data?.months.map((m) => ({ name: m.month, value: m.valueCOP })) ?? [], [data?.months]);
   const cupsData = useMemo(() => data?.months.map((m) => ({ Mes: m.month, CUPS: m.cups })) ?? [], [data?.months]);
 
   const getInformeData = (reportData: ReportData, charts: { [key: string]: string }, analysisTexts: ReportAnalysisOutput, auditorConclusions: string, auditorRecommendations: string): InformeDatos => {
@@ -364,10 +367,11 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
     }
   };
 
-  if (!data || !barData.length) {
+  if (!data || !pieData.length) {
     return null;
   }
 
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
   return (
     <div className="space-y-6">
@@ -428,16 +432,24 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
              <h3 className="text-center font-semibold text-sm mb-2">Ejecución Financiera Mensual</h3>
             <div className="h-60">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={barData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="Mes" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `$${new Intl.NumberFormat("es-CO", { notation: "compact" }).format(v as number)}`} />
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
                   <Tooltip formatter={(value) => formatCOP(value as number)} />
-                  <Bar dataKey="Valor" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                   {valorNotaTecnica > 0 && data && data.months.length > 0 && (
-                     <ReferenceLine y={valorNotaTecnica / data.months.length} label="NT Promedio" stroke="red" strokeDasharray="3 3" />
-                   )}
-                </BarChart>
+                  <Legend />
+                </PieChart>
               </ResponsiveContainer>
             </div>
           </section>
@@ -460,5 +472,3 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
     </div>
   );
 }
-
-    
