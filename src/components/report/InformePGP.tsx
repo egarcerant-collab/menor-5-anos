@@ -29,6 +29,7 @@ import { generateReportAnalysis, type ReportAnalysisInput, ReportAnalysisOutput 
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 
 // ======= Tipos =======
 export interface MonthExecution {
@@ -204,7 +205,7 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
 
 
   // Series para gráficas
-  const pieData = useMemo(() => data?.months.map((m) => ({ name: m.month, value: m.valueCOP })) ?? [], [data?.months]);
+  const pieData = useMemo(() => data?.months.map((m) => ({ name: m.month, value: m.valueCOP, fill: `hsl(var(--chart-${data.months.indexOf(m) + 1}))` })) ?? [], [data?.months]);
   const cupsData = useMemo(() => data?.months.map((m) => ({ Mes: m.month, CUPS: m.cups })) ?? [], [data?.months]);
 
   const getInformeData = (reportData: ReportData, charts: { [key: string]: string }, analysisTexts: ReportAnalysisOutput, auditorConclusions: string, auditorRecommendations: string): InformeDatos => {
@@ -371,7 +372,18 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
     return null;
   }
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+  const chartConfig = {
+    value: {
+      label: "Valor (COP)",
+    },
+    ...pieData.reduce((acc, item) => {
+        acc[item.name] = {
+            label: item.name,
+            color: item.fill
+        }
+        return acc;
+    }, {} as any)
+  } satisfies React.ComponentProps<typeof ChartContainer>["config"];
 
   return (
     <div className="space-y-6">
@@ -431,26 +443,27 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
           <section ref={financialChartRef}>
              <h3 className="text-center font-semibold text-sm mb-2">Ejecución Financiera Mensual</h3>
             <div className="h-60">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => formatCOP(value as number)} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              <ChartContainer config={chartConfig}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Tooltip
+                      formatter={(value) => formatCOP(value as number)}
+                      content={<ChartTooltipContent nameKey="name" />}
+                    />
+                    <Pie
+                      data={pieData}
+                      dataKey="value"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                    />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </ChartContainer>
             </div>
           </section>
            <section ref={cupsChartRef}>
@@ -472,3 +485,5 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
     </div>
   );
 }
+
+    
