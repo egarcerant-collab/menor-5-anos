@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -67,7 +66,7 @@ export const getNumericValue = (value: any): number => {
         numberString = cleanedString.replace(/,/g, '');
     } else {
         // No clear separator or only one type, treat as plain number
-        numberString = cleanedString;
+        numberString = cleanedString.replace(',', '.'); // Treat comma as decimal just in case
     }
       
     const n = parseFloat(numberString);
@@ -488,3 +487,5 @@ export default function JsonAnalyzerPage({ setExecutionData, setJsonPrestadorCod
     </div>
   );
 }
+
+    
