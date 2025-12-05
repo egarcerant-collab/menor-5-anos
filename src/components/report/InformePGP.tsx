@@ -29,7 +29,7 @@ import { generateReportAnalysis, type ReportAnalysisInput, ReportAnalysisOutput 
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
-import { ChartContainer, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 
 // ======= Tipos =======
 export interface MonthExecution {
@@ -233,12 +233,14 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
       { label: 'Porcentaje de Ejecución Final', value: `${porcentajeEjecucion.toFixed(2)}%` },
       { label: 'Total CUPS Ejecutados', value: totalCups.toLocaleString('es-CO') },
       { label: 'Costo Unitario Promedio (Post-Auditoría)', value: formatCOP(unitAvg) },
-      { label: 'Nota Técnica (Presupuesto)', value: formatCOP(valorNotaTecnica) },
     ].sort((a, b) => {
         if (a.label.includes('Nota Técnica')) return 1;
         if (b.label.includes('Nota Técnica')) return -1;
         return 0;
     });
+
+     kpis.push({ label: 'Nota Técnica (Presupuesto)', value: formatCOP(valorNotaTecnica) });
+
 
     const topOverExecuted = (reportData.overExecutedCups ?? [])
         .sort((a,b) => b.deviation - a.deviation)
@@ -459,7 +461,7 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                 <XAxis dataKey="Mes" fontSize={12} tickLine={false} axisLine={false} />
                                 <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => value.toLocaleString('es-CO')} />
-                                <Tooltip
+                                <ChartTooltip
                                     cursor={{ fill: 'hsl(var(--muted))' }}
                                     formatter={(value) => `${(value as number).toLocaleString('es-CO')} CUPS`}
                                     content={<ChartTooltipContent />}
@@ -510,27 +512,36 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
             <div className="h-60">
               <ChartContainer config={financialChartConfig} className="min-h-[200px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Tooltip
-                      formatter={(value) => formatCOP(value as number)}
-                      content={<ChartTooltipContent nameKey="name" />}
-                    />
-                    <Pie
-                      data={pieData}
-                      dataKey="value"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                    >
-                       {pieData.map((entry) => (
-                          <Cell key={`cell-${entry.name}`} fill={entry.fill} />
-                        ))}
-                    </Pie>
-                    <Legend />
-                  </PieChart>
+                   <BarChart data={financialData}>
+                      <CartesianGrid vertical={false} />
+                      <XAxis
+                        dataKey="Mes"
+                        tickLine={false}
+                        tickMargin={10}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={10}
+                        tickFormatter={(value) => formatCOP(value as number)}
+                      />
+                      <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent indicator="dot" />}
+                      />
+                      <Bar
+                        dataKey="Valor Presupuestado"
+                        fill="var(--color-Valor Presupuestado)"
+                        radius={4}
+                      />
+                      <Bar
+                        dataKey="Valor Ejecutado"
+                        fill="var(--color-Valor Ejecutado)"
+                        radius={4}
+                      />
+                      <ChartLegend content={<ChartLegendContent />} />
+                    </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
             </div>
