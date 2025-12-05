@@ -93,8 +93,6 @@ function buildDocDefinition(data: InformeDatos, backgroundImageBase64: string): 
 
             { text: 'OBJETIVOS', style: 'h2' },
             { ul: data.objetivos.map(o => ({ text: o, style: 'p' })) },
-
-            { text: 'INDICADORES CLAVE (KPIs) POST-AUDITORÍA', style: 'h2' },
             {
                 table: {
                     widths: ['*', 'auto'],
@@ -113,7 +111,7 @@ function buildDocDefinition(data: InformeDatos, backgroundImageBase64: string): 
                 if (item.chartImage) {
                     contentBlock.push({
                         image: item.chartImage,
-                        width: 480,
+                        width: 400,
                         alignment: 'center',
                         margin: [0, 5, 0, 10],
                     });
