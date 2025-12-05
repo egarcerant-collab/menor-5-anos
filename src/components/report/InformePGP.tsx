@@ -214,18 +214,23 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
     
     const periodoAnalizado = reportTitle.split('–')[1]?.trim() || 'Periodo Analizado';
 
-
+    // **CRITICAL CHANGE**: Use pre-calculated KPIs instead of recalculating.
     const kpis = [
-        { label: 'Valor Ejecutado (Bruto)', value: formatCOP(sumaMensual) },
-        { label: 'Descuento Aplicado (Auditoría)', value: formatCOP(descuentoAplicadoTotal), color: 'red' },
-        { label: 'Valor Final a Pagar (Post-Auditoría)', value: formatCOP(valorNetoFinalAuditoria), bold: true },
-        { label: 'Diferencia vs. Presupuesto', value: formatCOP(diffVsNota) },
-        { label: 'Porcentaje de Ejecución Final', value: `${porcentajeEjecucion.toFixed(2)}%` },
-        { label: 'Total CUPS Ejecutados', value: totalCups.toLocaleString('es-CO') },
-        { label: 'Costo Unitario Promedio (Post-Auditoría)', value: formatCOP(unitAvg) },
-        { label: 'Nota Técnica (Presupuesto)', value: formatCOP(valorNotaTecnica) },
-    ];
-    
+      { label: 'Valor Ejecutado (Bruto)', value: formatCOP(sumaMensual) },
+      { label: 'Descuento Aplicado (Auditoría)', value: formatCOP(descuentoAplicadoTotal), color: 'red' },
+      { label: 'Valor Final a Pagar (Post-Auditoría)', value: formatCOP(valorNetoFinalAuditoria), bold: true },
+      { label: 'Diferencia vs. Presupuesto', value: formatCOP(diffVsNota) },
+      { label: 'Porcentaje de Ejecución Final', value: `${porcentajeEjecucion.toFixed(2)}%` },
+      { label: 'Total CUPS Ejecutados', value: totalCups.toLocaleString('es-CO') },
+      { label: 'Costo Unitario Promedio (Post-Auditoría)', value: formatCOP(unitAvg) },
+      { label: 'Nota Técnica (Presupuesto)', value: formatCOP(valorNotaTecnica) },
+    ].sort((a, b) => {
+        // Move "Nota Técnica" to the end
+        if (a.label.includes('Nota Técnica')) return 1;
+        if (b.label.includes('Nota Técnica')) return -1;
+        return 0;
+    });
+
     const topOverExecuted = (reportData.overExecutedCups ?? [])
         .sort((a,b) => b.deviation - a.deviation)
         .slice(0, 5);
@@ -236,15 +241,15 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
     
     const adjustmentsForPdf = Object.entries(reportData.adjustedData?.comments || {})
       .map(([cup, comment]) => {
-        const overExecutedCup = reportData.overExecutedCups?.find(c => c.cup === cup);
-        if (!overExecutedCup || !comment) return null;
+        const deviatedCup = reportData.overExecutedCups?.find(c => c.cup === cup);
+        if (!deviatedCup || !comment) return null;
 
-        const validatedQty = reportData.adjustedData?.adjustedQuantities[cup] ?? overExecutedCup.realFrequency;
+        const validatedQty = reportData.adjustedData?.adjustedQuantities[cup] ?? deviatedCup.realFrequency;
         
         return {
           cup: cup,
-          description: overExecutedCup.description || 'N/A',
-          originalQty: overExecutedCup.realFrequency,
+          description: deviatedCup.description || 'N/A',
+          originalQty: deviatedCup.realFrequency,
           validatedQty: validatedQty,
           adjustmentValue: reportData.adjustedData?.adjustedValues[cup] || 0,
           comment: comment,
