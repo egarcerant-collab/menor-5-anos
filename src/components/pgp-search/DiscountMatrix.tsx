@@ -471,7 +471,7 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
             monthData.rawJsonData.usuarios?.forEach((user: any) => {
                 const userId = `${user.tipoDocumentoIdentificacion}-${user.numDocumentoIdentificacion}`;
 
-                const processServicesForDiscount = (services: any[], serviceType: ServiceType, codeField: string, valueField: string, unitValueField?: string, qtyField?: string) => {
+                const processServicesForDiscount = (services: any[], serviceType: ServiceType, codeField: string) => {
                     if (!services) return;
 
                     services.forEach((service: any) => {
@@ -488,16 +488,14 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
                             const discountRatio = (executedQty - validatedQty) / executedQty;
                             
                             let originalServiceValue = 0;
-                            if (serviceType === 'Medicamento' && unitValueField && qtyField) {
-                                originalServiceValue = getNumericValue(service[unitValueField]) * getNumericValue(service[qtyField]);
-                            } else if (serviceType === 'Otro Servicio' && qtyField) {
-                                originalServiceValue = getNumericValue(service[valueField]);
-                            }
-                            else {
-                                originalServiceValue = getNumericValue(service[valueField]);
+                            if (serviceType === 'Medicamento') {
+                                originalServiceValue = getNumericValue(service['vrUnitarioMedicamento']) * getNumericValue(service['cantidadMedicamento']);
+                            } else if (serviceType === 'Otro Servicio') {
+                                originalServiceValue = getNumericValue(service['vrServicio']) || (getNumericValue(service['vrUnitarioOS']) * getNumericValue(service['cantidadOS']));
+                            } else {
+                                originalServiceValue = getNumericValue(service['vrServicio']);
                             }
                             
-
                             const discountAmount = originalServiceValue * discountRatio;
                             const recognizedValue = originalServiceValue - discountAmount;
 
@@ -519,10 +517,10 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
                 };
 
                 if (user.servicios) {
-                    processServicesForDiscount(user.servicios.consultas, 'Consulta', 'codConsulta', 'vrServicio');
-                    processServicesForDiscount(user.servicios.procedimientos, 'Procedimiento', 'codProcedimiento', 'vrServicio');
-                    processServicesForDiscount(user.servicios.medicamentos, 'Medicamento', 'codTecnologiaSalud', 'vrServicio', 'vrUnitarioMedicamento', 'cantidadMedicamento');
-                    processServicesForDiscount(user.servicios.otrosServicios, 'Otro Servicio', 'codTecnologiaSalud', 'vrServicio', undefined, 'cantidadOS');
+                    processServicesForDiscount(user.servicios.consultas, 'Consulta', 'codConsulta');
+                    processServicesForDiscount(user.servicios.procedimientos, 'Procedimiento', 'codProcedimiento');
+                    processServicesForDiscount(user.servicios.medicamentos, 'Medicamento', 'codTecnologiaSalud');
+                    processServicesForDiscount(user.servicios.otrosServicios, 'Otro Servicio', 'codTecnologiaSalud');
                 }
             });
         });
