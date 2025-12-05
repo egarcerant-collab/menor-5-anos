@@ -29,7 +29,7 @@ import { generateReportAnalysis, type ReportAnalysisInput, ReportAnalysisOutput 
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 
 // ======= Tipos =======
 export interface MonthExecution {
@@ -207,7 +207,17 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
   // Series para gráficas
   const pieData = useMemo(() => data?.months.map((m) => ({ name: m.month, value: m.valueCOP, fill: `hsl(var(--chart-${data.months.indexOf(m) + 1}))` })) ?? [], [data?.months]);
   const cupsData = useMemo(() => data?.months.map((m) => ({ Mes: m.month, CUPS: m.cups })) ?? [], [data?.months]);
-  const financialData = useMemo(() => data?.months.map((m) => ({ Mes: m.month, 'Valor Ejecutado': m.valueCOP })) ?? [], [data?.months]);
+  
+  const financialData = useMemo(() => {
+    if (!data || !data.months.length) return [];
+    const budgetPerMonth = (data.notaTecnica?.valor3m || 0) / data.months.length;
+    return data.months.map(m => ({
+        Mes: m.month,
+        'Valor Ejecutado': m.valueCOP,
+        'Valor Presupuestado': budgetPerMonth
+    }))
+  }, [data]);
+
 
 
   const getInformeData = (reportData: ReportData, charts: { [key: string]: string }, analysisTexts: ReportAnalysisOutput, auditorConclusions: string, auditorRecommendations: string): InformeDatos => {
@@ -225,7 +235,6 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
       { label: 'Costo Unitario Promedio (Post-Auditoría)', value: formatCOP(unitAvg) },
       { label: 'Nota Técnica (Presupuesto)', value: formatCOP(valorNotaTecnica) },
     ].sort((a, b) => {
-        // Move "Nota Técnica" to the end
         if (a.label.includes('Nota Técnica')) return 1;
         if (b.label.includes('Nota Técnica')) return -1;
         return 0;
@@ -382,8 +391,12 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
   const financialChartConfig = {
       'Valor Ejecutado': {
           label: "Valor Ejecutado",
-          color: "hsl(var(--primary))",
+          color: "hsl(var(--chart-2))",
       },
+      'Valor Presupuestado': {
+          label: "Valor Presupuestado",
+          color: "hsl(var(--chart-1))",
+      }
   } satisfies React.ComponentProps<typeof ChartContainer>["config"];
 
   const cupsChartConfig = {
@@ -427,13 +440,13 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                 <XAxis dataKey="Mes" fontSize={12} tickLine={false} axisLine={false} />
                                 <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatCOP(value as number)} />
-                                <Tooltip
-                                    cursor={{ fill: 'hsl(var(--muted))' }}
-                                    formatter={(value) => formatCOP(value as number)}
-                                    content={<ChartTooltipContent />}
+                                <ChartTooltip
+                                    cursor={false}
+                                    content={<ChartTooltipContent indicator="dot" />}
                                 />
-                                <Bar dataKey="Valor Ejecutado" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                                {valorNotaTecnica > 0 && <ReferenceLine y={valorNotaTecnica / (data.months.length || 1)} label="Nota Técnica" stroke="hsl(var(--destructive))" strokeDasharray="3 3" />}
+                                <Bar dataKey="Valor Presupuestado" fill="var(--color-Valor Presupuestado)" radius={4} />
+                                <Bar dataKey="Valor Ejecutado" fill="var(--color-Valor Ejecutado)" radius={4} />
+                                <ChartLegend content={<ChartLegendContent />} />
                             </BarChart>
                         </ResponsiveContainer>
                     </ChartContainer>
@@ -511,7 +524,11 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
                       cx="50%"
                       cy="50%"
                       outerRadius={80}
-                    />
+                    >
+                       {pieData.map((entry) => (
+                          <Cell key={`cell-${entry.name}`} fill={entry.fill} />
+                        ))}
+                    </Pie>
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>
