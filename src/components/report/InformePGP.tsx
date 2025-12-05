@@ -225,7 +225,7 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
     const periodoAnalizado = reportTitle.split('–')[1]?.trim() || 'Periodo Analizado';
 
     // **CRITICAL CHANGE**: Use pre-calculated KPIs instead of recalculating.
-    const kpis = [
+    const kpisUnsorted = [
       { label: 'Valor Ejecutado (Bruto)', value: formatCOP(sumaMensual) },
       { label: 'Descuento Aplicado (Auditoría)', value: formatCOP(descuentoAplicadoTotal), color: 'red' },
       { label: 'Valor Final a Pagar (Post-Auditoría)', value: formatCOP(valorNetoFinalAuditoria), bold: true },
@@ -233,13 +233,12 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
       { label: 'Porcentaje de Ejecución Final', value: `${porcentajeEjecucion.toFixed(2)}%` },
       { label: 'Total CUPS Ejecutados', value: totalCups.toLocaleString('es-CO') },
       { label: 'Costo Unitario Promedio (Post-Auditoría)', value: formatCOP(unitAvg) },
-    ].sort((a, b) => {
-        if (a.label.includes('Nota Técnica')) return 1;
-        if (b.label.includes('Nota Técnica')) return -1;
-        return 0;
-    });
+    ];
 
-     kpis.push({ label: 'Nota Técnica (Presupuesto)', value: formatCOP(valorNotaTecnica) });
+     const kpis = [
+        ...kpisUnsorted,
+        { label: 'Nota Técnica (Presupuesto)', value: formatCOP(valorNotaTecnica) }
+     ];
 
 
     const topOverExecuted = (reportData.overExecutedCups ?? [])
@@ -532,12 +531,12 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
                       />
                       <Bar
                         dataKey="Valor Presupuestado"
-                        fill="var(--color-Valor Presupuestado)"
+                        fill="#3b82f6"
                         radius={4}
                       />
                       <Bar
                         dataKey="Valor Ejecutado"
-                        fill="var(--color-Valor Ejecutado)"
+                        fill="#16a34a"
                         radius={4}
                       />
                       <ChartLegend content={<ChartLegendContent />} />
@@ -555,7 +554,7 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
                   <XAxis dataKey="Mes" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip formatter={(value) => `${(value as number).toLocaleString('es-CO')} CUPS`} />
-                  <Bar dataKey="CUPS" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="CUPS" fill="#8884d8" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
