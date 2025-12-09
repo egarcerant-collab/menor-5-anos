@@ -111,11 +111,13 @@ function buildDocDefinition(data: InformeDatos, backgroundImageBase64: string): 
                 if (item.chartImage) {
                     contentBlock.push({
                         image: item.chartImage,
-                        width: 350,
+                        width: 400,
                         alignment: 'center',
                         margin: [0, 5, 0, 10],
                     });
                 }
+                // This was removed in a previous step, but re-adding it for clinical analysis if it exists.
+                // It is now an optional field.
                 if (item.text) {
                     contentBlock.push({ text: item.text, style: 'p' });
                 }
@@ -132,7 +134,7 @@ function buildDocDefinition(data: InformeDatos, backgroundImageBase64: string): 
                     ],
                 }
             ],
-            margin: [58, 0, 40, 0] // Margen ajustado para bajar el footer
+            margin: [58, -40, 40, 0]
         }),
     };
     
@@ -233,18 +235,32 @@ function buildDocDefinition(data: InformeDatos, backgroundImageBase64: string): 
 
     // CONCLUSIONES Y RECOMENDACIONES DEL AUDITOR
     if (data.auditorConclusions || data.auditorRecommendations) {
-        (docDefinition.content as Content[]).push({
-            text: 'CONCLUSIONES Y RECOMENDACIONES DE LA AUDITORÍA',
-            style: 'h2',
-            pageBreak: 'before',
-        });
+        // Find the index of the firmas_section if it exists
+        const firmasIndex = (docDefinition.content as Content[]).findIndex((item: any) => item.id === 'firmas_section');
+
+        const contentToInsert: Content[] = [
+            {
+                text: 'CONCLUSIONES Y RECOMENDACIONES DE LA AUDITORÍA',
+                style: 'h2',
+                pageBreak: 'before',
+            }
+        ];
+
         if (data.auditorConclusions) {
-            (docDefinition.content as Content[]).push({ text: 'Conclusiones', style: 'h2', fontSize: 11, margin: [0, 5, 0, 5] });
-            (docDefinition.content as Content[]).push({ text: data.auditorConclusions, style: 'p' });
+            contentToInsert.push({ text: 'Conclusiones', style: 'h2', fontSize: 11, margin: [0, 5, 0, 5] });
+            contentToInsert.push({ text: data.auditorConclusions, style: 'p' });
         }
         if (data.auditorRecommendations) {
-            (docDefinition.content as Content[]).push({ text: 'Recomendaciones', style: 'h2', fontSize: 11, margin: [0, 10, 0, 5] });
-            (docDefinition.content as Content[]).push({ text: data.auditorRecommendations, style: 'p' });
+            contentToInsert.push({ text: 'Recomendaciones', style: 'h2', fontSize: 11, margin: [0, 10, 0, 5] });
+            contentToInsert.push({ text: data.auditorRecommendations, style: 'p' });
+        }
+
+        if (firmasIndex !== -1) {
+            // Insert before firmas_section
+            (docDefinition.content as Content[]).splice(firmasIndex, 0, ...contentToInsert);
+        } else {
+            // Append to the end if firmas_section is not found
+            (docDefinition.content as Content[]).push(...contentToInsert);
         }
     }
 

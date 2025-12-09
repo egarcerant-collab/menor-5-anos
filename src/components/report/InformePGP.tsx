@@ -293,10 +293,6 @@ export default function InformePGP({ data }: { data?: ReportData | null }) {
               title: 'Análisis de Desviaciones: CUPS Sobre-ejecutados e Inesperados',
               text: analysisTexts.deviationAnalysis,
             },
-            {
-              title: 'Análisis Clínico y de Pertinencia Médica',
-              text: analysisTexts.clinicalAnalysis,
-            },
         ],
         topOverExecuted,
         topUnexpected,
