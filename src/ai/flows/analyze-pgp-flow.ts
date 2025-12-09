@@ -43,9 +43,15 @@ const AnalyzePgpDataOutputSchema = z.object({
 });
 
 export async function analyzePgpData(input: PgpRowForAI[]): Promise<z.infer<typeof AnalyzePgpDataOutputSchema>> {
-  // Convert the array of objects into a JSON string before passing to the flow.
-  const dataAsString = JSON.stringify(input, null, 2);
-  return analyzePgpDataFlow({ jsonData: dataAsString });
+  try {
+    // Convert the array of objects into a JSON string before passing to the flow.
+    const dataAsString = JSON.stringify(input, null, 2);
+    return await analyzePgpDataFlow({ jsonData: dataAsString });
+  } catch (error) {
+    console.error("Error executing analyzePgpData:", error);
+    // Re-throw a user-friendly error to be caught by the client-side action handler.
+    throw new Error("No se pudo completar el análisis de los datos.");
+  }
 }
 
 const prompt = ai.definePrompt({
