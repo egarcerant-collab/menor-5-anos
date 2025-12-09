@@ -365,7 +365,7 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
                 processServices(user.servicios?.consultas, 'codConsulta', 'Consulta');
                 processServices(user.servicios?.procedimientos, 'codProcedimiento', 'Procedimiento');
                 processServices(user.servicios?.medicamentos, 'codTecnologiaSalud', 'Medicamento', undefined, 'vrUnitarioMedicamento', 'cantidadMedicamento');
-                processServices(user.servicios?.otrosServicios, 'codTecnologiaSalud', 'Otro Servicio', 'vrServicio', undefined, 'cantidadOS');
+                processServices(user.servicios?.otrosServicios, 'codTecnologiaSalud', 'Otro Servicio', 'vrServicio', 'vrUnitarioOS', 'cantidadOS');
             });
         });
         setExecutionDetails(details);
@@ -491,7 +491,7 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
                             if (serviceType === 'Medicamento') {
                                 originalServiceValue = getNumericValue(service['vrUnitarioMedicamento']) * getNumericValue(service['cantidadMedicamento']);
                             } else if (serviceType === 'Otro Servicio') {
-                                originalServiceValue = getNumericValue(service['vrServicio']) || (getNumericValue(service['vrUnitarioOS']) * getNumericValue(service['cantidadOS']));
+                                originalServiceValue = getNumericValue(service['vrServicio']) || (getNumericValue(service['vrUnitarioOS']) * getNumericValue(service['cantidadOS'])) || 0;
                             } else {
                                 originalServiceValue = getNumericValue(service['vrServicio']);
                             }

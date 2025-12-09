@@ -364,7 +364,7 @@ const ValorizadoDetailModal = ({ open, onOpenChange, executionDataByMonth, pgpDa
                     processServicesForDownload(user.servicios.consultas, 'Consulta', 'codConsulta', 'vrServicio');
                     processServicesForDownload(user.servicios.procedimientos, 'Procedimiento', 'codProcedimiento', 'vrServicio');
                     processServicesForDownload(user.servicios.medicamentos, 'Medicamento', 'codTecnologiaSalud', 'vrServicio', 'vrUnitarioMedicamento', 'cantidadMedicamento');
-                    processServicesForDownload(user.servicios.otrosServicios, 'Otro Servicio', 'codTecnologiaSalud', 'vrServicio', undefined, 'cantidadOS');
+                    processServicesForDownload(user.servicios.otrosServicios, 'Otro Servicio', 'codTecnologiaSalud', 'vrServicio', 'vrUnitarioOS', 'cantidadOS');
                 }
             });
         });
@@ -958,14 +958,17 @@ const PgPsearchForm = forwardRef<
     if (!adjustedData?.adjustedValues) return 0;
     return Object.entries(adjustedData.adjustedValues).reduce((sum, [cup, value]) => {
         if (adjustedData.selectedRows[cup]) {
-            return sum + value;
+            return sum + (value || 0);
         }
         return sum;
     }, 0);
   }, [adjustedData]);
 
   const valorNetoFinal = useMemo(() => {
-      return totalRealEjecutadoJson - descuentoAplicadoTotal;
+      const totalReal = totalRealEjecutadoJson || 0;
+      const descuento = descuentoAplicadoTotal || 0;
+      if (isNaN(totalReal) || isNaN(descuento)) return 0;
+      return totalReal - descuento;
   }, [totalRealEjecutadoJson, descuentoAplicadoTotal]);
 
 
