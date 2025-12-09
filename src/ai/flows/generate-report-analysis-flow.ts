@@ -80,7 +80,7 @@ const prompt = ai.definePrompt({
   Genera los siguientes tres bloques de texto en el formato JSON especificado:
 
   1.  **financialAnalysis** (entre 1200 y 1500 caracteres): Análisis de Ejecución Financiera y Presupuestal.
-      - **PUNTO CRÍTICO:** Tu análisis DEBE centrarse en el **'Valor Total a Pagar (Post-Auditoría)' ({{valorNetoFinal}})**. Explica claramente que este es el resultado final después de la conciliación.
+      - **PUNTO CRÍTICO:** Tu análisis DEBE centrarse en el **'Valor Total a Pagar (Post-Auditoría)' ({{{valorNetoFinal}}})**. Explica claramente que este es el resultado final después de la conciliación.
       - Compara este valor final con el presupuesto ({{valorNotaTecnica}}).
       - Explica cómo se llegó a este valor, mencionando el **'Descuento Total Aplicado' ({{descuentoAplicado}})** como resultado de la auditoría de sobre-ejecución e imprevistos.
       - Concluye sobre la liquidación del contrato. ¿El valor final a pagar está dentro de las bandas esperadas? ¿Cuál es la implicación financiera para el prestador y el asegurador?
