@@ -1260,7 +1260,7 @@ const PgPsearchForm = forwardRef<
                   initialAuditData={initialAuditData}
                 />
 
-                {reportData && <InformePGP data={reportData} />}
+                {reportData && <InformePGP data={reportData} comparisonSummary={comparisonSummary} />}
               </>
             )}
           </div>

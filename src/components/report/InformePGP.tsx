@@ -23,7 +23,7 @@ import {
   Cell,
 } from "recharts";
 import { descargarInformePDF, type InformeDatos, generarURLInformePDF } from "@/lib/pdf-definitions";
-import type { DeviatedCupInfo, UnexpectedCupInfo, AdjustedData, ReportData as ReportDataType } from "@/components/pgp-search/PgPsearchForm";
+import type { DeviatedCupInfo, UnexpectedCupInfo, AdjustedData, ReportData as ReportDataType, ComparisonSummary } from "@/components/pgp-search/PgPsearchForm";
 import { generateReportAnalysis, type ReportAnalysisInput, ReportAnalysisOutput } from "@/ai/flows/generate-report-analysis-flow";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "../ui/textarea";
@@ -150,7 +150,7 @@ async function loadImageAsBase64(url: string): Promise<string> {
 }
 
 // ======= Componente (fusionado y reforzado) =======
-export default function InformePGP({ data }: { data?: ReportData | null }) {
+export default function InformePGP({ data, comparisonSummary }: { data?: ReportData | null, comparisonSummary: ComparisonSummary | null }) {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const { toast } = useToast();
