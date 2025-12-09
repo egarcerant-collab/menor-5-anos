@@ -744,5 +744,3 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
 };
 
 export default DiscountMatrix;
-
-    
