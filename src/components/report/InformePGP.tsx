@@ -497,61 +497,72 @@ export default function InformePGP({ data, comparisonSummary }: { data?: ReportD
         />
       
       {/* Hidden container for rendering charts for PDF */}
-      <div className="absolute -left-[9999px] top-0 w-[600px] space-y-8 bg-white p-4">
-          <section ref={financialChartRef}>
-             <h3 className="text-center font-semibold text-sm mb-2">Ejecución Financiera Mensual</h3>
-            <div className="h-60">
-              <ChartContainer config={financialChartConfig} className="min-h-[200px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                   <BarChart data={financialData} margin={{ left: 20 }}>
-                      <CartesianGrid vertical={false} />
-                      <XAxis
-                        dataKey="Mes"
-                        tickLine={false}
-                        tickMargin={10}
-                        axisLine={false}
-                      />
-                      <YAxis
-                        tickLine={false}
-                        axisLine={false}
-                        tickMargin={10}
-                        tickFormatter={(value) => formatCOP(value as number)}
-                      />
-                      <ChartTooltip
-                        cursor={false}
-                        content={<ChartTooltipContent indicator="dot" />}
-                      />
-                      <Bar
-                        dataKey="Valor Presupuestado"
-                        fill="#3b82f6"
-                        radius={4}
-                      />
-                      <Bar
-                        dataKey="Valor Ejecutado"
-                        fill="#16a34a"
-                        radius={4}
-                      />
-                      <ChartLegend content={<ChartLegendContent />} />
-                    </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </div>
-          </section>
-           <section ref={cupsChartRef}>
-            <h3 className="text-center font-semibold text-sm mb-2">Volumen de CUPS Mensual</h3>
-            <div className="h-60">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={cupsData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="Mes" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip formatter={(value) => `${(value as number).toLocaleString('es-CO')} CUPS`} />
-                  <Bar dataKey="CUPS" fill="#8884d8" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </section>
-      </div>
+<div className="absolute -left-[9999px] top-0 w-[450px] space-y-6 bg-white p-3">
+  <section ref={financialChartRef}>
+    <h3 className="text-center font-semibold text-xs mb-1">
+      Ejecución Financiera Mensual
+    </h3>
+    <div className="h-40"> {/* Reducido de h-60 a h-40 */}
+      <ChartContainer config={financialChartConfig} className="min-h-[160px] w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={financialData} margin={{ left: 10, right: 10, bottom: 5 }}>
+            <CartesianGrid vertical={false} strokeDasharray="3 3" />
+            <XAxis
+              dataKey="Mes"
+              tickLine={false}
+              tickMargin={8}
+              axisLine={false}
+              fontSize={10}
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              fontSize={10}
+              tickFormatter={(value) => {
+                const num = value as number;
+                if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+                if (num >= 1000) return `${(num / 1000).toFixed(0)}K`;
+                return num.toString();
+              }}
+            />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent indicator="dot" />}
+            />
+            <Bar
+              dataKey="Valor Presupuestado"
+              fill="#93c5fd" // azul claro
+              radius={[3, 3, 0, 0]}
+            />
+            <Bar
+              dataKey="Valor Ejecutado"
+              fill="#16a34a" // verde
+              radius={[3, 3, 0, 0]}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </ChartContainer>
+    </div>
+  </section>
+
+  <section ref={cupsChartRef}>
+    <h3 className="text-center font-semibold text-xs mb-1">Volumen de CUPS Mensual</h3>
+    <div className="h-40"> {/* Igualamos tamaño */}
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={cupsData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="Mes" fontSize={10} tickLine={false} axisLine={false} />
+          <YAxis fontSize={10} tickLine={false} axisLine={false} />
+          <Tooltip
+            formatter={(value) => `${(value as number).toLocaleString('es-CO')} CUPS`}
+          />
+          <Bar dataKey="CUPS" fill="#a78bfa" radius={[3, 3, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  </section>
+</div>
 
     </div>
   );
