@@ -169,8 +169,7 @@ function buildDocDefinition(data: InformeDatos, backgroundImageBase64: string): 
                     contentBlock.push({
                         image: item.chartImage,
                         width: 400,
-                        alignment: 'center',
-                        margin: [0, 5, 0, 10],
+                        margin: [20, 5, 0, 10], // margen [left, top, right, bottom]
                     });
                 }
                 // This was removed in a previous step, but re-adding it for clinical analysis if it exists.
