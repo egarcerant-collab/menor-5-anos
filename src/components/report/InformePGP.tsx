@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useMemo, useState, useRef, useEffect } from "react";
@@ -24,6 +25,7 @@ import {
 } from "recharts";
 import { descargarInformePDF, type InformeDatos, generarURLInformePDF, generateStaticAnalysisTexts } from "@/lib/pdf-definitions";
 import type { DeviatedCupInfo, UnexpectedCupInfo, AdjustedData, ReportData as ReportDataType, ComparisonSummary } from "@/components/pgp-search/PgPsearchForm";
+import { generateReportAnalysis, type ReportAnalysisInput, type ReportAnalysisOutput } from "@/ai/flows/generate-report-analysis-flow";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
@@ -314,11 +316,9 @@ export default function InformePGP({ data, comparisonSummary }: { data?: ReportD
         const totalValueUnderExecuted = comparisonSummary.underExecutedCups.reduce((sum, cup) => sum + cup.deviationValue, 0);
         const totalValueMissing = comparisonSummary.missingCups.reduce((sum, cup) => sum + cup.deviationValue, 0);
 
-        const executionPercentageAsString = isFinite(porcentajeEjecucion)
-          ? porcentajeEjecucion.toFixed(2)
-          : "0.00";
+        const executionPercentageAsString = isFinite(porcentajeEjecucion) ? porcentajeEjecucion.toFixed(2) : "0.00";
 
-        const analysisInput = {
+        const analysisInput: ReportAnalysisInput = {
             sumaMensual,
             valorNotaTecnica,
             diffVsNota,
@@ -337,8 +337,22 @@ export default function InformePGP({ data, comparisonSummary }: { data?: ReportD
             totalValueMissing,
         };
 
-        const analysisTexts = generateStaticAnalysisTexts(analysisInput);
-
+        let analysisTexts;
+        try {
+            // Intenta generar el análisis con IA
+            analysisTexts = await generateReportAnalysis(analysisInput);
+            toast({ title: 'Análisis con IA generado', description: 'Los textos del informe se crearon exitosamente.'});
+        } catch (aiError: any) {
+            console.error("AI analysis failed, falling back to static texts:", aiError);
+            toast({
+                title: 'Error en el análisis de IA',
+                description: 'Se usarán textos de respaldo para el informe. ' + (aiError.message || ''),
+                variant: 'destructive',
+            });
+            // Si la IA falla, usa los textos de respaldo
+            analysisTexts = generateStaticAnalysisTexts(analysisInput);
+        }
+        
         const backgroundImage = await loadImageAsBase64('/imagenes pdf/IMAGENEN UNIFICADA.jpg');
 
         const getChartImage = async (ref: React.RefObject<HTMLDivElement>) => {
@@ -505,7 +519,7 @@ export default function InformePGP({ data, comparisonSummary }: { data?: ReportD
     <div className="h-40"> {/* Reducido de h-60 a h-40 */}
       <ChartContainer config={financialChartConfig} className="min-h-[160px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={financialData} margin={{ left: 10, right: 10, bottom: 5 }}>
+          <BarChart data={financialData} margin={{ left: 20, right: 10, bottom: 5 }}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis
               dataKey="Mes"

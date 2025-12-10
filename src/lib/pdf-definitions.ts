@@ -79,14 +79,14 @@ Este valor representa una ejecución del ${porcentajeEjecucion}% frente al presu
 La diferencia se explica principalmente por un descuento total aplicado de ${formatCurrency(descuentoAplicado)}, derivado de los ajustes realizados en la validación de servicios sobre-ejecutados e inesperados.
 La liquidación final refleja una contención del gasto, alineándose con las proyecciones y garantizando la sostenibilidad del acuerdo.
 ${additionalConclusions || ''}
-  `.trim();
+  `.trim().replace(/\s+/g, ' ');
 
   const epidemiologicalAnalysis = `
 Durante el periodo analizado se registró un volumen total de ${totalCups.toLocaleString('es-CO')} CUPS prestados, con un costo unitario promedio de ${formatCurrency(unitAvg)}.
 Este costo promedio sugiere un nivel de complejidad en la atención que debe ser monitoreado para entender las tendencias de morbilidad de la población.
 El análisis de la demanda de servicios indica una utilización consistente con el perfil de riesgo esperado, aunque se identifican áreas específicas de sobre-utilización que requieren un análisis de causa raíz.
 La capacidad de la red de prestadores ha demostrado ser, en general, suficiente para la demanda, pero es crucial proyectar las necesidades futuras basadas en estas tendencias.
-  `.trim();
+  `.trim().replace(/\s+/g, ' ');
 
   const deviationAnalysis = `
 El principal impacto financiero en las desviaciones proviene de los CUPS sobre-ejecutados, que generaron un valor excedente de ${formatCurrency(totalValueOverExecuted)}.
@@ -94,7 +94,7 @@ Adicionalmente, los CUPS inesperados (no contenidos en la nota técnica) represe
 Estas desviaciones sugieren un posible aumento en la incidencia de ciertas patologías o cambios en las guías de manejo clínico que no fueron contemplados inicialmente.
 El riesgo financiero de estas desviaciones es significativo, ya que impactan directamente la prima del contrato. Se recomienda iniciar auditorías focalizadas en los CUPS con mayor desviación y revisar la pertinencia de las atenciones inesperadas para mitigar el riesgo económico a futuro.
 ${additionalRecommendations || ''}
-  `.trim();
+  `.trim().replace(/\s+/g, ' ');
 
   return {
     financialAnalysis,
