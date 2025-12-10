@@ -127,14 +127,20 @@ const generateReportAnalysisFlow = ai.defineFlow(
   },
   async (input) => {
     try {
-        // Run prompts sequentially to avoid overwhelming the service.
-        const { output: financialOutput } = await financialAnalysisPrompt(input);
+        // Run prompts in parallel for better performance and resilience.
+        const [financialResult, epidemiologicalResult, deviationResult] = await Promise.all([
+            financialAnalysisPrompt(input),
+            epidemiologicalAnalysisPrompt(input),
+            deviationAnalysisPrompt(input),
+        ]);
+
+        const financialOutput = financialResult.output;
         if (!financialOutput) throw new Error('La IA no pudo generar el análisis financiero.');
 
-        const { output: epidemiologicalOutput } = await epidemiologicalAnalysisPrompt(input);
+        const epidemiologicalOutput = epidemiologicalResult.output;
         if (!epidemiologicalOutput) throw new Error('La IA no pudo generar el análisis epidemiológico.');
-
-        const { output: deviationOutput } = await deviationAnalysisPrompt(input);
+        
+        const deviationOutput = deviationResult.output;
         if (!deviationOutput) throw new Error('La IA no pudo generar el análisis de desviaciones.');
 
         return {
