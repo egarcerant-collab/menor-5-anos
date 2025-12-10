@@ -453,9 +453,11 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
                 if (rowData) {
                     const executedQty = rowData.Cantidad_Ejecutada;
                     const validatedQty = adjustedQuantities[cup] ?? executedQty;
-                    if (validatedQty < executedQty && executedQty > 0) {
-                        discountedCupsInfo.set(cup, {
-                            discountRatio: (executedQty - validatedQty) / executedQty,
+                    
+                    if (executedQty > 0 && validatedQty < executedQty) {
+                         const ratio = (executedQty - validatedQty) / executedQty;
+                         discountedCupsInfo.set(cup, {
+                            discountRatio: ratio,
                             comment: comments[cup] || '',
                             description: rowData.Descripcion || 'N/A'
                         });
