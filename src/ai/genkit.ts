@@ -11,7 +11,7 @@ export const ai = genkit({
     }),
   ],
   model: {
-    name: 'googleai/gemini-pro',
+    name: 'googleai/gemini-1.5-pro-latest',
     temperature: 0.4,
     maxOutputTokens: 2048,
   },
