@@ -1,12 +1,13 @@
 
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { MonthlyExecutionData, SavedAuditData } from "@/components/app/JsonAnalyzerPage";
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 import SavedAuditsPage from "@/components/app/SavedAuditsPage";
 import { Separator } from "@/components/ui/separator";
+import ApiKeyManager from "@/components/app/ApiKeyManager";
 
 
 const JsonAnalyzerPage = dynamic(
@@ -45,8 +46,17 @@ export default function Home() {
   const [jsonPrestadorCode, setJsonPrestadorCode] = useState<string | null>(null);
   const [uniqueUserCount, setUniqueUserCount] = useState<number>(0);
   const [savedAuditData, setSavedAuditData] = useState<SavedAuditData | null>(null);
+  const [apiKey, setApiKey] = useState<string>('');
 
   const pgpSearchRef = useRef<{ handleSelectPrestador: (prestador: { PRESTADOR: string; WEB: string }) => void } | null>(null);
+
+  useEffect(() => {
+    // Cargar la clave de API desde localStorage al iniciar
+    const storedApiKey = localStorage.getItem('gemini_api_key');
+    if (storedApiKey) {
+      setApiKey(storedApiKey);
+    }
+  }, []);
 
   const handleAuditLoad = (auditData: SavedAuditData, prestadorName: string, month: string) => {
     // 1. Set the loaded audit data to be passed to PgpSearchPage
@@ -74,6 +84,8 @@ export default function Home() {
             Compare los datos reales de los archivos JSON con las proyecciones de las notas técnicas de Google Sheets.
           </p>
         </header>
+
+        <ApiKeyManager initialApiKey={apiKey} onApiKeyChange={setApiKey} />
 
         <h2 className="text-3xl font-semibold text-center text-foreground pt-8">
           Iniciar una Nueva Auditoría
