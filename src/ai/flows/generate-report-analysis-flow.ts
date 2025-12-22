@@ -50,24 +50,22 @@ const financialAnalysisPrompt = ai.definePrompt({
   output: { schema: z.object({ financialAnalysis: ReportAnalysisOutputSchema.shape.financialAnalysis }) },
   prompt: `
 Eres un analista financiero y médico auditor experto en el sistema de salud colombiano (PGP).
-Redacta el texto para la sección "Análisis de Ejecución Financiera y Presupuestal" (1200–1500 caracteres).
+Redacta un texto profesional y conciso (1200–1500 caracteres) para la sección "Análisis de Ejecución Financiera y Presupuestal".
 
-KPIs Financieros (Post Auditoría):
+Basado en estos KPIs:
 - Presupuesto (Nota Técnica): {{{valorNotaTecnica}}}
 - Valor Total a Pagar (Post Auditoría): {{{valorNetoFinal}}}
 - Descuento Total Aplicado: {{{descuentoAplicado}}}
 - Diferencia vs Presupuesto: {{{diffVsNota}}}
 - Porcentaje de Ejecución Final: {{{porcentajeEjecucion}}}
 
-{{#if additionalConclusions}}
-Conclusiones Adicionales del Auditor: {{{additionalConclusions}}}
-{{/if}}
-
 Instrucciones:
-- Enfatiza que el valor a pagar {{{valorNetoFinal}}} es el resultado final de conciliación.
-- Compara con el presupuesto y explica las causas de los ajustes.
-- Usa lenguaje ejecutivo, preciso y sin redundancias.
-- Concluye con implicaciones financieras del contrato.
+- Sé directo y usa lenguaje ejecutivo.
+- Explica que el valor a pagar es el resultado final post-auditoría, justificando los ajustes.
+- Concluye con las implicaciones financieras para el contrato.
+{{#if additionalConclusions}}
+- Considera estas conclusiones del auditor: {{{additionalConclusions}}}
+{{/if}}
 `,
 });
 
@@ -76,20 +74,20 @@ const epidemiologicalAnalysisPrompt = ai.definePrompt({
   input: { schema: ReportAnalysisInputSchema },
   output: { schema: z.object({ epidemiologicalAnalysis: ReportAnalysisOutputSchema.shape.epidemiologicalAnalysis }) },
   prompt: `
-Eres un médico auditor especializado en análisis epidemiológico de contratos PGP.
-Redacta el texto para la sección "Análisis del Comportamiento Epidemiológico y de Servicios (CUPS)" (1200–1500 caracteres).
+Eres un médico auditor especializado en epidemiología de contratos PGP.
+Redacta un texto profesional y conciso (1200–1500 caracteres) para la sección "Análisis del Comportamiento Epidemiológico y de Servicios (CUPS)".
 
-Indicadores del Periodo:
+Basado en estos indicadores:
 - Total de CUPS Ejecutados: {{{totalCups}}}
 - Costo Unitario Promedio: {{{unitAvg}}}
 - CUPS Sobre-ejecutados (>111%): {{{overExecutedCount}}}
 - CUPS Inesperados (no en NT): {{{unexpectedCount}}}
 
 Instrucciones:
-- Analiza el volumen y coherencia de la prestación.
-- Interpreta el costo unitario promedio como indicador de complejidad.
-- Evalúa la relación entre demanda, red de servicios y comportamiento epidemiológico.
-- Finaliza con observaciones sobre gestión del riesgo y capacidad instalada.
+- Analiza el volumen y la coherencia de la prestación.
+- Interpreta el costo unitario promedio como un indicador de complejidad de la atención.
+- Evalúa la relación entre la demanda, la red de servicios y el comportamiento epidemiológico.
+- Finaliza con observaciones sobre la gestión del riesgo y la capacidad de la red.
 `,
 });
 
@@ -98,23 +96,22 @@ const deviationAnalysisPrompt = ai.definePrompt({
   input: { schema: ReportAnalysisInputSchema },
   output: { schema: z.object({ deviationAnalysis: ReportAnalysisOutputSchema.shape.deviationAnalysis }) },
   prompt: `
-Eres un analista de riesgos y auditor financiero del sistema PGP.
-Redacta el texto para la sección "Análisis del Valor de las Desviaciones" (1500–2000 caracteres).
+Eres un analista de riesgos y auditor PGP.
+Redacta un texto profesional y conciso (1500–2000 caracteres) para la sección "Análisis del Valor de las Desviaciones".
 
-Desviaciones del Periodo:
+Basado en estas desviaciones:
 - Sobre-ejecución: {{{totalValueOverExecuted}}}
 - CUPS Inesperados: {{{totalValueUnexpected}}}
 - Sub-ejecución: {{{totalValueUnderExecuted}}}
 - Faltantes: {{{totalValueMissing}}}
 
-{{#if additionalRecommendations}}
-Recomendaciones Adicionales del Auditor: {{{additionalRecommendations}}}
-{{/if}}
-
 Instrucciones:
 - Cuantifica el impacto económico de cada desviación.
-- Explica causas probables (aumento de incidencia, cambios clínicos, etc.).
-- Evalúa riesgos financieros y plantea medidas de mitigación (auditorías específicas, ajustes de red, controles).
+- Explica las causas probables (aumento de incidencia, cambios clínicos, etc.).
+- Evalúa los riesgos financieros y plantea medidas de mitigación (auditorías, ajustes de red, controles).
+{{#if additionalRecommendations}}
+- Considera estas recomendaciones del auditor: {{{additionalRecommendations}}}
+{{/if}}
 `,
 });
 
@@ -135,9 +132,6 @@ const generateReportAnalysisFlow = ai.defineFlow(
       throw new Error("Entrada inválida para generar el informe PGP.");
     }
 
-    const executionId = Date.now();
-    console.log(`🧩 [${executionId}] Iniciando flujo de análisis PGP...`);
-
     try {
       // Ejecutar prompts en paralelo para más eficiencia
       const [financialResult, epidemiologicalResult, deviationResult] = await Promise.all([
@@ -151,16 +145,9 @@ const generateReportAnalysisFlow = ai.defineFlow(
       const dev = deviationResult.output?.deviationAnalysis;
       
       if (!fin || !epi || !dev) {
-        // Log individual results for debugging
-        console.error('AI analysis sub-task failed. Results:', {
-            financial: !!fin,
-            epidemiological: !!epi,
-            deviation: !!dev,
-        });
         throw new Error("La IA no devolvió todas las secciones esperadas del análisis.");
       }
 
-      console.log(`✅ [${executionId}] Flujo completado exitosamente.`);
       return {
         financialAnalysis: fin,
         epidemiologicalAnalysis: epi,
@@ -168,7 +155,7 @@ const generateReportAnalysisFlow = ai.defineFlow(
       };
 
     } catch (error) {
-      console.error(`🔥 [${executionId}] Error durante el flujo:`, error);
+      console.error(`🔥 Error durante el flujo de análisis:`, error);
       const errorMessage = error instanceof Error ? error.message : "Error desconocido";
       throw new Error(`El servicio de IA no pudo generar el análisis. Detalle: ${errorMessage}`);
     }
