@@ -8,6 +8,7 @@ export interface PrestadorInfo {
   'ID DE ZONA'?: string;
   WEB: string;
   POBLACION?: number;
+  CONTRATO?: string;
   [key: string]: any;
 }
 

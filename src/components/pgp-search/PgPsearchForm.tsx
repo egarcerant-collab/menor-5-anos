@@ -28,6 +28,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescript
 import { getNumericValue, type SavedAuditData } from '../app/JsonAnalyzerPage';
 import { findColumnValue } from '@/lib/matriz-helpers';
 import DiscountMatrix, { type DiscountMatrixRow, type ServiceType, type AdjustedData } from './DiscountMatrix';
+import InformeClinico from '../report/InformeClinico';
 
 
 export type Prestador = PrestadorInfo;
@@ -1066,7 +1067,8 @@ const PgPsearchForm = forwardRef<
         const typedData = data.map(p => ({
           'NIT': normalizeString(p.NIT), 'PRESTADOR': normalizeString(p.PRESTADOR),
           'ID DE ZONA': normalizeString(p['ID DE ZONA']), 'WEB': normalizeString(p.WEB),
-          'POBLACION': getNumericValue(p.POBLACION)
+          'POBLACION': getNumericValue(p.POBLACION),
+          'CONTRATO': normalizeString(p.CONTRATO),
         })).filter(p => p.PRESTADOR && p['ID DE ZONA']);
         setPrestadores(typedData);
         toast({ title: "Lista de prestadores cargada.", description: `Se encontraron ${typedData.length} prestadores.` });
@@ -1200,6 +1202,14 @@ const PgPsearchForm = forwardRef<
                 />
 
                 {reportData && <InformePGP data={reportData} comparisonSummary={comparisonSummary} />}
+                {reportData && globalSummary && totalRealEjecutadoJson > 0 && selectedPrestador && (
+                  <InformeClinico
+                    reportData={reportData}
+                    globalSummary={globalSummary}
+                    totalRealEjecutadoJson={totalRealEjecutadoJson}
+                    selectedPrestador={selectedPrestador}
+                  />
+                )}
               </>
             )}
           </div>
