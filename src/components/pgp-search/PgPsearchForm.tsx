@@ -922,7 +922,7 @@ const PgPsearchForm = forwardRef<
       header: {
         empresa: "Dusakawi EPSI", nit: "8240001398",
         ipsNombre: selectedPrestador.PRESTADOR, ipsNit: selectedPrestador.NIT,
-        municipio: "Uribia", contrato: "CW-052-2024-P", vigencia: "2024",
+        municipio: "Uribia", contrato: selectedPrestador.CONTRATO || "N/A", vigencia: "2024",
         ciudad: "Uribia", fecha: new Date().toLocaleDateString('es-CO'),
       },
       months: monthsData,
@@ -1203,7 +1203,7 @@ const PgPsearchForm = forwardRef<
 
                 {reportData && <InformePGP data={reportData} comparisonSummary={comparisonSummary} />}
                 
-                {reportData && globalSummary && totalRealEjecutadoJson > 0 && selectedPrestador && (
+                {comparisonSummary && globalSummary && totalRealEjecutadoJson > 0 && selectedPrestador && reportData && (
                   <InformeClinico
                     reportData={reportData}
                     globalSummary={globalSummary}
