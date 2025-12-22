@@ -1202,6 +1202,7 @@ const PgPsearchForm = forwardRef<
                 />
 
                 {reportData && <InformePGP data={reportData} comparisonSummary={comparisonSummary} />}
+                
                 {reportData && globalSummary && totalRealEjecutadoJson > 0 && selectedPrestador && (
                   <InformeClinico
                     reportData={reportData}
