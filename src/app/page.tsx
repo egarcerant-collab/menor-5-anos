@@ -7,13 +7,19 @@ import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 import SavedAuditsPage from "@/components/app/SavedAuditsPage";
 import { Separator } from "@/components/ui/separator";
-import PgPsearchForm from "@/components/pgp-search/PgPsearchForm";
-
 
 const JsonAnalyzerPage = dynamic(
   () => import("@/components/app/JsonAnalyzerPage"),
   { 
     loading: () => <div className="flex items-center justify-center p-4"><Loader2 className="mr-2 h-5 w-5 animate-spin" />Cargando Analizador JSON...</div>,
+    ssr: false 
+  }
+);
+
+const PgPsearchForm = dynamic(
+  () => import("@/components/pgp-search/PgPsearchForm"),
+  { 
+    loading: () => <div className="flex items-center justify-center p-4"><Loader2 className="mr-2 h-5 w-5 animate-spin" />Cargando Buscador PGP...</div>,
     ssr: false 
   }
 );
@@ -28,10 +34,6 @@ export type CupCountInfo = {
 export type CupCountsMap = Map<string, CupCountInfo>;
 export type ExecutionDataByMonth = Map<string, MonthlyExecutionData>;
 
-interface PgpSearchPageHandle {
-  handleSelectPrestador: (prestador: any) => void;
-}
-
 export default function Home() {
   const [executionData, setExecutionData] = useState<ExecutionDataByMonth>(new Map());
   const [jsonPrestadorCode, setJsonPrestadorCode] = useState<string | null>(null);
@@ -41,19 +43,11 @@ export default function Home() {
   const pgpSearchRef = useRef<{ handleSelectPrestador: (prestador: { PRESTADOR: string; WEB: string }) => void } | null>(null);
 
   const handleAuditLoad = (auditData: SavedAuditData, prestadorName: string, month: string) => {
-    // 1. Set the loaded audit data to be passed to PgpSearchPage
     setSavedAuditData(auditData);
-    
-    // 2. Trigger the prestador selection in the child PgpSearchPage component
-    // This will load the corresponding technical note (Nota Técnica)
     if(pgpSearchRef.current?.handleSelectPrestador) {
-       // We create a mock prestador object. The WEB property is not essential for this
-       // re-loading mechanism as the core logic relies on the PRESTADOR name.
-       // The handleSelectPrestador function in the child will find the full prestador info.
       pgpSearchRef.current.handleSelectPrestador({ PRESTADOR: prestadorName, WEB: '' }); 
     }
   };
-
 
   return (
     <main className="flex min-h-screen flex-col items-center p-4 sm:p-8 md:p-12 bg-background">
@@ -63,16 +57,15 @@ export default function Home() {
             Herramientas de Análisis PGP
           </h1>
           <p className="text-lg text-muted-foreground">
-            Compare los datos reales de los archivos JSON con las proyecciones de las notas técnicas de Google Sheets.
+            Gestión integral de auditoría: Compare datos reales JSON con proyecciones de Notas Técnicas.
           </p>
         </header>
 
         <h2 className="text-3xl font-semibold text-center text-foreground pt-8">
-          Iniciar una Nueva Auditoría
+          Nueva Auditoría
         </h2>
 
         <div className="grid grid-cols-1 gap-8 items-start">
-          {/* Columna Izquierda: Analizador JSON */}
           <div className="space-y-6">
              <h2 className="text-2xl font-semibold text-center">Paso 1: Análisis de Datos Reales (JSON)</h2>
              <JsonAnalyzerPage 
@@ -82,7 +75,6 @@ export default function Home() {
               />
           </div>
 
-          {/* Columna Derecha: Buscador PGP */}
           <div className="space-y-6">
              <h2 className="text-2xl font-semibold text-center">Paso 2: Análisis de Nota Técnica (PGP)</h2>
              <PgPsearchForm 
@@ -97,9 +89,7 @@ export default function Home() {
 
         <Separator className="my-12" />
 
-        {/* Cargar Auditoría Guardada */}
         <SavedAuditsPage onAuditLoad={handleAuditLoad} />
-
       </div>
     </main>
   );

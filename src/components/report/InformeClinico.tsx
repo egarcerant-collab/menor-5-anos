@@ -122,7 +122,11 @@ export default function InformeClinico({ reportData, globalSummary, totalRealEje
                             placeholder="Ej: Dr. Juan Pérez"
                         />
                     </div>
-                    <Button onClick={() => handleGeneratePdf('preview')} disabled={isGenerating}>
+                    <Button 
+                        id="generate-clinical-report-button"
+                        onClick={() => handleGeneratePdf('preview')} 
+                        disabled={isGenerating}
+                    >
                         {isGenerating ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileText className="h-4 w-4 mr-1" />}
                         Generar Informe Clínico
                     </Button>
@@ -149,7 +153,6 @@ export default function InformeClinico({ reportData, globalSummary, totalRealEje
                 </DialogContent>
             </Dialog>
 
-            {/* Hidden container for rendering chart for PDF */}
             <div className="absolute -left-[9999px] top-0 w-[550px] space-y-6 bg-white p-4">
                 <section ref={financialChartRef}>
                     <h3 className="text-center font-bold text-sm mb-2">

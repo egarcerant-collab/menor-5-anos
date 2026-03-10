@@ -2,27 +2,24 @@
 'use server';
 /**
  * @fileOverview Flujo para generar texto profesional de análisis (financiero, epidemiológico y de desviaciones)
- * en informes PGP, usando IA (Genkit).
+ * en informes PGP, usando IA (Genkit) con un enfoque ejecutivo para La Guajira.
  * Autor: Eduardo Garcerant — Dusakawi EPSI
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-// =======================
-// 🔹 1. Definición de Schemas
-// =======================
 const ReportAnalysisInputSchema = z.object({
-  sumaMensual: z.number().describe("Valor total ejecutado del periodo (vrServicio JSON)."),
-  valorNotaTecnica: z.number().describe("Presupuesto establecido en la nota técnica."),
-  diffVsNota: z.number().describe("Diferencia entre lo ejecutado y lo presupuestado."),
-  porcentajeEjecucion: z.string().describe("Porcentaje de ejecución (como string 'xx.xx%') respecto a la nota técnica."),
-  totalCups: z.number().describe("Cantidad total de CUPS ejecutados."),
-  unitAvg: z.number().describe("Costo unitario promedio (valor ejecutado / cantidad de CUPS)."),
-  overExecutedCount: z.number().describe("CUPS sobre-ejecutados."),
-  unexpectedCount: z.number().describe("CUPS no incluidos en la nota técnica."),
-  valorNetoFinal: z.number().describe("Valor final a pagar al prestador post auditoría."),
-  descuentoAplicado: z.number().describe("Monto total descontado por la auditoría."),
+  sumaMensual: z.number(),
+  valorNotaTecnica: z.number(),
+  diffVsNota: z.number(),
+  porcentajeEjecucion: z.string(),
+  totalCups: z.number(),
+  unitAvg: z.number(),
+  overExecutedCount: z.number(),
+  unexpectedCount: z.number(),
+  valorNetoFinal: z.number(),
+  descuentoAplicado: z.number(),
   additionalConclusions: z.string().optional(),
   additionalRecommendations: z.string().optional(),
   totalValueOverExecuted: z.number(),
@@ -40,31 +37,29 @@ const ReportAnalysisOutputSchema = z.object({
 export type ReportAnalysisInput = z.infer<typeof ReportAnalysisInputSchema>;
 export type ReportAnalysisOutput = z.infer<typeof ReportAnalysisOutputSchema>;
 
-// =======================
-// 🔹 2. Prompts Definidos
-// =======================
-
 const financialAnalysisPrompt = ai.definePrompt({
   name: 'financialAnalysisPrompt',
   input: { schema: ReportAnalysisInputSchema },
-  output: { schema: z.object({ financialAnalysis: ReportAnalysisOutputSchema.shape.financialAnalysis }) },
+  output: { schema: z.object({ financialAnalysis: z.string() }) },
   prompt: `
-Eres un analista financiero y médico auditor experto en el sistema de salud colombiano (PGP).
-Redacta un texto profesional y conciso (1200–1500 caracteres) para la sección "Análisis de Ejecución Financiera y Presupuestal".
+Eres un Analista Financiero Senior y Médico Auditor de Dusakawi EPSI, experto en el modelo PGP en el departamento de La Guajira.
+Redacta un análisis profesional y contundente para la sección "Análisis de Ejecución Financiera y Presupuestal".
 
-Basado en estos KPIs:
+KPIs para el análisis:
 - Presupuesto (Nota Técnica): {{{valorNotaTecnica}}}
-- Valor Total a Pagar (Post Auditoría): {{{valorNetoFinal}}}
+- Valor Final a Pagar (Post-Auditoría): {{{valorNetoFinal}}}
 - Descuento Total Aplicado: {{{descuentoAplicado}}}
 - Diferencia vs Presupuesto: {{{diffVsNota}}}
-- Porcentaje de Ejecución Final: {{{porcentajeEjecucion}}}
+- Porcentaje de Ejecución: {{{porcentajeEjecucion}}}
 
 Instrucciones:
-- Sé directo y usa lenguaje ejecutivo.
-- Explica que el valor a pagar es el resultado final post-auditoría, justificando los ajustes.
-- Concluye con las implicaciones financieras para el contrato.
+- Usa un lenguaje altamente ejecutivo y directo.
+- Resalta en **negrilla** las cifras y términos clave.
+- Contextualiza la importancia de la sostenibilidad financiera en la red de servicios de La Guajira.
+- Explica que el valor final es el resultado de una auditoría rigurosa.
+- Si hay un ahorro o sobre-costo, justifica su impacto en el equilibrio contractual.
 {{#if additionalConclusions}}
-- Considera estas conclusiones del auditor: {{{additionalConclusions}}}
+- Integra estas conclusiones del auditor: {{{additionalConclusions}}}
 {{/if}}
 `,
 });
@@ -72,100 +67,65 @@ Instrucciones:
 const epidemiologicalAnalysisPrompt = ai.definePrompt({
   name: 'epidemiologicalAnalysisPrompt',
   input: { schema: ReportAnalysisInputSchema },
-  output: { schema: z.object({ epidemiologicalAnalysis: ReportAnalysisOutputSchema.shape.epidemiologicalAnalysis }) },
+  output: { schema: z.object({ epidemiologicalAnalysis: z.string() }) },
   prompt: `
-Eres un médico auditor especializado en epidemiología de contratos PGP.
-Redacta un texto profesional y conciso (1200–1500 caracteres) para la sección "Análisis del Comportamiento Epidemiológico y de Servicios (CUPS)".
+Eres un Médico Auditor especializado en Epidemiología para Dusakawi EPSI en La Guajira.
+Redacta un análisis técnico sobre el "Comportamiento Epidemiológico y de Servicios (CUPS)".
 
-Basado en estos indicadores:
+KPIs para el análisis:
 - Total de CUPS Ejecutados: {{{totalCups}}}
 - Costo Unitario Promedio: {{{unitAvg}}}
-- CUPS Sobre-ejecutados (>111%): {{{overExecutedCount}}}
-- CUPS Inesperados (no en NT): {{{unexpectedCount}}}
+- CUPS Sobre-ejecutados: {{{overExecutedCount}}}
+- CUPS Inesperados: {{{unexpectedCount}}}
 
 Instrucciones:
-- Analiza el volumen y la coherencia de la prestación.
-- Interpreta el costo unitario promedio como un indicador de complejidad de la atención.
-- Evalúa la relación entre la demanda, la red de servicios y el comportamiento epidemiológico.
-- Finaliza con observaciones sobre la gestión del riesgo y la capacidad de la red.
+- Analiza la coherencia de la prestación frente al perfil de morbilidad esperado en el territorio.
+- Resalta en **negrilla** los indicadores clave.
+- Interpreta el costo unitario promedio como un reflejo de la complejidad asistencial.
+- Menciona cómo la red de servicios está respondiendo a la demanda real de los afiliados.
 `,
 });
 
 const deviationAnalysisPrompt = ai.definePrompt({
   name: 'deviationAnalysisPrompt',
   input: { schema: ReportAnalysisInputSchema },
-  output: { schema: z.object({ deviationAnalysis: ReportAnalysisOutputSchema.shape.deviationAnalysis }) },
+  output: { schema: z.object({ deviationAnalysis: z.string() }) },
   prompt: `
-Eres un analista de riesgos y auditor PGP.
-Redacta un texto profesional y conciso (1500–2000 caracteres) para la sección "Análisis del Valor de las Desviaciones".
+Eres un Analista de Riesgos y Auditor PGP para Dusakawi EPSI.
+Redacta un análisis profundo para la sección "Análisis de Desviaciones Críticas".
 
-Basado en estas desviaciones:
+Impacto de las Desviaciones:
 - Sobre-ejecución: {{{totalValueOverExecuted}}}
 - CUPS Inesperados: {{{totalValueUnexpected}}}
 - Sub-ejecución: {{{totalValueUnderExecuted}}}
 - Faltantes: {{{totalValueMissing}}}
 
 Instrucciones:
-- Cuantifica el impacto económico de cada desviación.
-- Explica las causas probables (aumento de incidencia, cambios clínicos, etc.).
-- Evalúa los riesgos financieros y plantea medidas de mitigación (auditorías, ajustes de red, controles).
+- Sé crítico y profesional. Cuantifica el impacto económico de las desviaciones.
+- Resalta en **negrilla** los valores y los tipos de desviación.
+- Explica posibles causas (mala planificación, incremento de incidencia, problemas de registro).
+- Propón medidas de mitigación para blindar el contrato ante riesgos financieros futuros.
 {{#if additionalRecommendations}}
-- Considera estas recomendaciones del auditor: {{{additionalRecommendations}}}
+- Incorpora estas recomendaciones: {{{additionalRecommendations}}}
 {{/if}}
 `,
 });
 
-// =======================
-// 🔹 3. Flujo Principal
-// =======================
-
-const generateReportAnalysisFlow = ai.defineFlow(
-  {
-    name: 'generateReportAnalysisFlow',
-    inputSchema: ReportAnalysisInputSchema,
-    outputSchema: ReportAnalysisOutputSchema,
-  },
-  async (input) => {
-    const validation = ReportAnalysisInputSchema.safeParse(input);
-    if (!validation.success) {
-      console.error("❌ Datos inválidos para el flujo:", validation.error);
-      throw new Error("Entrada inválida para generar el informe PGP.");
-    }
-
-    try {
-      // Ejecutar prompts en paralelo para más eficiencia
-      const [financialResult, epidemiologicalResult, deviationResult] = await Promise.all([
-        financialAnalysisPrompt(input),
-        epidemiologicalAnalysisPrompt(input),
-        deviationAnalysisPrompt(input),
-      ]);
-      
-      const fin = financialResult.output?.financialAnalysis;
-      const epi = epidemiologicalResult.output?.epidemiologicalAnalysis;
-      const dev = deviationResult.output?.deviationAnalysis;
-      
-      if (!fin || !epi || !dev) {
-        throw new Error("La IA no devolvió todas las secciones esperadas del análisis.");
-      }
-
-      return {
-        financialAnalysis: fin,
-        epidemiologicalAnalysis: epi,
-        deviationAnalysis: dev,
-      };
-
-    } catch (error) {
-      console.error(`🔥 Error durante el flujo de análisis:`, error);
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-      throw new Error(`El servicio de IA no pudo generar el análisis. Detalle: ${errorMessage}`);
-    }
-  }
-);
-
-// =======================
-// 🔹 4. Función Exportada Simplificada
-// =======================
-
 export async function generateReportAnalysis(input: ReportAnalysisInput): Promise<ReportAnalysisOutput> {
-  return generateReportAnalysisFlow(input);
+  try {
+    const [fin, epi, dev] = await Promise.all([
+      financialAnalysisPrompt(input),
+      epidemiologicalAnalysisPrompt(input),
+      deviationAnalysisPrompt(input),
+    ]);
+    
+    return {
+      financialAnalysis: fin.output?.financialAnalysis || "Error al generar análisis financiero.",
+      epidemiologicalAnalysis: epi.output?.epidemiologicalAnalysis || "Error al generar análisis epidemiológico.",
+      deviationAnalysis: dev.output?.deviationAnalysis || "Error al generar análisis de desviaciones.",
+    };
+  } catch (error) {
+    console.error(`Error en flujo de IA:`, error);
+    throw new Error(`El servicio de IA no pudo completar el análisis.`);
+  }
 }
