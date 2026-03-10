@@ -403,6 +403,23 @@ const PgPsearchForm = forwardRef<
     });
   }, []);
 
+  // Lógica de Sugerencia y Selección Automática
+  useEffect(() => {
+    if (jsonPrestadorCode && prestadores.length > 0 && !loading) {
+      // Si no hay prestador seleccionado O el código del JSON no coincide con la selección actual, sugerir
+      if (!selectedPrestador || selectedPrestador['ID DE ZONA'] !== jsonPrestadorCode) {
+        const suggested = prestadores.find(p => p['ID DE ZONA'] === jsonPrestadorCode);
+        if (suggested) {
+          toast({
+            title: "Nota Técnica Sugerida",
+            description: `Analizaré con esta nota (${suggested.PRESTADOR}) pero puedes escoger otro e inicie el análisis.`,
+          });
+          handleSelectPrestador(suggested);
+        }
+      }
+    }
+  }, [jsonPrestadorCode, prestadores, selectedPrestador, handleSelectPrestador, toast, loading]);
+
   return (
     <Card className="w-full">
       <CardHeader>
