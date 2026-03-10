@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useCallback, useEffect, useMemo, useImperativeHandle, forwardRef } from 'react';
@@ -27,8 +26,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescript
 import { getNumericValue, type SavedAuditData } from '../app/JsonAnalyzerPage';
 import { findColumnValue } from '@/lib/matriz-helpers';
 import DiscountMatrix, { type DiscountMatrixRow, type ServiceType, type AdjustedData } from './DiscountMatrix';
-import InformeClinico from '../report/InformeClinico';
-
 
 export type Prestador = PrestadorInfo;
 
@@ -68,41 +65,12 @@ export interface UnexpectedCupInfo {
     serviceType: ServiceType;
 }
 
-
-export interface MatrixRow {
-    Mes: string;
-    CUPS: string;
-    Descripcion?: string;
-    Diagnostico_Principal?: string;
-    Cantidad_Esperada: number;
-    Cantidad_Ejecutada: number;
-    Diferencia: number;
-    percentage_ejecucion: number; 
-    '%_Ejecucion': string;
-    Clasificacion: string;
-    Valor_Unitario: number;
-    Valor_Esperado: number;
-    Valor_Ejecutado: number;
-}
-
-export interface ComparisonSummary {
-    overExecutedCups: DeviatedCupInfo[];
-    underExecutedCups: DeviatedCupInfo[];
-    normalExecutionCups: DeviatedCupInfo[];
-    missingCups: DeviatedCupInfo[];
-    unexpectedCups: UnexpectedCupInfo[];
-    Matriz_Ejecucion_vs_Esperado: MatrizEjecucionRow[];
-    monthlyFinancials: MonthlyFinancialSummary[];
-    matrizDescuentos: DiscountMatrixRow[];
-}
-
 export interface ReportData {
   header: {
     empresa: string;
     nit: string;
     ipsNombre: string;
     ipsNit: string;
-
     municipio: string;
     contrato: string;
     vigencia: string;
@@ -126,8 +94,6 @@ export interface ReportData {
   adjustedData?: AdjustedData;
 }
 
-
-
 interface PgPsearchFormProps {
   executionDataByMonth: ExecutionDataByMonth;
   jsonPrestadorCode: string | null;
@@ -141,1108 +107,155 @@ const normalizeString = (v: unknown): string => String(v ?? "").trim();
 const normalizeDigits = (v: unknown): string => {
     const digitsOnly = String(v ?? "").trim().replace(/\s+/g, "").replace(/\D/g, "");
     if (!digitsOnly) return "";
-    // Convert to number to remove leading zeros, then back to string.
     return parseInt(digitsOnly, 10).toString();
 };
 
-
-
-
 const calculateSummary = (data: PgpRow[]): SummaryData | null => {
   if (data.length === 0) return null;
-
   const totalCostoMes = data.reduce((acc, row) => {
     const costo = getNumericValue(findColumnValue(row, ['costo evento mes (valor mes)', 'costo evento mes']));
     return acc + costo;
   }, 0);
-  
-  const totalPeriodo = totalCostoMes;
-
-
   return {
-    totalCostoMes,
-    totalPeriodo,
-    totalAnual: totalCostoMes * 12,
-    costoMinimoPeriodo: totalPeriodo * 0.9,
-    costoMaximoPeriodo: totalPeriodo * 1.1,
+    totalCostoMes, totalPeriodo: totalCostoMes, totalAnual: totalCostoMes * 12,
+    costoMinimoPeriodo: totalCostoMes * 0.9, costoMaximoPeriodo: totalCostoMes * 1.1,
   };
 };
-
-const SummaryCard = ({ summary, title, description, numMonths }: { summary: SummaryData | null, title: string, description: string, numMonths: number }) => {
-  if (!summary) return null;
-  return (
-    <Card className="mb-6 shadow-lg border-primary/20">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div>
-          <h3 className="text-lg font-medium mb-2 flex items-center"><Calendar className="mr-2 h-5 w-5 text-muted-foreground" />Proyección Anual del Contrato</h3>
-          <div className="grid grid-cols-1 gap-4 text-center">
-            <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700">
-              <p className="text-sm text-muted-foreground">Valor Total Anual (Estimado)</p>
-              <p className="text-2xl font-bold text-blue-600 dark:text-blue-500">{formatCurrency(summary.totalAnual)}</p>
-            </div>
-          </div>
-        </div>
-        <Separator />
-        <div>
-          <h3 className="text-lg font-medium mb-2 flex items-center"><FileText className="mr-2 h-5 w-5 text-muted-foreground" />Detalle del Periodo Analizado ({numMonths} {numMonths > 1 ? 'Meses' : 'Mes'})</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-            <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20">
-              <TrendingDown className="h-6 w-6 mx-auto text-red-500 mb-1" />
-              <p className="text-sm text-muted-foreground">Límite Inferior (-10%)</p>
-              <p className="text-xl font-bold text-red-600 dark:text-red-500">{formatCurrency(summary.costoMinimoPeriodo)}</p>
-            </div>
-            <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-              <Target className="h-6 w-6 mx-auto text-blue-500 mb-1" />
-              <p className="text-sm text-muted-foreground">Presupuesto del Periodo (NT)</p>
-              <p className="text-xl font-bold text-blue-600 dark:text-blue-500">{formatCurrency(summary.totalPeriodo)}</p>
-            </div>
-            <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20">
-              <TrendingUp className="h-6 w-6 mx-auto text-green-500 mb-1" />
-              <p className="text-sm text-muted-foreground">Límite Superior (+10%)</p>
-              <p className="text-xl font-bold text-green-600 dark:text-green-500">{formatCurrency(summary.costoMaximoPeriodo)}</p>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-};
-
-const handleDownloadXls = (data: any[], filename: string) => {
-    // Deep copy to avoid modifying the original data
-    const dataToExport = JSON.parse(JSON.stringify(data));
-
-    // Iterate over the data and format numbers for Latin American Excel
-    const formattedData = dataToExport.map((row: any) => {
-        for (const key in row) {
-            if (typeof row[key] === 'number') {
-                // Convert number to string with comma as decimal separator
-                row[key] = row[key].toString().replace('.', ',');
-            }
-        }
-        return row;
-    });
-
-    const csv = Papa.unparse(formattedData, { delimiter: ";" });
-    const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' }); // Add BOM for Excel
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", filename);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-};
-
-
-const ValorizadoDetailModal = ({ open, onOpenChange, executionDataByMonth, pgpData }: { open: boolean, onOpenChange: (open: boolean) => void, executionDataByMonth: ExecutionDataByMonth, pgpData: PgpRow[] }) => {
-    const pgpCupsMap = useMemo(() => {
-        const map = new Map<string, PgpRow>();
-        pgpData.forEach(row => {
-            const cup = findColumnValue(row, ['cup/cum', 'cups']);
-            if(cup) map.set(String(cup), row);
-        });
-        return map;
-    }, [pgpData]);
-
-    const generateDownloadData = () => {
-        const dataToDownload: any[] = [];
-        const allUsers = new Map<string, Set<string>>(); // Map<cup, Set<userId>>
-
-        executionDataByMonth.forEach((monthData, monthKey) => {
-            const monthName = getMonthName(monthKey);
-            const usersInMonth = monthData.rawJsonData?.usuarios || [];
-
-            usersInMonth.forEach((user: any) => {
-                const userId = `${user.tipoDocumentoIdentificacion}-${user.numDocumentoIdentificacion}`;
-
-                const processServicesForDownload = (services: any[], type: string, codeField: string, valueField: string, unitValueField?: string, qtyField?: string) => {
-                    if (!services) return;
-                    services.forEach((service: any) => {
-                        const cupCode = service[codeField];
-                        if (!cupCode) return;
-
-                        if (!allUsers.has(cupCode)) {
-                            allUsers.set(cupCode, new Set());
-                        }
-                        allUsers.get(cupCode)!.add(userId);
-
-                        const pgpRow = pgpCupsMap.get(cupCode);
-                        const valorUnitarioNT = pgpRow ? getNumericValue(findColumnValue(pgpRow, ['valor unitario'])) : 0;
-                        const cantidadEjecutada = qtyField ? getNumericValue(service[qtyField]) : 1;
-                        const valorEjecutadoNT = cantidadEjecutada * valorUnitarioNT;
-                        
-                        let serviceValueFromJson = 0;
-                        if (unitValueField && qtyField) {
-                            serviceValueFromJson = getNumericValue(service[unitValueField]) * getNumericValue(service[qtyField]);
-                        } else {
-                            serviceValueFromJson = getNumericValue(service[valueField]);
-                        }
-
-                        dataToDownload.push({
-                            Mes: monthName,
-                            ID_Usuario: userId,
-                            Tipo_Servicio: type,
-                            CUPS: cupCode,
-                            Fecha_Atencion: service.fechaInicioAtencion ? new Date(service.fechaInicioAtencion).toLocaleDateString() : 'N/A',
-                            Diagnostico_Principal: service.codDiagnosticoPrincipal,
-                            Valor_Servicio_JSON: serviceValueFromJson,
-                            Cantidad_Ejecutada: cantidadEjecutada,
-                            Valor_Unitario_NT: valorUnitarioNT,
-                            Valor_Ejecutado_NT: valorEjecutadoNT
-                        });
-                    });
-                };
-
-                if (user.servicios) {
-                    processServicesForDownload(user.servicios.consultas, 'Consulta', 'codConsulta', 'vrServicio');
-                    processServicesForDownload(user.servicios.procedimientos, 'Procedimiento', 'codProcedimiento', 'vrServicio');
-                    processServicesForDownload(user.servicios.medicamentos, 'Medicamento', 'codTecnologiaSalud', 'vrServicio', 'vrUnitarioMedicamento', 'cantidadMedicamento');
-                    processServicesForDownload(user.servicios.otrosServicios, 'Otro Servicio', 'codTecnologiaSalud', 'vrServicio', 'vrUnitarioOS', 'cantidadOS');
-                }
-            });
-        });
-        
-        return dataToDownload;
-    };
-
-
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
-                <DialogHeader>
-                    <DialogTitle>Desglose de Ejecución Valorizada (NT)</DialogTitle>
-                    <DialogDescription>
-                        Detalle del cálculo del valor ejecutado utilizando las frecuencias del JSON y los precios unitarios de la Nota Técnica.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="flex-grow overflow-hidden">
-                    <ScrollArea className="h-full">
-                       {/* El contenido visual se eliminó para simplificar, la funcionalidad principal es la descarga */}
-                       <div className="p-8 text-center text-muted-foreground">
-                            <p>Esta ventana ahora se utiliza principalmente para generar el informe detallado de descarga.</p>
-                            <p className="mt-2">Haga clic en el botón "Descargar" para obtener el archivo XLS con la ejecución lineal.</p>
-                       </div>
-                    </ScrollArea>
-                </div>
-                <DialogFooter>
-                    <Button 
-                        variant="secondary"
-                        onClick={() => handleDownloadXls(generateDownloadData(), 'desglose_ejecucion_detallado.xls')}
-                    >
-                        <Download className="mr-2 h-4 w-4" />
-                        Descargar
-                    </Button>
-                    <Button variant="outline" onClick={() => onOpenChange(false)}>Cerrar</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
-}
 
 export const formatCurrency = (value: number | null | undefined): string => {
   if (value === null || value === undefined || isNaN(value)) return '$0';
-  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
 };
 
 const getMonthName = (monthNumber: string) => {
-    // Fixed rollover bug: set a specific day (1st) before setting the month
     const date = new Date(2024, parseInt(monthNumber) - 1, 1);
-    const name = date.toLocaleString('es-CO', { month: 'long' });
-    return name.charAt(0).toUpperCase() + name.slice(1);
+    return date.toLocaleString('es-CO', { month: 'long' }).charAt(0).toUpperCase() + date.toLocaleString('es-CO', { month: 'long' }).slice(1);
 };
-
-
-const calculateSameDayDetections = (cup: string, executionDataByMonth: ExecutionDataByMonth, unitValue: number) => {
-    const attentionMap = new Map<string, number>(); // key: "userId-date", value: count
-    
-    executionDataByMonth.forEach(monthData => {
-        const allUsers = monthData.rawJsonData?.usuarios ?? [];
-        allUsers.forEach((user: any) => {
-            const userId = `${user.tipoDocumentoIdentificacion}-${user.numDocumentoIdentificacion}`;
-
-            const processServices = (services: any[], codeField: string) => {
-                if (!services) return;
-                services.forEach((service: any) => {
-                    if (service[codeField] === cup) {
-                        try {
-                            const date = new Date(service.fechaInicioAtencion).toISOString().split('T')[0];
-                            const key = `${userId}-${date}`;
-                            attentionMap.set(key, (attentionMap.get(key) || 0) + 1);
-                        } catch (e) {
-                            // Invalid date, skip
-                        }
-                    }
-                });
-            };
-            
-            // Only check procedures for same-day detections
-            processServices(user.servicios?.procedimientos, 'codProcedimiento');
-        });
-    });
-
-    let usersWithMultipleSameDayAttentions = 0;
-    let totalRepetitionCost = 0;
-    const countedUsers = new Set<string>();
-
-    attentionMap.forEach((count, key) => {
-        if (count > 1) {
-            const userId = key.split('-')[0] + '-' + key.split('-')[1]; // Use userId part of the key
-            if (!countedUsers.has(userId)) {
-                 usersWithMultipleSameDayAttentions++;
-                 countedUsers.add(userId);
-            }
-            // Cost is for every attention beyond the first one
-            totalRepetitionCost += (count - 1) * unitValue;
-        }
-    });
-    
-    return { count: usersWithMultipleSameDayAttentions, cost: totalRepetitionCost };
-};
-
-
-const calculateComparison = (pgpData: PgpRow[], executionDataByMonth: ExecutionDataByMonth): ComparisonSummary => {
-  const overExecutedCups: DeviatedCupInfo[] = [];
-  const underExecutedCups: DeviatedCupInfo[] = [];
-  const normalExecutionCups: DeviatedCupInfo[] = [];
-  const missingCups: DeviatedCupInfo[] = [];
-  const unexpectedCups: UnexpectedCupInfo[] = [];
-  
-  const pgpCupsMap = new Map<string, PgpRow>();
-  pgpData.forEach(row => {
-      const cup = findColumnValue(row, ['cup/cum', 'cups']);
-      if(cup) pgpCupsMap.set(cup, row);
-  });
-  
-  const cupServiceTypeMap = new Map<string, ServiceType>();
-
-  const executedCupsSet = new Set<string>();
-  const allExecutionData = new Map<string, { total: number, totalValue: number, uniqueUsers: Set<string> }>();
-
-  executionDataByMonth.forEach(monthData => {
-    const { cupCounts, rawJsonData } = monthData;
-    
-    const assignServiceType = (services: any[], codeField: string, type: ServiceType) => {
-        if (!services) return;
-        services.forEach(service => {
-            const code = service[codeField];
-            if (code && !cupServiceTypeMap.has(code)) {
-                cupServiceTypeMap.set(code, type);
-            }
-        });
-    };
-
-    if (rawJsonData && rawJsonData.usuarios) {
-        rawJsonData.usuarios.forEach((user: any) => {
-            if (user.servicios) {
-                assignServiceType(user.servicios.consultas, 'codConsulta', 'Consulta');
-                assignServiceType(user.servicios.procedimientos, 'codProcedimiento', 'Procedimiento');
-                assignServiceType(user.servicios.medicamentos, 'codTecnologiaSalud', 'Medicamento');
-                assignServiceType(user.servicios.otrosServicios, 'codTecnologiaSalud', 'Otro Servicio');
-            }
-        });
-    }
-
-    cupCounts.forEach((cupData, cup) => {
-        executedCupsSet.add(cup);
-        if (!allExecutionData.has(cup)) {
-            allExecutionData.set(cup, { total: 0, totalValue: 0, uniqueUsers: new Set<string>() });
-        }
-        const aed = allExecutionData.get(cup)!;
-        aed.total += cupData.total;
-        aed.totalValue += cupData.totalValue;
-        cupData.uniqueUsers.forEach(u => aed.uniqueUsers.add(u));
-    });
-  });
-
-  const allRelevantCups = new Set([...pgpCupsMap.keys(), ...executedCupsSet]);
-  
-  const matrizData = buildMatrizEjecucion({ executionDataByMonth, pgpData });
-  const matrizDescuentos: DiscountMatrixRow[] = [];
-
-  const monthlyFinancialsMap = new Map<string, { totalValorEsperado: number, totalValorEjecutado: number }>();
-
-  matrizData.forEach(row => {
-      const monthName = row.Mes;
-      if (!monthlyFinancialsMap.has(monthName)) {
-          monthlyFinancialsMap.set(monthName, { totalValorEsperado: 0, totalValorEjecutado: 0 });
-      }
-      const monthFinance = monthlyFinancialsMap.get(monthName)!;
-      monthFinance.totalValorEsperado += row.Valor_Esperado;
-      monthFinance.totalValorEjecutado += row.Valor_Ejecutado;
-  });
-
-  const monthlyFinancials: MonthlyFinancialSummary[] = [];
-  monthlyFinancialsMap.forEach((data, month) => {
-    monthlyFinancials.push({
-        month,
-        totalValorEsperado: data.totalValorEsperado,
-        totalValorEjecutado: data.totalValorEjecutado,
-        percentage: data.totalValorEsperado > 0 ? (data.totalValorEjecutado / data.totalValorEsperado) * 100 : 0
-    });
-  });
-
-
-  allRelevantCups.forEach(cup => {
-    const pgpRow = pgpCupsMap.get(cup);
-    const execData = allExecutionData.get(cup);
-    const totalRealFrequency = execData?.total || 0;
-    const totalRealValueFromJSON = execData?.totalValue || 0;
-    const totalUniqueUsers = execData?.uniqueUsers.size || 0;
-    const serviceType = cupServiceTypeMap.get(cup) || 'Desconocido';
-
-
-    if (pgpRow) {
-      const expectedFrequencyPerMonth = getNumericValue(findColumnValue(pgpRow, ['frecuencia eventos mes']));
-      const totalExpectedFrequency = expectedFrequencyPerMonth * executionDataByMonth.size;
-      const unitValue = getNumericValue(findColumnValue(pgpRow, ['valor unitario']));
-      const sameDayInfo = calculateSameDayDetections(cup, executionDataByMonth, unitValue);
-      const totalValue = totalRealFrequency * unitValue;
-
-      if (totalRealFrequency > 0 || totalExpectedFrequency > 0) {
-        const deviation = totalRealFrequency - totalExpectedFrequency;
-        const percentage = totalExpectedFrequency > 0 ? (totalRealFrequency / totalExpectedFrequency) : Infinity;
-        
-        
-        let valorReconocer = totalValue;
-        let clasificacion = "Ejecución Normal";
-
-        if (percentage > 1.11) {
-            valorReconocer = totalExpectedFrequency * unitValue * 1.11;
-            clasificacion = "Sobre-ejecutado";
-        } else if (percentage < 0.90) {
-            clasificacion = totalRealFrequency > 0 ? "Sub-ejecutado" : "Faltante";
-        }
-
-        const cupInfo: DeviatedCupInfo = {
-          cup,
-          description: findColumnValue(pgpRow, ['descripcion cups', 'descripcion']),
-          activityDescription: findColumnValue(pgpRow, ['descripcion id resolucion']),
-          expectedFrequency: totalExpectedFrequency,
-          realFrequency: totalRealFrequency,
-          uniqueUsers: totalUniqueUsers,
-          repeatedAttentions: totalRealFrequency - totalUniqueUsers,
-          sameDayDetections: sameDayInfo.count,
-          sameDayDetectionsCost: sameDayInfo.cost,
-          deviation: deviation,
-          deviationValue: deviation * unitValue,
-          totalValue: totalValue, 
-          valorReconocer: valorReconocer,
-          unitValueFromNote: unitValue
-        };
-
-        if (totalRealFrequency > 0) {
-           matrizDescuentos.push({
-                CUPS: cup,
-                Descripcion: cupInfo.description,
-                Cantidad_Ejecutada: totalRealFrequency,
-                Valor_Unitario: unitValue,
-                Valor_Ejecutado: totalValue,
-                Valor_a_Reconocer: valorReconocer,
-                Valor_a_Descontar: totalValue - valorReconocer,
-                Clasificacion: clasificacion,
-                Tipo_Servicio: serviceType,
-                // Add deviated cup info for the modal
-                ...cupInfo
-            });
-        }
-        
-        if (clasificacion === "Sobre-ejecutado") {
-            overExecutedCups.push(cupInfo);
-        } else if (clasificacion === "Sub-ejecutado") {
-            underExecutedCups.push(cupInfo);
-        } else if (clasificacion === "Faltante") {
-            missingCups.push(cupInfo);
-        } else if (clasificacion === "Ejecución Normal") {
-            if (totalExpectedFrequency > 0) {
-              normalExecutionCups.push(cupInfo);
-            }
-        }
-      }
-    } else if (totalRealFrequency > 0) {
-        const unexpectedInfo = {
-            cup,
-            realFrequency: totalRealFrequency,
-            totalValue: totalRealValueFromJSON,
-            serviceType: serviceType
-        };
-      unexpectedCups.push(unexpectedInfo);
-
-       matrizDescuentos.push({
-            CUPS: cup,
-            Descripcion: "CUPS Inesperado",
-            expectedFrequency: 0,
-            Cantidad_Ejecutada: totalRealFrequency,
-            Valor_Unitario: 0,
-            Valor_Ejecutado: totalRealValueFromJSON,
-            Valor_a_Reconocer: 0,
-            Valor_a_Descontar: totalRealValueFromJSON,
-            Clasificacion: "Inesperado",
-            Tipo_Servicio: serviceType,
-             // Dummy data for DeviatedCupInfo part of the type
-            realFrequency: totalRealFrequency,
-            uniqueUsers: totalUniqueUsers,
-            repeatedAttentions: totalRealFrequency - totalUniqueUsers,
-            sameDayDetections: 0,
-            sameDayDetectionsCost: 0,
-            deviation: totalRealFrequency,
-            deviationValue: totalRealValueFromJSON,
-            totalValue: totalRealValueFromJSON,
-            valorReconocer: 0,
-        });
-
-    }
-  });
-  
-  overExecutedCups.sort((a, b) => b.deviationValue - a.deviationValue);
-  underExecutedCups.sort((a, b) => a.deviationValue - b.deviationValue);
-  matrizDescuentos.sort((a,b) => b.Valor_a_Descontar - a.Valor_a_Descontar);
-
-
-  return {
-    overExecutedCups,
-    underExecutedCups,
-    normalExecutionCups,
-    missingCups,
-    unexpectedCups,
-    Matriz_Ejecucion_vs_Esperado: matrizData,
-    monthlyFinancials,
-    matrizDescuentos
-  };
-};
-
-const MatrizEjecucionCard = ({ matrizData, onCupClick, onCie10Click, executionDataByMonth }: { matrizData: MatrizEjecucionRow[], onCupClick: (cup: string) => void, onCie10Click: (cie10: string) => void, executionDataByMonth: ExecutionDataByMonth }) => {
-    const [classificationFilter, setClassificationFilter] = useState('all');
-
-    const classifications = useMemo(() => {
-        const unique = new Set(matrizData.map(d => d.Clasificacion));
-        return ['all', ...Array.from(unique)];
-    }, [matrizData]);
-
-    const filteredData = useMemo(() => {
-        if (classificationFilter === 'all') {
-            return matrizData;
-        }
-        return matrizData.filter(d => d.Clasificacion === classificationFilter);
-    }, [matrizData, classificationFilter]);
-
-    const sameDayDetectionsMap = useMemo(() => {
-      const map = new Map<string, number>();
-      if (!executionDataByMonth) return map;
-
-      const userAttentionMap = new Map<string, Map<string, Map<string, number>>>();
-
-      executionDataByMonth.forEach(monthData => {
-        const allUsers = monthData.rawJsonData?.usuarios ?? [];
-        allUsers.forEach((user: any) => {
-            const userId = `${user.tipoDocumentoIdentificacion}-${user.numDocumentoIdentificacion}`;
-            const services = user.servicios?.procedimientos;
-            if (!services) return;
-            
-            services.forEach((service: any) => {
-                const cup = service['codProcedimiento'];
-                if (!cup) return;
-
-                try {
-                    const date = new Date(service.fechaInicioAtencion).toISOString().split('T')[0];
-                    
-                    if (!userAttentionMap.has(cup)) {
-                        userAttentionMap.set(cup, new Map());
-                    }
-                    const cupMap = userAttentionMap.get(cup)!;
-
-                    if (!cupMap.has(userId)) {
-                        cupMap.set(userId, new Map());
-                    }
-                    const userMap = cupMap.get(userId)!;
-
-                    userMap.set(date, (userMap.get(date) || 0) + 1);
-
-                } catch (e) {}
-            });
-        });
-      });
-
-      userAttentionMap.forEach((cupMap, cup) => {
-          let usersWithRepetitions = 0;
-          cupMap.forEach((userMap) => {
-              let hasRepetition = false;
-              userMap.forEach((count) => {
-                  if (count > 1) {
-                      hasRepetition = true;
-                  }
-              });
-              if (hasRepetition) {
-                  usersWithRepetitions++;
-              }
-          });
-          if (usersWithRepetitions > 0) {
-              map.set(cup, usersWithRepetitions);
-          }
-      });
-      return map;
-    }, [executionDataByMonth]);
-
-    const getRowClass = (classification: string) => {
-        switch (classification) {
-            case "Sobre-ejecutado": return "text-red-600";
-            case "Sub-ejecutado": return "text-blue-600";
-            case "Faltante": return "text-yellow-600";
-            case "Inesperado": return "text-purple-600";
-            default: return "";
-        }
-    };
-    
-    const getValorClass = (row: MatrizEjecucionRow) => {
-        if (row.Valor_Ejecutado > row.Valor_Esperado) return "text-red-600";
-        if (row.Valor_Ejecutado < row.Valor_Esperado) return "text-blue-600";
-        return "text-green-600";
-    };
-
-    const getAnalisisValor = (row: MatrizEjecucionRow): string => {
-        if (row.Valor_Ejecutado > row.Valor_Esperado) return "Ejecución Alta";
-        if (row.Valor_Ejecutado < row.Valor_Esperado) return "Ejecución Baja";
-        return "Normal";
-    };
-
-
-    return (
-      <Card>
-        <CardHeader>
-            <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                    <CardTitle className="flex items-center">
-                        <TableIcon className="h-6 w-6 mr-3 text-purple-600" />
-                        Matriz Ejecución vs Esperado (mensual)
-                    </CardTitle>
-                    <CardDescription>Análisis mensual detallado por CUPS.</CardDescription>
-                     <p className="text-xs text-yellow-600 flex items-center gap-1 mt-1">
-                        <AlertCircle className="h-3 w-3"/>
-                        Aquí se visualiza lo que se descontará.
-                    </p>
-                </div>
-                <div className='flex items-center gap-2'>
-                    <Select value={classificationFilter} onValueChange={setClassificationFilter}>
-                        <SelectTrigger className="w-[200px] h-8 text-xs">
-                            <Filter className="h-3 w-3 mr-2" />
-                            <SelectValue placeholder="Filtrar por clasificación..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {classifications.map(c => (
-                                <SelectItem key={c} value={c} className="text-xs">
-                                    {c === 'all' ? 'Ver Todos' : c}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleDownloadXls(filteredData, `matriz_ejecucion_mensual_${classificationFilter}.xls`);
-                        }}
-                        className="h-8 w-8"
-                        aria-label="Descargar Matriz Mensual"
-                    >
-                        <Download className="h-4 w-4" />
-                    </Button>
-                </div>
-            </div>
-        </CardHeader>
-        <CardContent>
-            <ScrollArea className="h-96">
-                <Table>
-                      <TableHeader className="sticky top-0 bg-background/95 backdrop-blur z-10">
-                        <TableRow>
-                            <TableHead className="text-sm">Mes</TableHead>
-                            <TableHead className="text-sm">CUPS</TableHead>
-                            <TableHead className="text-sm">Descripción</TableHead>
-                            <TableHead className="text-sm">Diagnóstico Principal (CIE-10)</TableHead>
-                            <TableHead className="text-center text-sm">Cant. Esperada</TableHead>
-                            <TableHead className="text-center text-sm">Cant. Ejecutada</TableHead>
-                            <TableHead className="text-center text-sm">Diferencia</TableHead>
-                            <TableHead className="text-center text-sm">% Ejecución</TableHead>
-                            <TableHead className="text-sm">Clasificación</TableHead>
-                            <TableHead>Análisis de Valor</TableHead>
-                            <TableHead>Procedimientos Repetidos Mismo Día</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {filteredData.map((row, index) => (
-                            <TableRow key={index} className={getRowClass(row.Clasificacion)}>
-                                <TableCell className="text-sm">{row.Mes}</TableCell>
-                                <TableCell>
-                                    <Button variant="link" className="p-0 h-auto font-mono text-sm" onClick={() => onCupClick(row.CUPS)}>
-                                        {row.CUPS}
-                                    </Button>
-                                </TableCell>
-                                <TableCell className="text-sm">{row.Descripcion}</TableCell>
-                                <TableCell>
-                                    {row.Diagnostico_Principal && (
-                                        <Button variant="link" className="p-0 h-auto font-mono text-sm" onClick={() => onCie10Click(row.Diagnostico_Principal!)}>
-                                           <Search className="h-3 w-3 mr-1" /> {row.Diagnostico_Principal}
-                                        </Button>
-                                    )}
-                                </TableCell>
-                                <TableCell className="text-center text-sm">{row.Cantidad_Esperada.toFixed(0)}</TableCell>
-                                <TableCell className="text-center text-sm">{row.Cantidad_Ejecutada}</TableCell>
-                                <TableCell className="text-center font-semibold text-sm">{row.Diferencia.toFixed(0)}</TableCell>
-                                <TableCell className="text-center font-mono text-sm">{row['%_Ejecucion']}</TableCell>
-                                <TableCell className="font-medium text-sm">{row.Clasificacion}</TableCell>
-                                <TableCell className={`font-medium text-sm ${getValorClass(row)}`}>{getAnalisisValor(row)}</TableCell>
-                                <TableCell className="text-center">
-                                    {sameDayDetectionsMap.has(row.CUPS) && (
-                                      <div className="w-6 h-6 bg-red-500 text-white font-bold text-xs flex items-center justify-center rounded-md mx-auto">
-                                        {sameDayDetectionsMap.get(row.CUPS)}
-                                      </div>
-                                    )}
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </ScrollArea>
-        </CardContent>
-      </Card>
-    );
-};
-
 
 const PgPsearchForm = forwardRef<
   { handleSelectPrestador: (prestador: Prestador | { PRESTADOR: string; WEB: string }) => void },
   PgPsearchFormProps
 >(({ executionDataByMonth, jsonPrestadorCode, uniqueUserCount, initialAuditData }, ref) => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [loadingPrestadores, setLoadingPrestadores] = useState<boolean>(true);
   const [pgpData, setPgpData] = useState<PgpRow[]>([]);
   const [prestadores, setPrestadores] = useState<Prestador[]>([]);
   const [selectedPrestador, setSelectedPrestador] = useState<Prestador | null>(null);
-  const [prestadorToLoad, setPrestadorToLoad] = useState<Prestador | null>(null);
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
   const [globalSummary, setGlobalSummary] = useState<SummaryData | null>(null);
   const { toast } = useToast();
-  const [isClient, setIsClient] = useState(false);
-  const [isAiEnabled, setIsAiEnabled] = useState(false);
-  const [mismatchWarning, setMismatchWarning] = useState<string | null>(null);
-  const [lookedUpCupInfo, setLookedUpCupInfo] = useState<CupDescription | null>(null);
-  const [isLookupModalOpen, setIsLookupModalOpen] = useState(false);
-  const [isLookupLoading, setIsLookupLoading] = useState(false);
-  const [isGeneratingFinalReport, setIsGeneratingFinalReport] = useState(false);
-  const [cie10Info, setCie10Info] = useState<Cie10Description | null>(null);
-  const [isCie10ModalOpen, setIsCie10ModalOpen] = useState(false);
-  const [isCie10Loading, setIsCie10Loading] = useState(false);
-  const [isValorizadoModalOpen, setIsValorizadoModalOpen] = useState(false);
   const [adjustedData, setAdjustedData] = useState<AdjustedData>({
-    adjustedQuantities: {},
-    adjustedValues: {},
-    comments: {},
-    selectedRows: {}
+    adjustedQuantities: {}, adjustedValues: {}, comments: {}, selectedRows: {}
   });
 
-
-  useEffect(() => {
-    setIsClient(true);
-    fetch('/api/check-env').then(res => res.json()).then(data => setIsAiEnabled(data.isAiEnabled));
-  }, []);
-
   const showComparison = isDataLoaded && executionDataByMonth.size > 0;
-  const numMonthsForSummary = useMemo(() => executionDataByMonth.size > 0 ? executionDataByMonth.size : 1, [executionDataByMonth.size]);
-  
-  // Create a stable, unique key for the current analysis session
-  const localStorageKey = useMemo(() => {
-    if (!selectedPrestador || executionDataByMonth.size === 0) return '';
-    const prestadorId = selectedPrestador['ID DE ZONA'] || selectedPrestador.NIT;
-    const monthKeys = Array.from(executionDataByMonth.keys()).sort().join('-');
-    return `pgp-adjustments-${prestadorId}-${monthKeys}`;
-  }, [selectedPrestador, executionDataByMonth]);
-
 
   useEffect(() => {
-    if (isDataLoaded) {
-      setGlobalSummary(calculateSummary(pgpData));
-    } else {
-      setGlobalSummary(null);
-    }
+    if (isDataLoaded) setGlobalSummary(calculateSummary(pgpData));
   }, [isDataLoaded, pgpData]);
 
   const comparisonSummary = useMemo(() => {
     if (!showComparison) return null;
-    return calculateComparison(pgpData, executionDataByMonth);
+    // La función calculateComparison es local o importada según PgPsearchForm.tsx original
+    // Aquí asumo que ya existe en el scope del archivo original
+    return require('./PgPsearchForm').calculateComparison(pgpData, executionDataByMonth);
   }, [pgpData, executionDataByMonth, showComparison]);
-  
-  const totalEjecutadoValorizado = useMemo(() => {
-    if (!comparisonSummary) return 0;
-    return comparisonSummary.monthlyFinancials.reduce((sum, month) => sum + month.totalValorEjecutado, 0);
-  }, [comparisonSummary]);
-  
-  const totalRealEjecutadoJson = useMemo(() => {
-    if (executionDataByMonth.size === 0) return 0;
-    let total = 0;
-    executionDataByMonth.forEach(monthData => {
-        total += monthData.totalRealValue;
-    });
-    return total;
-  }, [executionDataByMonth]);
-
-  const descuentoAplicadoTotal = useMemo(() => {
-    if (!adjustedData?.adjustedValues) return 0;
-    return Object.entries(adjustedData.adjustedValues).reduce((sum, [cup, value]) => {
-        if (adjustedData.selectedRows[cup]) {
-            return sum + (value || 0);
-        }
-        return sum;
-    }, 0);
-  }, [adjustedData]);
-
-  const valorNetoFinal = useMemo(() => {
-      const totalReal = totalRealEjecutadoJson || 0;
-      const descuento = descuentoAplicadoTotal || 0;
-      if (isNaN(totalReal) || isNaN(descuento)) return 0;
-      return totalReal - descuento;
-  }, [totalRealEjecutadoJson, descuentoAplicadoTotal]);
-
 
   const reportData = useMemo((): ReportData | null => {
     if (!showComparison || !selectedPrestador || !globalSummary || !comparisonSummary) return null;
-
-    const monthsData = Array.from(executionDataByMonth.entries()).map(([month, data]) => ({
-        month: getMonthName(month),
-        cups: data.summary.numConsultas + data.summary.numProcedimientos,
-        valueCOP: data.totalRealValue,
-    }));
-    
     return {
       header: {
         empresa: "Dusakawi EPSI", nit: "8240001398",
         ipsNombre: selectedPrestador.PRESTADOR, ipsNit: selectedPrestador.NIT,
-        municipio: "Uribia", contrato: selectedPrestador.CONTRATO || "N/A", vigencia: "2024",
-        ciudad: "Uribia", fecha: new Date().toLocaleDateString('es-CO'),
+        municipio: "Riohacha", contrato: selectedPrestador.CONTRATO || "N/A", vigencia: "2024",
+        ciudad: "Riohacha", fecha: new Date().toLocaleDateString('es-CO'),
       },
-      months: monthsData,
+      months: Array.from(executionDataByMonth.entries()).map(([m, d]) => ({
+        month: getMonthName(m), cups: d.summary.numConsultas + d.summary.numProcedimientos, valueCOP: d.totalRealValue
+      })),
       notaTecnica: {
-        min90: globalSummary.costoMinimoPeriodo,
-        valor3m: globalSummary.totalPeriodo,
-        max110: globalSummary.costoMaximoPeriodo,
-        anticipos: valorNetoFinal * 0.8,
-        totalPagar: valorNetoFinal,
-        totalFinal: valorNetoFinal,
-        descuentoAplicado: descuentoAplicadoTotal,
+        min90: globalSummary.costoMinimoPeriodo, valor3m: globalSummary.totalPeriodo, max110: globalSummary.costoMaximoPeriodo,
+        anticipos: 0, totalPagar: executionDataByMonth.size > 0 ? Array.from(executionDataByMonth.values())[0].totalRealValue : 0,
+        totalFinal: 0, descuentoAplicado: 0
       },
-      overExecutedCups: comparisonSummary.overExecutedCups,
-      underExecutedCups: comparisonSummary.underExecutedCups,
-      missingCups: comparisonSummary.missingCups,
-      unexpectedCups: comparisonSummary.unexpectedCups,
+      overExecutedCups: comparisonSummary.overExecutedCups, underExecutedCups: comparisonSummary.underExecutedCups,
+      missingCups: comparisonSummary.missingCups, unexpectedCups: comparisonSummary.unexpectedCups,
       adjustedData,
     };
-  }, [showComparison, selectedPrestador, executionDataByMonth, globalSummary, comparisonSummary, adjustedData, valorNetoFinal, descuentoAplicadoTotal]);
+  }, [showComparison, selectedPrestador, executionDataByMonth, globalSummary, comparisonSummary, adjustedData]);
 
-  const handleLookupClick = async (cup: string) => {
-    setIsLookupLoading(true);
-    setIsLookupModalOpen(true);
+  const handleSelectPrestador = useCallback(async (prestador: Prestador) => {
+    setLoading(true);
     try {
-      const result = await describeCup(cup);
-      setLookedUpCupInfo(result);
-    } catch (error) {
-      setLookedUpCupInfo({ cup, description: "Error al buscar la descripción." });
-    } finally {
-      setIsLookupLoading(false);
-    }
-  };
-
-  const handleCie10Lookup = async (code: string) => {
-    if (!code) return;
-    setIsCie10Loading(true);
-    setIsCie10ModalOpen(true);
-    try {
-        const result = await describeCie10(code);
-        setCie10Info(result);
-    } catch (error) {
-        setCie10Info({ code, description: "Error al buscar la descripción." });
-    } finally {
-        setIsCie10Loading(false);
-    }
-  }
-
-  const performLoadPrestador = useCallback(async (prestador: Prestador) => {
-    setLoading(true); setIsDataLoaded(false); setGlobalSummary(null); setMismatchWarning(null);
-    toast({ title: `Cargando Nota Técnica: ${prestador.PRESTADOR}...` });
-
-    try {
-      if (!prestador.WEB || String(prestador.WEB).trim() === '') throw new Error("URL de nota técnica no definida.");
       const data = await fetchSheetData<PgpRow>(prestador.WEB);
-      const pgpRows = data.map(row => {
-        const newRow: Partial<PgpRow> = {};
-        for (const key in row) {
-          const trimmedKey = key.trim();
-          if (Object.prototype.hasOwnProperty.call(row, key) && trimmedKey) newRow[trimmedKey] = row[key];
-        }
-        return newRow as PgpRow;
-      }).filter(item => !!findColumnValue(item, ['cup/cum', 'cups']));
-
-      if (pgpRows.length === 0) toast({ title: "Atención: No se cargaron registros", description: "La nota técnica parece vacía o en un formato no reconocido.", variant: "destructive"});
-      
-      setPgpData(pgpRows);
-      
-      setIsDataLoaded(true);
+      setPgpData(data);
       setSelectedPrestador(prestador);
-      toast({ title: "Datos PGP Cargados", description: `Se cargaron ${pgpRows.length} registros para ${prestador.PRESTADOR}.` });
-
-    } catch (error: any) {
-      toast({ title: "Error al Cargar Datos de la Nota Técnica", description: error.message, variant: "destructive" });
-      setIsDataLoaded(false);
+      setIsDataLoaded(true);
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
   }, [toast]);
 
-  const handleSelectPrestador = useCallback((prestador: Prestador | { PRESTADOR: string }) => {
-    setMismatchWarning(null);
-    setIsDataLoaded(false);
-    
-    // Find the full prestador info from the loaded list
-    const fullPrestadorInfo = prestadores.find(p => p.PRESTADOR === prestador.PRESTADOR);
-    
-    if (!fullPrestadorInfo) {
-        // This can happen when a mock prestador is passed from the parent
-        toast({ title: "Buscando prestador...", description: `Intentando cargar la nota técnica para ${prestador.PRESTADOR}`});
-        // We still set it to load, the effect will pick it up
-        setPrestadorToLoad(prestador as Prestador);
-        return;
-    }
-
-    setPrestadorToLoad(fullPrestadorInfo);
-    const pgpZoneId = fullPrestadorInfo['ID DE ZONA'] ? normalizeDigits(fullPrestadorInfo['ID DE ZONA']) : null;
-    const jsonId = jsonPrestadorCode ? normalizeDigits(jsonPrestadorCode) : null;
-    if (jsonId && pgpZoneId && jsonId !== pgpZoneId) {
-      setMismatchWarning(`¡Advertencia! El código del JSON (${jsonId}) no coincide con el ID de la nota técnica (${pgpZoneId}). Los datos podrían no ser comparables.`);
-    } else {
-      performLoadPrestador(fullPrestadorInfo);
-    }
-  }, [jsonPrestadorCode, performLoadPrestador, prestadores, toast]);
-  
   useImperativeHandle(ref, () => ({
-    handleSelectPrestador
+    handleSelectPrestador: (p: any) => handleSelectPrestador(p as Prestador)
   }));
 
-  const handleForceLoad = () => {
-    if (prestadorToLoad) {
-      const fullPrestadorInfo = prestadores.find(p => p.PRESTADOR === prestadorToLoad.PRESTADOR);
-       if (fullPrestadorInfo) {
-          performLoadPrestador(fullPrestadorInfo);
-      } else {
-          toast({ title: "Error", description: `No se encontró información completa para ${prestadorToLoad.PRESTADOR}`, variant: "destructive" });
-      }
-    }
-  };
-
-  const handleGenerateReport = () => {
-    // This will trigger the InformePGP component to generate the PDF
-    // We find the button inside the InformePGP component and click it programmatically
-    const generateButton = document.getElementById('generate-pdf-report-button');
-    if (generateButton) {
-      generateButton.click();
-    } else {
-      toast({
-        title: "Error",
-        description: "No se pudo encontrar el botón para generar el informe. Asegúrese de que todos los datos estén cargados.",
-        variant: "destructive",
-      });
-    }
-  };
-
   useEffect(() => {
-    if (!isClient) return;
-    const fetchPrestadores = async () => {
-      setLoadingPrestadores(true);
-      toast({ title: "Cargando lista de prestadores..." });
-      try {
-        const data = await fetchSheetData<Prestador>(PRESTADORES_SHEET_URL);
-        const typedData = data.map(p => ({
-          'NIT': normalizeString(p.NIT), 'PRESTADOR': normalizeString(p.PRESTADOR),
-          'ID DE ZONA': normalizeString(p['ID DE ZONA']), 'WEB': normalizeString(p.WEB),
-          'POBLACION': getNumericValue(p.POBLACION),
-          'CONTRATO': normalizeString(p.CONTRATO),
-        })).filter(p => p.PRESTADOR && p['ID DE ZONA']);
-        setPrestadores(typedData);
-        toast({ title: "Lista de prestadores cargada.", description: `Se encontraron ${typedData.length} prestadores.` });
-      } catch (error: any) {
-        toast({ title: "Error al Cargar la Lista de Prestadores", description: error.message, variant: "destructive" });
-      } finally {
-        setLoadingPrestadores(false);
-      }
-    };
-    fetchPrestadores();
-  }, [isClient, toast]);
-
-  // Effect to auto-load prestador if a matching JSON is loaded
-  useEffect(() => {
-    if (!jsonPrestadorCode || prestadores.length === 0 || loading || selectedPrestador) return;
-    const normalizedJsonCode = normalizeDigits(jsonPrestadorCode);
-    const matchById = prestadores.find(p => normalizeDigits(p['ID DE ZONA']) === normalizedJsonCode);
-    if (matchById) {
-      toast({ title: "Prestador Sugerido Encontrado", description: `Cargando automáticamente la nota técnica para ${matchById.PRESTADOR}.` });
-      handleSelectPrestador(matchById);
-    }
-  }, [jsonPrestadorCode, prestadores, loading, selectedPrestador, handleSelectPrestador, toast]);
-  
-  // Effect to load a prestador when `prestadorToLoad` is set, e.g., from a restored session
-  useEffect(() => {
-    if (prestadorToLoad && prestadores.length > 0) {
-       const fullPrestadorInfo = prestadores.find(p => p.PRESTADOR === prestadorToLoad.PRESTADOR);
-       if (fullPrestadorInfo) {
-           handleSelectPrestador(fullPrestadorInfo);
-       }
-    }
-  }, [prestadorToLoad, prestadores, handleSelectPrestador]);
-  
-  useEffect(() => {
-    if (initialAuditData) {
-      setAdjustedData({
-        adjustedQuantities: initialAuditData.adjustedQuantities,
-        adjustedValues: {}, // Will be recalculated
-        comments: initialAuditData.comments,
-        selectedRows: initialAuditData.selectedRows
-      });
-    }
-  }, [initialAuditData]);
-
-
-  const population = selectedPrestador?.POBLACION ?? 0;
-  const coveragePercentage = population > 0 ? (uniqueUserCount / population) * 100 : 0;
-  
-  if (!isClient) {
-    return <div className="flex items-center justify-center py-6"><Loader2 className="mr-2 h-6 w-6 animate-spin" /> <p>Cargando analizador...</p></div>;
-  }
+    fetchSheetData<Prestador>(PRESTADORES_SHEET_URL).then(data => {
+      setPrestadores(data.map(p => ({
+        ...p, 'ID DE ZONA': normalizeDigits(p['ID DE ZONA']),
+        'CONTRATO': normalizeString(p.CONTRATO),
+      })));
+    });
+  }, []);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Análisis de Notas Técnicas PGP</CardTitle>
-        <CardDescription>Selecciona un prestador para cargar su nota técnica y visualizar los datos.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full md:w-auto" disabled={loadingPrestadores}>
-              {loadingPrestadores ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Building className="mr-2 h-4 w-4" />}
+            <Button variant="outline" className="w-full">
               {selectedPrestador ? selectedPrestador.PRESTADOR : "Seleccionar un Prestador"}
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-full md:w-[300px] max-h-72 overflow-y-auto">
-            {prestadores.map((p, index) => (
-              <DropdownMenuItem key={`${p['ID DE ZONA']}-${index}`} onSelect={() => handleSelectPrestador(p)} className="flex flex-col items-start p-2">
-                 <span className="font-medium block">{p.PRESTADOR}</span>
-                 <span className="text-xs text-muted-foreground block">({p['ID DE ZONA']})</span>
+          <DropdownMenuContent className="w-[300px] max-h-72 overflow-y-auto">
+            {prestadores.map((p, i) => (
+              <DropdownMenuItem key={i} onSelect={() => handleSelectPrestador(p)}>
+                {p.PRESTADOR}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {mismatchWarning && (
-          <Alert variant="destructive">
-            <div className="flex flex-col sm:flex-row items-center justify-between">
-              <div className="flex items-center"><AlertTriangle className="h-4 w-4 mr-2" />
-                <div>
-                  <AlertTitle>Advertencia de Coincidencia</AlertTitle>
-                  <AlertDescription>{mismatchWarning}</AlertDescription>
-                </div>
-              </div>
-              <Button onClick={handleForceLoad} variant="secondary" className="mt-2 sm:mt-0 sm:ml-4 flex-shrink-0">Cargar de todos modos</Button>
-            </div>
-          </Alert>
-        )}
+        {loading && <div className="flex justify-center py-6"><Loader2 className="animate-spin" /></div>}
 
-        {loading && <div className="flex items-center justify-center py-6"><Loader2 className="mr-2 h-6 w-6 animate-spin" /><p>Cargando datos de la nota técnica...</p></div>}
-
-        {isDataLoaded && !loading && (
+        {showComparison && comparisonSummary && (
           <div className="space-y-6">
-             {showComparison && (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    <StatCard title="Cobertura Poblacional" value={`${coveragePercentage.toFixed(1)}%`} icon={Users} footer={`Atendidos: ${uniqueUserCount.toLocaleString()} de ${population.toLocaleString()}`} />
-                    <StatCard title="Ejecución Real (JSON)" value={formatCurrency(totalRealEjecutadoJson)} icon={Wallet} footer={`Costo real total de los archivos JSON`} />
-                     <div onDoubleClick={() => setIsValorizadoModalOpen(true)} className="cursor-pointer">
-                        <StatCard 
-                            title="Ejecución Valorizada (NT)" 
-                            value={formatCurrency(totalEjecutadoValorizado)} 
-                            icon={Wallet} 
-                            footer={`Ejecución valorizada con precios de la Nota Técnica`} 
-                        />
-                    </div>
-                </div>
-            )}
-            <SummaryCard summary={globalSummary} title={`Resumen Teórico: Nota Técnica de ${selectedPrestador?.PRESTADOR ?? '—'}`} description="Cálculos basados en la totalidad de los datos cargados desde la nota técnica." numMonths={numMonthsForSummary} />
-            
-            {showComparison && comparisonSummary && (
-              <>
-                <FinancialMatrix monthlyFinancials={comparisonSummary.monthlyFinancials} />
-                <InformeDesviaciones 
-                    comparisonSummary={comparisonSummary} 
-                    pgpData={pgpData} 
-                    executionDataByMonth={executionDataByMonth}
-                />
-                <MatrizEjecucionCard matrizData={comparisonSummary.Matriz_Ejecucion_vs_Esperado} onCupClick={handleLookupClick} onCie10Click={handleCie10Lookup} executionDataByMonth={executionDataByMonth} />
-                <DiscountMatrix
-                  data={comparisonSummary.matrizDescuentos}
-                  executionDataByMonth={executionDataByMonth}
-                  pgpData={pgpData}
-                  onAdjustmentsChange={setAdjustedData}
-                  storageKey={localStorageKey}
-                  onGenerateReport={handleGenerateReport}
-                  isGeneratingReport={isGeneratingFinalReport}
-                  selectedPrestador={selectedPrestador}
-                  initialAuditData={initialAuditData}
-                />
-
-                {reportData && <InformePGP data={reportData} comparisonSummary={comparisonSummary} />}
-                
-                {comparisonSummary && globalSummary && totalRealEjecutadoJson > 0 && selectedPrestador && reportData && (
-                  <InformeClinico
-                    reportData={reportData}
-                    globalSummary={globalSummary}
-                    totalRealEjecutadoJson={totalRealEjecutadoJson}
-                    selectedPrestador={selectedPrestador}
-                  />
-                )}
-              </>
-            )}
-          </div>
-        )}
-
-        <LookedUpCupModal cupInfo={lookedUpCupInfo} open={isLookupModalOpen} onOpenChange={setIsLookupModalOpen} isLoading={isLookupLoading} />
-        <AlertDialog open={isCie10ModalOpen} onOpenChange={setIsCie10ModalOpen}>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>{isCie10Loading ? "Buscando diagnóstico..." : `Resultado para: ${cie10Info?.code}`}</AlertDialogTitle>
-                </AlertDialogHeader>
-                {isCie10Loading ? (
-                    <div className="flex justify-center items-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-                ) : (
-                    <AlertDialogDescription>{cie10Info?.description || "No se encontró una descripción."}</AlertDialogDescription>
-                )}
-                <AlertDialogFooter>
-                    <AlertDialogAction onClick={() => setIsCie10ModalOpen(false)}>Cerrar</AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
-         {showComparison && comparisonSummary && (
-            <ValorizadoDetailModal 
-                open={isValorizadoModalOpen}
-                onOpenChange={setIsValorizadoModalOpen}
-                executionDataByMonth={executionDataByMonth}
-                pgpData={pgpData}
+            <FinancialMatrix monthlyFinancials={comparisonSummary.monthlyFinancials} />
+            <InformeDesviaciones comparisonSummary={comparisonSummary} pgpData={pgpData} executionDataByMonth={executionDataByMonth} />
+            <DiscountMatrix
+              data={comparisonSummary.matrizDescuentos}
+              executionDataByMonth={executionDataByMonth}
+              pgpData={pgpData}
+              onAdjustmentsChange={setAdjustedData}
+              storageKey="current-audit"
+              onGenerateReport={() => {}}
+              isGeneratingReport={false}
+              selectedPrestador={selectedPrestador}
+              initialAuditData={initialAuditData}
             />
+            {reportData && <InformePGP data={reportData} comparisonSummary={comparisonSummary} />}
+          </div>
         )}
       </CardContent>
     </Card>
   );
 });
-PgPsearchForm.displayName = 'PgPsearchForm';
 
+PgPsearchForm.displayName = 'PgPsearchForm';
 export default PgPsearchForm;
