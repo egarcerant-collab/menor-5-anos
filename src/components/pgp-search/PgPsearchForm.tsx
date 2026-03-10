@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useCallback, useEffect, useMemo, useImperativeHandle, forwardRef } from 'react';
@@ -20,7 +21,7 @@ import { describeCup, type CupDescription } from '@/ai/flows/describe-cup-flow';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import StatCard from '../shared/StatCard';
 import { describeCie10, Cie10Description } from '@/ai/flows/describe-cie10-flow';
-import InformeDesviaciones, { LookedUpCupModal } from '../report/InformeDesviaciones';
+import InformeDesviaciones from '../report/InformeDesviaciones';
 import InformePGP from '../report/InformePGP';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { getNumericValue, type SavedAuditData } from '../app/JsonAnalyzerPage';
@@ -65,6 +66,16 @@ export interface UnexpectedCupInfo {
     serviceType: ServiceType;
 }
 
+export interface ComparisonSummary {
+    monthlyFinancials: MonthlyFinancialSummary[];
+    overExecutedCups: DeviatedCupInfo[];
+    underExecutedCups: DeviatedCupInfo[];
+    missingCups: DeviatedCupInfo[];
+    unexpectedCups: UnexpectedCupInfo[];
+    normalExecutionCups: DeviatedCupInfo[];
+    matrizDescuentos: DiscountMatrixRow[];
+}
+
 export interface ReportData {
   header: {
     empresa: string;
@@ -76,6 +87,7 @@ export interface ReportData {
     vigencia: string;
     ciudad?: string;
     fecha?: string;
+    responsable1?: { nombre: string; cargo: string };
   };
   months: { month: string; cups: number; valueCOP: number; }[];
   notaTecnica: {
@@ -110,6 +122,111 @@ const normalizeDigits = (v: unknown): string => {
     return parseInt(digitsOnly, 10).toString();
 };
 
+export const formatCurrency = (value: number | null | undefined): string => {
+  if (value === null || value === undefined || isNaN(value)) return '$0';
+  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
+};
+
+const getMonthName = (monthNumber: string) => {
+    const date = new Date(2024, parseInt(monthNumber) - 1, 1);
+    return date.toLocaleString('es-CO', { month: 'long' }).charAt(0).toUpperCase() + date.toLocaleString('es-CO', { month: 'long' }).slice(1);
+};
+
+/**
+ * Función central para calcular la comparación entre PGP y ejecución real.
+ */
+export function calculateComparison(pgpData: any[], executionDataByMonth: ExecutionDataByMonth): ComparisonSummary {
+  const matrizRows = buildMatrizEjecucion({ executionDataByMonth, pgpData });
+  
+  const overExecutedCups: DeviatedCupInfo[] = [];
+  const underExecutedCups: DeviatedCupInfo[] = [];
+  const missingCups: DeviatedCupInfo[] = [];
+  const normalExecutionCups: DeviatedCupInfo[] = [];
+  const unexpectedCups: UnexpectedCupInfo[] = [];
+  const matrizDescuentos: DiscountMatrixRow[] = [];
+
+  const monthlyFinancialsMap = new Map<string, { expected: number; executed: number }>();
+
+  matrizRows.forEach(row => {
+    // Agrupar financieros por mes
+    const current = monthlyFinancialsMap.get(row.Mes) || { expected: 0, executed: 0 };
+    current.expected += row.Valor_Esperado;
+    current.executed += row.Valor_Ejecutado;
+    monthlyFinancialsMap.set(row.Mes, current);
+
+    // Información base de auditoría
+    const commonInfo: DeviatedCupInfo = {
+      cup: row.CUPS,
+      description: row.Descripcion,
+      activityDescription: row.Descripcion,
+      expectedFrequency: row.Cantidad_Esperada,
+      realFrequency: row.Cantidad_Ejecutada,
+      uniqueUsers: 0,
+      repeatedAttentions: 0,
+      sameDayDetections: 0,
+      sameDayDetectionsCost: 0,
+      deviation: row.Diferencia,
+      deviationValue: row.Diferencia * row.Valor_Unitario,
+      totalValue: row.Valor_Ejecutado,
+      valorReconocer: Math.min(row.Valor_Ejecutado, row.Valor_Esperado * 1.11),
+      unitValueFromNote: row.Valor_Unitario
+    };
+
+    // Enriquecer con datos de ejecución real (Usuarios únicos)
+    executionDataByMonth.forEach((monthData) => {
+        const cupData = monthData.cupCounts.get(row.CUPS);
+        if (cupData) {
+            commonInfo.uniqueUsers = cupData.uniqueUsers.size;
+            commonInfo.repeatedAttentions = Math.max(0, cupData.total - cupData.uniqueUsers.size);
+        }
+    });
+
+    // Clasificar según la lógica de auditoría
+    if (row.Clasificacion === "Sobre-ejecutado") overExecutedCups.push(commonInfo);
+    else if (row.Clasificacion === "Sub-ejecutado") underExecutedCups.push(commonInfo);
+    else if (row.Clasificacion === "Faltante") missingCups.push(commonInfo);
+    else if (row.Clasificacion === "Ejecución Normal") normalExecutionCups.push(commonInfo);
+    else if (row.Clasificacion === "Inesperado") {
+        unexpectedCups.push({
+            cup: row.CUPS,
+            realFrequency: row.Cantidad_Ejecutada,
+            totalValue: row.Valor_Ejecutado,
+            serviceType: "Procedimiento"
+        });
+    }
+
+    // Preparar fila para la Matriz de Descuentos
+    matrizDescuentos.push({
+        ...commonInfo,
+        CUPS: row.CUPS,
+        Cantidad_Ejecutada: row.Cantidad_Ejecutada,
+        Valor_Unitario: row.Valor_Unitario,
+        Valor_Ejecutado: row.Valor_Ejecutado,
+        Valor_a_Reconocer: commonInfo.valorReconocer,
+        Valor_a_Descontar: Math.max(0, row.Valor_Ejecutado - commonInfo.valorReconocer),
+        Clasificacion: row.Clasificacion,
+        Tipo_Servicio: "Procedimiento" as ServiceType
+    });
+  });
+
+  const monthlyFinancials: MonthlyFinancialSummary[] = Array.from(monthlyFinancialsMap.entries()).map(([month, data]) => ({
+    month,
+    totalValorEsperado: data.expected,
+    totalValorEjecutado: data.executed,
+    percentage: data.expected > 0 ? (data.executed / data.expected) * 100 : 0
+  }));
+
+  return {
+    monthlyFinancials,
+    overExecutedCups,
+    underExecutedCups,
+    missingCups,
+    unexpectedCups,
+    normalExecutionCups,
+    matrizDescuentos
+  };
+}
+
 const calculateSummary = (data: PgpRow[]): SummaryData | null => {
   if (data.length === 0) return null;
   const totalCostoMes = data.reduce((acc, row) => {
@@ -120,16 +237,6 @@ const calculateSummary = (data: PgpRow[]): SummaryData | null => {
     totalCostoMes, totalPeriodo: totalCostoMes, totalAnual: totalCostoMes * 12,
     costoMinimoPeriodo: totalCostoMes * 0.9, costoMaximoPeriodo: totalCostoMes * 1.1,
   };
-};
-
-export const formatCurrency = (value: number | null | undefined): string => {
-  if (value === null || value === undefined || isNaN(value)) return '$0';
-  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
-};
-
-const getMonthName = (monthNumber: string) => {
-    const date = new Date(2024, parseInt(monthNumber) - 1, 1);
-    return date.toLocaleString('es-CO', { month: 'long' }).charAt(0).toUpperCase() + date.toLocaleString('es-CO', { month: 'long' }).slice(1);
 };
 
 const PgPsearchForm = forwardRef<
@@ -155,13 +262,19 @@ const PgPsearchForm = forwardRef<
 
   const comparisonSummary = useMemo(() => {
     if (!showComparison) return null;
-    // La función calculateComparison es local o importada según PgPsearchForm.tsx original
-    // Aquí asumo que ya existe en el scope del archivo original
-    return require('./PgPsearchForm').calculateComparison(pgpData, executionDataByMonth);
+    return calculateComparison(pgpData, executionDataByMonth);
   }, [pgpData, executionDataByMonth, showComparison]);
 
   const reportData = useMemo((): ReportData | null => {
     if (!showComparison || !selectedPrestador || !globalSummary || !comparisonSummary) return null;
+    
+    const totalDescuentoCalculado = Object.entries(adjustedData.adjustedValues).reduce((acc, [cup, val]) => {
+      if (adjustedData.selectedRows[cup]) return acc + val;
+      return acc;
+    }, 0);
+
+    const sumaMensual = Array.from(executionDataByMonth.values()).reduce((acc, d) => acc + d.totalRealValue, 0);
+
     return {
       header: {
         empresa: "Dusakawi EPSI", nit: "8240001398",
@@ -174,11 +287,14 @@ const PgPsearchForm = forwardRef<
       })),
       notaTecnica: {
         min90: globalSummary.costoMinimoPeriodo, valor3m: globalSummary.totalPeriodo, max110: globalSummary.costoMaximoPeriodo,
-        anticipos: 0, totalPagar: executionDataByMonth.size > 0 ? Array.from(executionDataByMonth.values())[0].totalRealValue : 0,
-        totalFinal: 0, descuentoAplicado: 0
+        anticipos: 0, totalPagar: sumaMensual,
+        totalFinal: sumaMensual - totalDescuentoCalculado, 
+        descuentoAplicado: totalDescuentoCalculado
       },
-      overExecutedCups: comparisonSummary.overExecutedCups, underExecutedCups: comparisonSummary.underExecutedCups,
-      missingCups: comparisonSummary.missingCups, unexpectedCups: comparisonSummary.unexpectedCups,
+      overExecutedCups: comparisonSummary.overExecutedCups, 
+      underExecutedCups: comparisonSummary.underExecutedCups,
+      missingCups: comparisonSummary.missingCups, 
+      unexpectedCups: comparisonSummary.unexpectedCups,
       adjustedData,
     };
   }, [showComparison, selectedPrestador, executionDataByMonth, globalSummary, comparisonSummary, adjustedData]);
@@ -211,19 +327,20 @@ const PgPsearchForm = forwardRef<
   }, []);
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Análisis de Notas Técnicas PGP</CardTitle>
+        <CardDescription>Selecciona un prestador para comparar la Nota Técnica con la ejecución real.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full justify-between">
               {selectedPrestador ? selectedPrestador.PRESTADOR : "Seleccionar un Prestador"}
-              <ChevronDown className="ml-2 h-4 w-4" />
+              <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-[300px] max-h-72 overflow-y-auto">
+          <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] max-h-72 overflow-y-auto">
             {prestadores.map((p, i) => (
               <DropdownMenuItem key={i} onSelect={() => handleSelectPrestador(p)}>
                 {p.PRESTADOR}
@@ -232,25 +349,44 @@ const PgPsearchForm = forwardRef<
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {loading && <div className="flex justify-center py-6"><Loader2 className="animate-spin" /></div>}
+        {loading && <div className="flex justify-center py-12"><Loader2 className="animate-spin h-8 w-8 text-primary" /></div>}
 
         {showComparison && comparisonSummary && (
-          <div className="space-y-6">
+          <div className="space-y-12 animate-in fade-in duration-500">
+            {/* 1. Resumen Financiero Mensual */}
             <FinancialMatrix monthlyFinancials={comparisonSummary.monthlyFinancials} />
+            
+            {/* 2. Análisis de Desviaciones */}
             <InformeDesviaciones comparisonSummary={comparisonSummary} pgpData={pgpData} executionDataByMonth={executionDataByMonth} />
+            
+            {/* 3. Matriz de Descuentos para Ajustes */}
             <DiscountMatrix
               data={comparisonSummary.matrizDescuentos}
               executionDataByMonth={executionDataByMonth}
               pgpData={pgpData}
               onAdjustmentsChange={setAdjustedData}
-              storageKey="current-audit"
+              storageKey={`audit-${selectedPrestador?.NIT}`}
               onGenerateReport={() => {}}
               isGeneratingReport={false}
               selectedPrestador={selectedPrestador}
               initialAuditData={initialAuditData}
             />
-            {reportData && <InformePGP data={reportData} comparisonSummary={comparisonSummary} />}
+
+            {/* 4. Centro de Generación de Informes (Ejecutivo y Clínico) */}
+            <div className="pt-8">
+               <InformePGP data={reportData} comparisonSummary={comparisonSummary} />
+            </div>
           </div>
+        )}
+
+        {!showComparison && !loading && (
+           <Alert className="bg-muted/50">
+             <Info className="h-4 w-4" />
+             <AlertTitle>Información</AlertTitle>
+             <AlertDescription>
+               Carga los archivos JSON arriba y selecciona un prestador para iniciar la auditoría comparativa.
+             </AlertDescription>
+           </Alert>
         )}
       </CardContent>
     </Card>
