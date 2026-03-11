@@ -38,13 +38,24 @@ export const findColumnValue = (row: PgpRow, possibleNames: string[]): any => {
   return undefined;
 };
 
+/**
+ * Intenta determinar el tipo de servicio basado en el código CUPS
+ * para casos donde no hay datos de ejecución (Faltantes).
+ */
+const guessServiceTypeByCup = (cup: string): "Consulta" | "Procedimiento" | "Medicamento" | "Otro Servicio" => {
+    const code = String(cup).trim();
+    if (code.startsWith('89') || code.startsWith('86')) return "Consulta";
+    if (code.startsWith('93') || code.startsWith('94') || code.startsWith('90') || code.startsWith('87') || code.startsWith('88')) return "Procedimiento";
+    if (code.match(/^[A-Z0-9]{6}$/) && !code.match(/^\d+$/)) return "Medicamento";
+    return "Procedimiento"; // Default
+};
 
 export function buildMatrizEjecucion({ executionDataByMonth, pgpData }: BuildMatrizArgs): MatrizRow[] {
   const matriz: MatrizRow[] = [];
   
   const pgpCupsMap = new Map<string, PgpRow>();
   pgpData.forEach(row => {
-      const cup = findColumnValue(row, ['cup/cum', 'cups', 'id resolucion 3100', 'código']);
+      const cup = findColumnValue(row, ['cups', 'cup/cum', 'id resolucion 3100', 'código', 'cup']);
       if(cup) pgpCupsMap.set(String(cup).trim().toUpperCase(), row);
   });
 
@@ -62,11 +73,12 @@ export function buildMatrizEjecucion({ executionDataByMonth, pgpData }: BuildMat
       const pgpRow = pgpCupsMap.get(cup);
       const monthCupData = monthData.cupCounts.get(cup) || monthData.cupCounts.get(cup.toLowerCase());
 
-      const cantidadEsperada = pgpRow ? getNumericValue(findColumnValue(pgpRow, ['frecuencia eventos mes', 'frecuencia'])) : 0;
+      const cantidadEsperada = pgpRow ? getNumericValue(findColumnValue(pgpRow, ['frecuencia eventos mes', 'frecuencia', 'frecuencia_mes'])) : 0;
       const cantidadEjecutada = monthCupData?.total || 0;
       
-      const valorEsperado = pgpRow ? getNumericValue(findColumnValue(pgpRow, ['costo evento mes (valor mes)', 'costo evento mes', 'valor total'])) : 0;
-      const unitValue = pgpRow ? getNumericValue(findColumnValue(pgpRow, ['valor unitario', 'vr unitario'])) : 0;
+      // Buscamos el valor unitario en G (VALOR) o nombres comunes
+      const unitValue = pgpRow ? getNumericValue(findColumnValue(pgpRow, ['valor unitario', 'vr unitario', 'valor', 'valor_unitario'])) : 0;
+      const valorEsperado = pgpRow ? getNumericValue(findColumnValue(pgpRow, ['costo evento mes (valor mes)', 'costo evento mes', 'valor total', 'valor_total'])) : (cantidadEsperada * unitValue);
 
       const valorEjecutado = cantidadEjecutada * unitValue;
       
@@ -86,7 +98,8 @@ export function buildMatrizEjecucion({ executionDataByMonth, pgpData }: BuildMat
         diagnosticoPrincipal = [...monthCupData.diagnoses.entries()].reduce((a, b) => a[1] > b[1] ? a : b)[0];
       }
 
-      const descripcion = findColumnValue(pgpRow, ['descripcion cups', 'descripcion id resolucion', 'descripcion', 'nombre del servicio']);
+      // Buscamos la descripción en la Columna F (DESCRIPCION CUPS)
+      const descripcion = findColumnValue(pgpRow, ['descripcion cups', 'descripcion id resolucion', 'descripcion', 'nombre del servicio', 'nombre_cups']);
 
       matriz.push({
         Mes: monthName,
@@ -102,7 +115,7 @@ export function buildMatrizEjecucion({ executionDataByMonth, pgpData }: BuildMat
         Valor_Unitario: unitValue,
         Valor_Esperado: valorEsperado,
         Valor_Ejecutado: valorEjecutado,
-        Tipo_Servicio: monthCupData?.type || "Desconocido"
+        Tipo_Servicio: monthCupData?.type || guessServiceTypeByCup(cup)
       });
     });
   });
