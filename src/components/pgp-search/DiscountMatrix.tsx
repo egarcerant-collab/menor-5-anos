@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -70,16 +69,7 @@ interface DiscountMatrixProps {
 }
 
 const handleDownloadXls = (data: any[], filename: string) => {
-    const dataToExport = JSON.parse(JSON.stringify(data));
-    const formattedData = dataToExport.map((row: any) => {
-        for (const key in row) {
-            if (typeof row[key] === 'number') {
-                row[key] = row[key].toString().replace('.', ',');
-            }
-        }
-        return row;
-    });
-    const csv = Papa.unparse(formattedData, { delimiter: ";" });
+    const csv = Papa.unparse(data);
     const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
@@ -185,7 +175,7 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
             setComments(initialAuditData.comments || {});
             setSelectedRows(initialAuditData.selectedRows || {});
              toast({
-                title: "Auditoría Guardada Cargada",
+                title: "Auditoría Cargada",
                 description: "Se restauró el progreso de la auditoría seleccionada.",
             });
         } else {
@@ -218,9 +208,9 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
 
     useEffect(() => {
         initializeStateFromData();
-    }, [initializeStateFromData]); // Depend on initialAuditData to re-run
+    }, [initializeStateFromData]);
     
-    // This effect now passes data up, but doesn't save to localStorage
+    // This effect now passes data up
     useEffect(() => {
         const adjustedValues: Record<string, number> = {};
         data.forEach(row => {
@@ -244,13 +234,11 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
         setIsSaving(true);
         
         const getMonthName = (monthNumber: string) => {
-            const date = new Date();
-            date.setMonth(parseInt(monthNumber) - 1);
-            const monthName = date.toLocaleString('es-CO', { month: 'long' });
-            return monthName.charAt(0).toUpperCase() + monthName.slice(1);
+            const date = new Date(2024, parseInt(monthNumber) - 1, 1);
+            const name = date.toLocaleString('es-CO', { month: 'long' });
+            return name.charAt(0).toUpperCase() + name.slice(1);
         };
         
-        // Asumimos un solo mes por simplicidad, se puede mejorar para multimes
         const monthKey = executionDataByMonth.keys().next().value;
         const monthName = getMonthName(monthKey);
 
@@ -276,15 +264,16 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
             const result = await response.json();
 
             if (!response.ok) {
-                throw new Error(result.message || 'Error en el servidor');
+                // If the error message is descriptive, use it.
+                throw new Error(result.message || 'Error en el servidor al intentar guardar el archivo.');
             }
             
             toast({
-                title: "Auditoría Guardada Exitosamente",
-                description: `El archivo se ha guardado en el servidor para ${selectedPrestador.PRESTADOR}.`,
+                title: "Auditoría Guardada",
+                description: result.message || "La auditoría se guardó correctamente en el servidor.",
             });
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : "Error desconocido";
+            const errorMessage = error instanceof Error ? error.message : "Error desconocido al comunicarse con el servidor.";
             console.error("Error saving audit state to server:", error);
             toast({
                 title: "Error al Guardar",
@@ -306,13 +295,13 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
             };
             localStorage.setItem(storageKey, JSON.stringify(stateToSave));
             toast({
-                title: "Progreso Guardado",
+                title: "Progreso Guardado Localmente",
                 description: "El progreso de la auditoría se ha guardado en tu navegador.",
             });
         } catch (error) {
             console.error("Error saving state to localStorage", error);
             toast({
-                title: "Error al Guardar",
+                title: "Error al Guardar Localmente",
                 description: "No se pudo guardar el progreso en el navegador.",
                 variant: "destructive",
             });
@@ -321,7 +310,6 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
     
     const handleClearAdjustments = () => {
         if (storageKey) localStorage.removeItem(storageKey);
-        // Reset state to initial from props, not to empty
         const initialQuantities: Record<string, number> = {};
         data.forEach(row => {
             initialQuantities[row.CUPS] = row.Cantidad_Ejecutada;
@@ -390,7 +378,6 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
         const numericValue = parseInt(value.replace(/[^0-9]+/g,""), 10) || 0;
         const rowData = data.find(r => r.CUPS === cup);
         if (rowData && numericValue > rowData.Cantidad_Ejecutada) {
-            // Prevent setting a value higher than executed
             setAdjustedQuantities(prev => ({ ...prev, [cup]: rowData.Cantidad_Ejecutada }));
         } else {
             setAdjustedQuantities(prev => ({ ...prev, [cup]: numericValue }));
@@ -403,7 +390,6 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
       }
     };
     
-    // KPIs Calculations
     const totalEjecutadoBruto = useMemo(() => {
         return filteredData.reduce((sum, row) => sum + row.Valor_Ejecutado, 0);
     }, [filteredData]);
@@ -421,7 +407,6 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
     }, [data, selectedRows, adjustedQuantities]);
     
     const valorNetoFinal = useMemo(() => {
-        // Calculate total bruto from ALL data, not just filtered
         const totalBrutoAll = data.reduce((sum, row) => sum + row.Valor_Ejecutado, 0);
         return totalBrutoAll - descuentoAplicado;
     }, [data, descuentoAplicado]);
@@ -444,8 +429,6 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
     
     const generateDownloadData = () => {
         const discountedServices: any[] = [];
-
-        // 1. Create a map of CUPS that are selected and have a discount
         const discountedCupsInfo = new Map<string, { discountRatio: number; comment: string; description: string }>();
         Object.entries(selectedRows).forEach(([cup, isSelected]) => {
             if (isSelected) {
@@ -474,7 +457,6 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
             return [];
         }
 
-        // 2. Iterate through all raw services and apply discount if needed
         executionDataByMonth.forEach((monthData) => {
             monthData.rawJsonData.usuarios?.forEach((user: any) => {
                 const userId = `${user.tipoDocumentoIdentificacion}-${user.numDocumentoIdentificacion}`;
@@ -639,11 +621,11 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
                              <div className="flex items-center gap-2">
                                 <Button onClick={handleSaveStateToLocal} variant="outline" size="sm" className="h-8">
                                     <Save className="mr-2 h-4 w-4" />
-                                    Guardar Progreso
+                                    Guardar Progreso Local
                                 </Button>
                                 <Button onClick={handleSaveStateToServer} variant="default" size="sm" className="h-8" disabled={isSaving}>
                                     {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                    Guardar Auditoría
+                                    Guardar Auditoría Servidor
                                 </Button>
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
@@ -656,7 +638,7 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
                                             <AlertDialogDescription>
-                                                Esta acción eliminará permanentemente todos los ajustes (cantidades, valores y comentarios) que has realizado en esta matriz. Se perderá el progreso guardado.
+                                                Esta acción eliminará permanentemente todos los ajustes que has realizado en esta matriz.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
@@ -669,7 +651,7 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
                                 <Button onClick={() => {
                                     const downloadData = generateDownloadData();
                                     if(downloadData.length > 0) {
-                                      handleDownloadXls(downloadData, 'desglose_descuentos_aplicados.xls');
+                                      handleDownloadXls(downloadData, 'desglose_descuentos.xls');
                                     }
                                   }} variant="outline" size="sm" className="h-8">
                                     <Download className="mr-2 h-4 w-4" />
@@ -678,21 +660,21 @@ const DiscountMatrix: React.FC<DiscountMatrixProps> = ({
                             </div>
                              <Button onClick={onGenerateReport} disabled={isGeneratingReport || !data.length} variant="secondary" size="sm" className="h-8 mt-2 sm:mt-0">
                                 {isGeneratingReport ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
-                                Generar Informe Final
+                                Informe Final
                             </Button>
                         </div>
                     </div>
                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-right w-full mt-4">
                         <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200">
-                            <p className="text-xs text-muted-foreground flex items-center justify-end gap-1"><WalletCards className="h-4 w-4"/> Valor Ejecutado Total (Filtrado)</p>
+                            <p className="text-xs text-muted-foreground flex items-center justify-end gap-1"><WalletCards className="h-4 w-4"/> Valor Ejecutado Total</p>
                             <p className="text-lg font-bold text-blue-600">{formatCurrency(totalEjecutadoBruto)}</p>
                         </div>
                         <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200">
-                            <p className="text-xs text-muted-foreground flex items-center justify-end gap-1"><TrendingDown className="h-4 w-4"/> Descuento Aplicado (Total)</p>
+                            <p className="text-xs text-muted-foreground flex items-center justify-end gap-1"><TrendingDown className="h-4 w-4"/> Descuento Aplicado</p>
                             <p className="text-lg font-bold text-red-500">{formatCurrency(descuentoAplicado)}</p>
                         </div>
                         <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950 border border-green-200">
-                            <p className="text-xs text-muted-foreground flex items-center justify-end gap-1"><CheckCircle className="h-4 w-4"/> Valor Neto Final (Total)</p>
+                            <p className="text-xs text-muted-foreground flex items-center justify-end gap-1"><CheckCircle className="h-4 w-4"/> Valor Neto Final</p>
                             <p className="text-lg font-bold text-green-600">{formatCurrency(valorNetoFinal)}</p>
                         </div>
                     </div>

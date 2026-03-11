@@ -11,7 +11,8 @@ interface AuditFile {
 
 export async function GET() {
   try {
-    const reportsDir = path.join(process.cwd(), 'public', 'informes');
+    const rootDir = process.cwd();
+    const reportsDir = path.join(rootDir, 'public', 'informes');
     
     try {
       await fs.access(reportsDir);
@@ -35,12 +36,11 @@ export async function GET() {
                         allAudits.push({
                             month: monthDir.name,
                             prestador: prestadorName,
-                            path: path.join('/informes', monthDir.name, file),
+                            path: `/informes/${monthDir.name}/${file}`,
                         });
                     }
                 }
             } catch (err) {
-                // Ignore directories that can't be read
                 console.warn(`Could not read directory ${monthPath}:`, err);
             }
         }
@@ -48,11 +48,9 @@ export async function GET() {
 
     return NextResponse.json(allAudits);
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error al listar los archivos de auditoría:', error);
-    
-    const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error desconocido en el servidor.';
-    
-    return NextResponse.json({ message: 'Error interno del servidor al listar archivos.', error: errorMessage }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    return NextResponse.json({ message: 'Error al listar archivos.', error: errorMessage }, { status: 500 });
   }
 }
