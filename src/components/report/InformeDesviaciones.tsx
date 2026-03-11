@@ -19,6 +19,7 @@ import { ExecutionDataByMonth } from '@/app/page';
 import { findColumnValue } from '@/lib/matriz-helpers';
 import StatCard from '../shared/StatCard';
 import { getNumericValue } from '../app/JsonAnalyzerPage';
+import { cn } from '@/lib/utils';
 
 const handleDownloadXls = (data: any[], filename: string) => {
     const dataToExport = JSON.parse(JSON.stringify(data));
@@ -45,95 +46,47 @@ const handleDownloadXls = (data: any[], filename: string) => {
 };
 
 
-const DeviatedCupsCard = ({ title, icon, data, badgeVariant, pgpData, onDownload, onDoubleClick, totalValue, valueLabel }: {
+const DeviatedCupsCard = ({ title, icon, data, badgeVariant, onDownload, onDoubleClick, totalValue, valueLabel, color }: {
     title: string;
     icon: React.ElementType;
     data: DeviatedCupInfo[];
-    badgeVariant: "destructive" | "default" | "success";
-    pgpData: any[];
+    badgeVariant: "destructive" | "default" | "success" | "secondary";
     onDownload: (data: any[], filename: string) => void;
     onDoubleClick: () => void;
     totalValue: number;
     valueLabel: string;
+    color: 'red' | 'green' | 'blue' | 'black' | 'purple';
 }) => {
     const Icon = icon;
     const hasData = data && data.length > 0;
     
-    let colorClass = 'text-muted-foreground';
-    if(hasData) {
-        if (badgeVariant === 'destructive') colorClass = 'text-red-500';
-        else if (badgeVariant === 'default') colorClass = 'text-blue-500';
-        else if (badgeVariant === 'success') colorClass = 'text-green-500';
-    }
+    const colorMap = {
+        red: 'text-red-500',
+        green: 'text-green-600',
+        blue: 'text-blue-500',
+        black: 'text-foreground',
+        purple: 'text-purple-600'
+    };
+
+    const badgeColorMap = {
+        red: 'bg-red-500 hover:bg-red-600',
+        green: 'bg-green-600 hover:bg-green-700',
+        blue: 'bg-blue-500 hover:bg-blue-600',
+        black: 'bg-slate-500 hover:bg-slate-600',
+        purple: 'bg-purple-600 hover:bg-purple-700'
+    };
     
     return (
         <Card className="w-full cursor-pointer hover:bg-muted/50 transition-colors" onDoubleClick={onDoubleClick}>
             <CardHeader className="flex flex-row items-center justify-between p-4">
                 <div className="flex items-center gap-3">
-                    <Icon className={`h-6 w-6 ${colorClass}`} />
+                    <Icon className={cn("h-6 w-6", colorMap[color])} />
                     <CardTitle className="text-base font-medium">{title}</CardTitle>
                 </div>
                 <div className='flex items-center gap-4 pl-4'>
                     {hasData && (
                         <div className="text-right">
-                             <p className={`text-sm font-bold ${colorClass}`}>{formatCurrency(totalValue)}</p>
-                             <p className="text-xs text-muted-foreground">{valueLabel}</p>
-                        </div>
-                    )}
-                    {hasData && (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                const downloadData = data.map(item => ({
-                                    ...item,
-                                    deviation: item.deviation,
-                                    deviationValue: item.deviationValue
-                                }));
-                                onDownload(downloadData, `${title.toLowerCase().replace(/ /g, '_')}.xls`);
-                            }}
-                            className="h-7 w-7"
-                            aria-label={`Descargar ${title}`}
-                        >
-                            <Download className="h-4 w-4" />
-                        </Button>
-                    )}
-                    <Badge variant={hasData ? badgeVariant : 'secondary'}>{data.length}</Badge>
-                </div>
-            </CardHeader>
-        </Card>
-    )
-};
-
-
-const DiscrepancyCard = ({ title, icon, data, badgeVariant, onLookupClick, onDownload, emptyText, onDoubleClick, totalValue, valueLabel }: {
-    title: string;
-    icon: React.ElementType;
-    data: any[];
-    badgeVariant: "secondary" | "outline";
-    onLookupClick?: (cup: string) => void;
-    onDownload: (data: any[], filename: string) => void;
-    emptyText: string;
-    onDoubleClick: () => void;
-    totalValue?: number;
-    valueLabel?: string;
-}) => {
-    const Icon = icon;
-    const hasData = data && data.length > 0;
-    const hasValue = typeof totalValue === 'number';
-
-    return (
-        <Card className="w-full cursor-pointer hover:bg-muted/50 transition-colors" onDoubleClick={onDoubleClick}>
-            <CardHeader className="flex flex-row items-center justify-between p-4">
-                <div className="flex items-center gap-3">
-                    <Icon className="h-6 w-6 text-muted-foreground" />
-                    <CardTitle className="text-base font-medium">{title}</CardTitle>
-                </div>
-                 <div className='flex items-center gap-4 pl-4'>
-                    {hasValue && (
-                         <div className="text-right">
-                             <p className="text-sm font-bold text-purple-600">{formatCurrency(totalValue)}</p>
+                             <p className={cn("text-sm font-bold", colorMap[color])}>{formatCurrency(totalValue)}</p>
                              <p className="text-xs text-muted-foreground">{valueLabel}</p>
                         </div>
                     )}
@@ -146,12 +99,80 @@ const DiscrepancyCard = ({ title, icon, data, badgeVariant, onLookupClick, onDow
                                 onDownload(data, `${title.toLowerCase().replace(/ /g, '_')}.xls`);
                             }}
                             className="h-7 w-7"
-                            aria-label={`Descargar ${title}`}
                         >
                             <Download className="h-4 w-4" />
                         </Button>
                     )}
-                    <Badge variant={hasData ? badgeVariant : 'secondary'}>{data.length}</Badge>
+                    <Badge className={cn("text-white border-transparent", hasData ? badgeColorMap[color] : 'bg-muted text-muted-foreground')}>
+                        {data.length}
+                    </Badge>
+                </div>
+            </CardHeader>
+        </Card>
+    )
+};
+
+
+const DiscrepancyCard = ({ title, icon, data, onDownload, onDoubleClick, totalValue, valueLabel, color }: {
+    title: string;
+    icon: React.ElementType;
+    data: any[];
+    onDownload: (data: any[], filename: string) => void;
+    onDoubleClick: () => void;
+    totalValue?: number;
+    valueLabel?: string;
+    color: 'red' | 'green' | 'blue' | 'black' | 'purple';
+}) => {
+    const Icon = icon;
+    const hasData = data && data.length > 0;
+    const hasValue = typeof totalValue === 'number';
+
+    const colorMap = {
+        red: 'text-red-500',
+        green: 'text-green-600',
+        blue: 'text-blue-500',
+        black: 'text-foreground',
+        purple: 'text-purple-600'
+    };
+
+    const badgeColorMap = {
+        red: 'bg-red-500 hover:bg-red-600',
+        green: 'bg-green-600 hover:bg-green-700',
+        blue: 'bg-blue-500 hover:bg-blue-600',
+        black: 'bg-slate-500 hover:bg-slate-600',
+        purple: 'bg-purple-600 hover:bg-purple-700'
+    };
+
+    return (
+        <Card className="w-full cursor-pointer hover:bg-muted/50 transition-colors" onDoubleClick={onDoubleClick}>
+            <CardHeader className="flex flex-row items-center justify-between p-4">
+                <div className="flex items-center gap-3">
+                    <Icon className={cn("h-6 w-6", colorMap[color])} />
+                    <CardTitle className="text-base font-medium">{title}</CardTitle>
+                </div>
+                 <div className='flex items-center gap-4 pl-4'>
+                    {hasValue && (
+                         <div className="text-right">
+                             <p className={cn("text-sm font-bold", colorMap[color])}>{formatCurrency(totalValue)}</p>
+                             <p className="text-xs text-muted-foreground">{valueLabel}</p>
+                        </div>
+                    )}
+                    {hasData && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDownload(data, `${title.toLowerCase().replace(/ /g, '_')}.xls`);
+                            }}
+                            className="h-7 w-7"
+                        >
+                            <Download className="h-4 w-4" />
+                        </Button>
+                    )}
+                    <Badge className={cn("text-white border-transparent", hasData ? badgeColorMap[color] : 'bg-muted text-muted-foreground')}>
+                        {data.length}
+                    </Badge>
                 </div>
             </CardHeader>
         </Card>
@@ -184,7 +205,6 @@ export const CupDetailsModal = ({ open, onOpenChange, cup, executionDetails }: {
                 </AlertDialogHeader>
                 
                 <div className="flex-grow overflow-y-auto pr-6">
-                    {/* Panel de Resumen Estadístico */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 p-4 bg-muted/50 rounded-lg">
                         <SummaryStat label="Valor Unitario (NT)" value={formatCurrency(cup.unitValueFromNote ?? 0)} className="text-purple-600" />
                         <SummaryStat label="Frecuencia Real" value={cup.realFrequency} className="text-blue-600" />
@@ -197,7 +217,6 @@ export const CupDetailsModal = ({ open, onOpenChange, cup, executionDetails }: {
                         <SummaryStat label="Costo Repetición Mismo Día" value={formatCurrency(cup.sameDayDetectionsCost)} className="text-red-600 font-bold" />
                     </div>
 
-                    {/* Tabla de Detalle de Ejecuciones */}
                     <div className="mt-4 relative">
                       <ScrollArea className="h-[45vh]">
                         <Table>
@@ -546,54 +565,51 @@ export default function InformeDesviaciones({ comparisonSummary, pgpData, execut
                         icon={TrendingUp}
                         data={comparisonSummary.overExecutedCups}
                         badgeVariant="destructive"
-                        pgpData={pgpData}
                         onDownload={handleDownloadXls}
                         onDoubleClick={() => handleDoubleClick('over-executed', "CUPS Sobreejecutados (>111%)", comparisonSummary.overExecutedCups, overExecutionTotals)}
                         totalValue={overExecutionTotals.desviacion}
                         valueLabel="Valor Desviación"
+                        color="red"
                     />
                     <DeviatedCupsCard
                         title="Ejecución dentro del rango (90-111%)"
                         icon={Target}
                         data={comparisonSummary.normalExecutionCups}
                         badgeVariant="success"
-                        pgpData={pgpData}
                         onDownload={handleDownloadXls}
                         onDoubleClick={() => handleDoubleClick('normal-execution', "Ejecución dentro del rango (90-111%)", comparisonSummary.normalExecutionCups, normalExecutionTotals)}
                         totalValue={normalExecutionTotals.ejecutado}
                         valueLabel="Valor Ejecutado"
+                        color="green"
                     />
                     <DeviatedCupsCard
-                        title="CUPS Subejecutados (&lt;90%)"
+                        title="CUPS Subejecutados (<90%)"
                         icon={TrendingDown}
                         data={comparisonSummary.underExecutedCups}
                         badgeVariant="default"
-                        pgpData={pgpData}
                         onDownload={handleDownloadXls}
                         onDoubleClick={() => handleDoubleClick('under-executed', "CUPS Subejecutados (<90%)", comparisonSummary.underExecutedCups, underExecutionTotals)}
                         totalValue={underExecutionTotals.desviacion}
                         valueLabel="Valor Desviación"
+                        color="blue"
                     />
                      <DiscrepancyCard
                         title="CUPS Faltantes"
                         icon={AlertTriangle}
                         data={comparisonSummary.missingCups}
-                        badgeVariant="secondary"
                         onDownload={handleDownloadXls}
-                        emptyText="No hay CUPS planificados que falten en la ejecución."
                         onDoubleClick={() => handleDoubleClick('missing', 'CUPS Faltantes', comparisonSummary.missingCups, {ejecutado: 0, desviacion: 0})}
+                        color="black"
                     />
                      <DiscrepancyCard
                         title="CUPS Inesperados"
                         icon={Search}
                         data={comparisonSummary.unexpectedCups}
-                        badgeVariant="outline"
-                        onLookupClick={handleLookupClick}
                         onDownload={handleDownloadXls}
-                        emptyText="No se encontraron CUPS ejecutados que no estuvieran en la nota técnica."
                         onDoubleClick={() => handleDoubleClick('unexpected', 'CUPS Inesperados', comparisonSummary.unexpectedCups, {ejecutado: totalUnexpectedValue, desviacion: totalUnexpectedValue})}
                         totalValue={totalUnexpectedValue}
                         valueLabel="Valor Ejecutado"
+                        color="purple"
                     />
                 </CardContent>
             </Card>
