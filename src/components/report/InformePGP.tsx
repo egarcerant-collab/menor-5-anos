@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useMemo, useState } from "react";
@@ -34,7 +35,7 @@ export default function InformePGP({ data, comparisonSummary }: { data: any, com
   const handleGenerate = async (action: 'preview' | 'download') => {
     if (!data || !comparisonSummary) return;
     setIsGenerating(true);
-    toast({ title: "Generando Informe Senior...", description: "Estructurando documento de 12 páginas." });
+    toast({ title: "Generando Informe Senior...", description: "Redactando informe anual de 12 páginas (Arial)." });
 
     try {
         const metaAnual = data.notaTecnica.valor3m * 4; 
@@ -42,6 +43,8 @@ export default function InformePGP({ data, comparisonSummary }: { data: any, com
         const totalCups = comparisonSummary.overExecutedCups.reduce((acc: number, c: any) => acc + c.realFrequency, 0) +
                          comparisonSummary.normalExecutionCups.reduce((acc: number, c: any) => acc + c.realFrequency, 0) +
                          comparisonSummary.underExecutedCups.reduce((acc: number, c: any) => acc + c.realFrequency, 0);
+
+        const referenciaMensual = metaAnual / 12;
 
         let accumulated = 0;
         const meses: MonthlyRow[] = comparisonSummary.monthlyFinancials.map((m: any) => {
@@ -55,7 +58,7 @@ export default function InformePGP({ data, comparisonSummary }: { data: any, com
                 avgCost: cups > 0 ? m.totalValorEjecutado / cups : 0,
                 accumulated,
                 percVsMeta: (accumulated / metaAnual) * 100,
-                percVsRef: m.percentage
+                percVsRef: (m.totalValorEjecutado / referenciaMensual) * 100
             };
         });
 
@@ -77,6 +80,7 @@ export default function InformePGP({ data, comparisonSummary }: { data: any, com
             ejecucionAnual,
             porcentajeCumplimiento: (ejecucionAnual / metaAnual) * 100,
             totalCups,
+            referenciaMensual,
             meses: meses.map(m => ({ month: m.month, cups: m.cups, value: m.value })),
             conclusionesAdicionales: conclusions
         });
@@ -113,11 +117,7 @@ export default function InformePGP({ data, comparisonSummary }: { data: any, com
         else await descargarInformeSeniorPDF(reportData, background);
 
     } catch (e: any) {
-        toast({ 
-          title: "Error de IA", 
-          description: e.message.includes("API key") ? "Clave de API inválida o ausente. Configúrala en los secretos del proyecto." : e.message, 
-          variant: "destructive" 
-        });
+        toast({ title: "Error en Generación", description: e.message, variant: "destructive" });
     } finally {
       setIsGenerating(false);
     }
@@ -128,28 +128,28 @@ export default function InformePGP({ data, comparisonSummary }: { data: any, com
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
             <Landmark className="h-6 w-6 text-primary" />
-            Generación de Informe de Gestión Senior
+            Informe de Gestión Anual Senior (12 Páginas)
         </CardTitle>
-        <CardDescription>Genera el documento oficial de Dusakawi EPSI siguiendo el modelo de 12 páginas.</CardDescription>
+        <CardDescription>Genera el documento oficial de auditoría con análisis narrativo trimestral y tablas de control de gestión.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
                 <Label className="flex items-center gap-2"><User className="h-4 w-4" /> Profesional Responsable</Label>
-                <Input value={auditorName} onChange={e => setAuditorName(e.target.value)} placeholder="EDUARDO GARCERANT GONZALEZ" />
+                <Input value={auditorName} onChange={e => setAuditorName(e.target.value)} />
             </div>
             <div className="space-y-2">
-                <Label className="flex items-center gap-2"><Settings className="h-4 w-4" /> Notas del Auditor (Opcional)</Label>
-                <Textarea placeholder="Observaciones adicionales para la narrativa..." value={conclusions} onChange={e => setConclusions(e.target.value)} />
+                <Label className="flex items-center gap-2"><Settings className="h-4 w-4" /> Notas adicionales del Auditor</Label>
+                <Textarea placeholder="Ej: Favorabilidad alta, estacionalidad detectada en julio..." value={conclusions} onChange={e => setConclusions(e.target.value)} />
             </div>
         </div>
         <div className="flex gap-4">
             <Button onClick={() => handleGenerate('preview')} disabled={isGenerating} className="flex-1 bg-primary hover:bg-primary/90">
                 {isGenerating ? <Loader2 className="mr-2 animate-spin" /> : <FileText className="mr-2" />}
-                Vista Previa Informe (Arial 12)
+                Vista Previa Informe
             </Button>
             <Button variant="secondary" onClick={() => handleGenerate('download')} disabled={isGenerating} className="flex-1">
-                <DownloadCloud className="mr-2" /> Descargar PDF Final
+                <DownloadCloud className="mr-2" /> Descargar PDF (Arial 12)
             </Button>
         </div>
 

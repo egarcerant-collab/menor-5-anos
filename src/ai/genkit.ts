@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview Centralized Genkit AI configuration.
  */
@@ -14,7 +15,7 @@ export const ai = genkit({
   ],
   model: {
     name: 'googleai/gemini-1.5-flash-latest',
-    temperature: 0.3,
+    temperature: 0.2, // Reducido para mayor precisión técnica
     maxOutputTokens: 4096, 
   },
   logLevel: 'debug',

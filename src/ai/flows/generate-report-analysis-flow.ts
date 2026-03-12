@@ -1,7 +1,8 @@
+
 'use server';
 /**
  * @fileOverview Flujo de IA Senior para generar la narrativa del Informe de Gestión Anual PGP.
- * Redacción ejecutiva para Dusakawi EPSI - Territorio La Guajira.
+ * Redacción ejecutiva de alto nivel para Dusakawi EPSI.
  */
 
 import { ai } from '@/ai/genkit';
@@ -20,19 +21,20 @@ const ReportAnalysisInputSchema = z.object({
   ejecucionAnual: z.number(),
   porcentajeCumplimiento: z.number(),
   totalCups: z.number(),
+  referenciaMensual: z.number(),
   meses: z.array(MonthlyDataSchema),
   conclusionesAdicionales: z.string().optional(),
 });
 
 const ReportAnalysisOutputSchema = z.object({
-  resumenEjecutivo: z.string(),
-  analisisT1: z.string(),
-  analisisT2: z.string(),
-  analisisT3: z.string(),
-  analisisT4: z.string(),
-  hallazgosClave: z.array(z.string()),
-  accionesMejora: z.array(z.string()),
-  conclusionesFinales: z.string(),
+  resumenEjecutivo: z.string().describe("Narrativa densa y técnica sobre la favorabilidad del modelo."),
+  analisisT1: z.string().describe("Análisis detallado mes a mes del Trimestre I."),
+  analisisT2: z.string().describe("Análisis detallado mes a mes del Trimestre II."),
+  analisisT3: z.string().describe("Análisis detallado mes a mes del Trimestre III."),
+  analisisT4: z.string().describe("Análisis detallado mes a mes del Trimestre IV."),
+  hallazgosClave: z.array(z.string()).describe("Lista de 5-6 hallazgos financieros y administrativos."),
+  accionesMejora: z.array(z.string()).describe("Lista de 3-4 acciones correctivas estratégicas."),
+  conclusionesFinales: z.string().describe("Cierre contundente sobre la eficiencia del contrato."),
 });
 
 export type ReportAnalysisInput = z.infer<typeof ReportAnalysisInputSchema>;
@@ -43,41 +45,34 @@ const seniorReportPrompt = ai.definePrompt({
   input: { schema: ReportAnalysisInputSchema },
   output: { schema: ReportAnalysisOutputSchema },
   prompt: `
-Eres el Director Nacional de Gestión del Riesgo en Salud de Dusakawi EPSI. Debes redactar el Informe de Gestión Anual 2025 para el prestador {{{prestador}}} (NIT: {{{nit}}}).
+Eres el Director Nacional de Gestión del Riesgo en Salud de Dusakawi EPSI. Debes redactar el INFORME DE GESTIÓN ANUAL — VIGENCIA 2025 para el prestador {{{prestador}}} (NIT: {{{nit}}}).
 
-DATOS CLAVE DEL EJERCICIO:
-- Meta Anual PGP: {{{metaAnual}}}
-- Ejecución Real Consolidada: {{{ejecucionAnual}}} ({{{porcentajeCumplimiento}}}%)
-- Producción Total: {{{totalCups}}} actividades/CUPS atendidas.
+DATOS CLAVE PARA EL ANÁLISIS:
+- Meta Anual 2025: {{{metaAnual}}}
+- Ejecución Real Consolidada: {{{ejecucionAnual}}} ({{{porcentajeCumplimiento}}}% de la meta).
+- Referencia Mensual (Meta/12): {{{referenciaMensual}}}
+- Producción Total: {{{totalCups}}} actividades/CUPS.
 
 INSTRUCCIONES DE REDACCIÓN (ESTILO EJECUTIVO SENIOR):
-1. Usa un lenguaje técnico, contundente y con autoridad institucional.
-2. Genera análisis narrativos profundos para cada trimestre del año.
-3. El Resumen Ejecutivo debe ser denso, mencionando la favorabilidad y eficiencia del modelo PGP.
-4. Los Hallazgos Clave deben ser puntos directos sobre impacto administrativo y financiero.
-5. Las Acciones de Mejora deben ser correctivas y orientadas al control del gasto.
+1. Tono: Institucional, técnico, analítico y con autoridad.
+2. Estructura Narrativa: Debe seguir el modelo de 12 páginas, con análisis profundo mes a mes.
+3. Resumen Ejecutivo: Menciona explícitamente la favorabilidad del modelo PGP, la trazabilidad trimestral y el cumplimiento porcentual.
+4. Análisis Trimestrales: Describe cada mes mencionando actividades, valor ejecutado y costo promedio. Interpreta la variabilidad como estacionalidad de la demanda.
+5. Hallazgos Clave: Deben ser contundentes, por ejemplo: "Mes pico en valor detectado en [Mes]", "Cumplimiento del 90-110% verificado".
+6. Acciones de Mejora: Orientadas al control del gasto, conciliación anual y validación de soportes en plataforma (Aryuwi Soft).
+
 {{#if conclusionesAdicionales}}
-6. Integra obligatoriamente estas observaciones técnicas del auditor: {{{conclusionesAdicionales}}}
+OBSERVACIONES TÉCNICAS DEL AUDITOR A INTEGRAR:
+{{{conclusionesAdicionales}}}
 {{/if}}
 
-Divide la respuesta exactamente en los campos JSON solicitados. Usa el tono de un auditor senior de EPS.
+Divide la respuesta exactamente en los campos JSON solicitados. Genera textos largos y descriptivos para cada trimestre.
 `,
 });
 
 export async function generateReportAnalysis(input: ReportAnalysisInput): Promise<ReportAnalysisOutput> {
-  if (!process.env.GOOGLE_GENAI_API_KEY) {
-    throw new Error("La clave de API de IA no está configurada. Por favor, añádela en los secretos del proyecto.");
-  }
-
   try {
-    const cleanInput = {
-        ...input,
-        porcentajeCumplimiento: Math.round(input.porcentajeCumplimiento * 100) / 100,
-        metaAnual: Math.round(input.metaAnual),
-        ejecucionAnual: Math.round(input.ejecucionAnual)
-    };
-
-    const { output } = await seniorReportPrompt(cleanInput);
+    const { output } = await seniorReportPrompt(input);
     if (!output) throw new Error('La IA no pudo procesar la solicitud.');
     return output;
   } catch (error: any) {
