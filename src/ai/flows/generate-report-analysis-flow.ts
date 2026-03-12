@@ -68,7 +68,7 @@ INSTRUCCIONES DE REDACCIÓN (ESTILO EJECUTIVO SENIOR):
 
 DATOS MENSUALES PARA NARRATIVA:
 {{#each meses}}
-- {{month}}: {{cups}} CUPS, Valor ${{value}}.
+- {{month}}: {{cups}} CUPS, Valor \${{value}}.
 {{/each}}
 
 {{#if conclusionesAdicionales}}
