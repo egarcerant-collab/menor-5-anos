@@ -27,14 +27,14 @@ const ReportAnalysisInputSchema = z.object({
 });
 
 const ReportAnalysisOutputSchema = z.object({
-  resumenEjecutivo: z.string().describe("Narrativa densa y técnica sobre la favorabilidad del modelo."),
-  analisisT1: z.string().describe("Análisis detallado mes a mes del Trimestre I."),
-  analisisT2: z.string().describe("Análisis detallado mes a mes del Trimestre II."),
-  analisisT3: z.string().describe("Análisis detallado mes a mes del Trimestre III."),
-  analisisT4: z.string().describe("Análisis detallado mes a mes del Trimestre IV."),
-  hallazgosClave: z.array(z.string()).describe("Lista de 5-6 hallazgos financieros y administrativos."),
-  accionesMejora: z.array(z.string()).describe("Lista de 3-4 acciones correctivas estratégicas."),
-  conclusionesFinales: z.string().describe("Cierre contundente sobre la eficiencia del contrato."),
+  resumenEjecutivo: z.string().describe("Narrativa densa, técnica y corporativa sobre la favorabilidad del modelo PGP."),
+  analisisT1: z.string().describe("Análisis exhaustivo y detallado del Trimestre I (Ene-Mar). Mínimo 4 párrafos largos."),
+  analisisT2: z.string().describe("Análisis exhaustivo y detallado del Trimestre II (Abr-Jun). Mínimo 4 párrafos largos."),
+  analisisT3: z.string().describe("Análisis exhaustivo y detallado del Trimestre III (Jul-Sep). Mínimo 4 párrafos largos."),
+  analisisT4: z.string().describe("Análisis exhaustivo y detallado del Trimestre IV (Oct-Dic). Mínimo 4 párrafos largos."),
+  hallazgosClave: z.array(z.string()).describe("Lista de 6 hallazgos financieros y administrativos de alto impacto."),
+  accionesMejora: z.array(z.string()).describe("Lista de 4 acciones correctivas estratégicas para la vigencia futura."),
+  conclusionesFinales: z.string().describe("Cierre institucional sobre la eficiencia y sostenibilidad del contrato."),
 });
 
 export type ReportAnalysisInput = z.infer<typeof ReportAnalysisInputSchema>;
@@ -42,31 +42,41 @@ export type ReportAnalysisOutput = z.infer<typeof ReportAnalysisOutputSchema>;
 
 const seniorReportPrompt = ai.definePrompt({
   name: 'seniorReportPrompt',
+  model: 'googleai/gemini-1.5-flash',
   input: { schema: ReportAnalysisInputSchema },
   output: { schema: ReportAnalysisOutputSchema },
+  config: {
+    temperature: 0.1,
+    maxOutputTokens: 4096,
+  },
   prompt: `
 Eres el Director Nacional de Gestión del Riesgo en Salud de Dusakawi EPSI. Debes redactar el INFORME DE GESTIÓN ANUAL — VIGENCIA 2025 para el prestador {{{prestador}}} (NIT: {{{nit}}}).
 
-DATOS CLAVE PARA EL ANÁLISIS:
-- Meta Anual 2025: {{{metaAnual}}}
-- Ejecución Real Consolidada: {{{ejecucionAnual}}} ({{{porcentajeCumplimiento}}}% de la meta).
-- Referencia Mensual (Meta/12): {{{referenciaMensual}}}
-- Producción Total: {{{totalCups}}} actividades/CUPS.
+DATOS CLAVE DEL CONTRATO:
+- Meta Anual Programada: {{{metaAnual}}}
+- Ejecución Real Consolidada: {{{ejecucionAnual}}} (Cumplimiento: {{{porcentajeCumplimiento}}}%).
+- Referencia Mensual de Gestión (Meta/12): {{{referenciaMensual}}}
+- Producción Física: {{{totalCups}}} actividades/CUPS atendidas.
 
 INSTRUCCIONES DE REDACCIÓN (ESTILO EJECUTIVO SENIOR):
-1. Tono: Institucional, técnico, analítico y con autoridad.
-2. Estructura Narrativa: Debe seguir el modelo de 12 páginas, con análisis profundo mes a mes.
-3. Resumen Ejecutivo: Menciona explícitamente la favorabilidad del modelo PGP, la trazabilidad trimestral y el cumplimiento porcentual.
-4. Análisis Trimestrales: Describe cada mes mencionando actividades, valor ejecutado y costo promedio. Interpreta la variabilidad como estacionalidad de la demanda.
-5. Hallazgos Clave: Deben ser contundentes, por ejemplo: "Mes pico en valor detectado en [Mes]", "Cumplimiento del 90-110% verificado".
-6. Acciones de Mejora: Orientadas al control del gasto, conciliación anual y validación de soportes en plataforma (Aryuwi Soft).
+1. TONO: Altamente institucional, analítico, contundente y con autoridad técnica. Evita redundancias simples; busca profundidad en la interpretación del dato.
+2. ESTRUCTURA: El informe debe proyectar una extensión de 12 páginas. Por ello, genera párrafos extensos y detallados para cada trimestre.
+3. RESUMEN EJECUTIVO: Define la favorabilidad del modelo PGP. Menciona que no hay señales de sobreejecución y que la variabilidad es consistente con la estacionalidad de la demanda en Riohacha.
+4. ANÁLISIS POR TRIMESTRE: Para cada mes del trimestre, menciona el volumen de actividades, el valor ejecutado y el costo promedio. Interpreta estos datos como una gestión eficiente del riesgo.
+5. HALLAZGOS CLAVE: Identifica mes pico en valor y mes pico en volumen. Resalta la capacidad de compensación del modelo.
+6. ACCIONES DE MEJORA: Propón un tablero mensual único de indicadores y actas de conciliación integral que incluyan retenciones y saldos netos.
+
+DATOS MENSUALES PARA NARRATIVA:
+{{#each meses}}
+- {{month}}: {{cups}} CUPS, Valor ${{value}}.
+{{/each}}
 
 {{#if conclusionesAdicionales}}
-OBSERVACIONES TÉCNICAS DEL AUDITOR A INTEGRAR:
+OBSERVACIONES ADICIONALES DEL AUDITOR:
 {{{conclusionesAdicionales}}}
 {{/if}}
 
-Divide la respuesta exactamente en los campos JSON solicitados. Genera textos largos y descriptivos para cada trimestre.
+Genera textos profesionales que utilicen terminología como "estacionalidad de demanda", "mezcla de procedimientos", "trazabilidad verificable" y "sostenibilidad contractural".
 `,
 });
 
@@ -77,6 +87,6 @@ export async function generateReportAnalysis(input: ReportAnalysisInput): Promis
     return output;
   } catch (error: any) {
     console.error(`Error crítico en redacción senior:`, error);
-    throw new Error(error.message || 'Error desconocido en el servicio de IA.');
+    throw new Error('Error al conectar con el motor de IA. Por favor verifique la clave API.');
   }
 }

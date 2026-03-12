@@ -24,8 +24,12 @@ export async function describeCup(cupCode: string): Promise<CupDescription> {
 
 const prompt = ai.definePrompt({
   name: 'describeCupPrompt',
+  model: 'googleai/gemini-1.5-flash',
   input: {schema: DescribeCupInputSchema},
   output: {schema: DescribeCupOutputSchema},
+  config: {
+    temperature: 0.1,
+  },
   prompt: `Eres un experto en la Clasificación Única de Procedimientos en Salud (CUPS) de Colombia.
   Dado el siguiente código CUPS, proporciona una descripción clara y concisa del procedimiento o servicio de salud al que corresponde.
 

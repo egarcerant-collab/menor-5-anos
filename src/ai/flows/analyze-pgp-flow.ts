@@ -44,20 +44,22 @@ const AnalyzePgpDataOutputSchema = z.object({
 
 export async function analyzePgpData(input: PgpRowForAI[]): Promise<z.infer<typeof AnalyzePgpDataOutputSchema>> {
   try {
-    // Convert the array of objects into a JSON string before passing to the flow.
     const dataAsString = JSON.stringify(input, null, 2);
     return await analyzePgpDataFlow({ jsonData: dataAsString });
   } catch (error) {
     console.error("Error executing analyzePgpData:", error);
-    // Re-throw a user-friendly error to be caught by the client-side action handler.
     throw new Error("No se pudo completar el análisis de los datos.");
   }
 }
 
 const prompt = ai.definePrompt({
   name: 'pgpAnalysisPrompt',
+  model: 'googleai/gemini-1.5-flash',
   input: {schema: AnalyzePgpDataInputSchema},
   output: {schema: AnalyzePgpDataOutputSchema},
+  config: {
+    temperature: 0.1,
+  },
   prompt: `Eres un analista financiero experto en contratos de salud PGP en Colombia.
   Analiza los siguientes datos de una nota técnica para un contrato de Pago Global Prospectivo.
   Tu objetivo es producir un análisis estratégico, conciso y de alto nivel para la gerencia.

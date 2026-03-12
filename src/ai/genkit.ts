@@ -5,7 +5,8 @@
 import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/google-genai';
 
-const apiKey = process.env.GOOGLE_GENAI_API_KEY;
+// Usamos la clave proporcionada por el usuario
+const apiKey = "AIzaSyB5hgQ6izdIMfHu3psJDgtUFe1LAHjYvls";
 
 export const ai = genkit({
   plugins: [
@@ -13,15 +14,6 @@ export const ai = genkit({
       apiKey: apiKey,
     }),
   ],
-  model: {
-    name: 'googleai/gemini-1.5-flash-latest',
-    temperature: 0.2, // Reducido para mayor precisión técnica
-    maxOutputTokens: 4096, 
-  },
   logLevel: 'debug',
   enableTracing: true,
 });
-
-if (!apiKey) {
-  console.warn("ADVERTENCIA: GOOGLE_GENAI_API_KEY no está configurada. Las funciones de redacción de informes no funcionarán hasta que se añada una clave válida.");
-}
