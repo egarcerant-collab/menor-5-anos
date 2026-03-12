@@ -2,7 +2,7 @@
 /**
  * @fileOverview Flujo de IA Senior para generar la narrativa del Informe de Gestión Anual PGP.
  * Redacción ejecutiva de alto nivel para Dusakawi EPSI.
- * Soluciona el error de referencia escapando el símbolo $.
+ * Soluciona el error de referencia separando el símbolo $ de las llaves de Handlebars.
  */
 
 import { ai } from '@/ai/genkit';
@@ -55,9 +55,9 @@ const seniorReportPrompt = ai.definePrompt({
 Eres el Director Nacional de Gestión del Riesgo en Salud de Dusakawi EPSI. Debes redactar el INFORME DE GESTIÓN ANUAL — VIGENCIA 2025 para el prestador {{{prestador}}} (NIT: {{{nit}}}).
 
 DATOS CLAVE DEL CONTRATO:
-- Meta Anual Programada: \$ {{{metaAnual}}}
-- Ejecución Real Consolidada: \$ {{{ejecucionAnual}}} (Cumplimiento: {{{porcentajeCumplimiento}}}%).
-- Referencia Mensual de Gestión (Meta/12): \$ {{{referenciaMensual}}}
+- Meta Anual Programada: $ {{{metaAnual}}}
+- Ejecución Real Consolidada: $ {{{ejecucionAnual}}} (Cumplimiento: {{{porcentajeCumplimiento}}}%).
+- Referencia Mensual de Gestión (Meta/12): $ {{{referenciaMensual}}}
 - Producción Física: {{{totalCups}}} actividades/CUPS atendidas.
 
 INSTRUCCIONES DE REDACCIÓN (ESTILO EJECUTIVO SENIOR):
@@ -70,7 +70,7 @@ INSTRUCCIONES DE REDACCIÓN (ESTILO EJECUTIVO SENIOR):
 
 DATOS MENSUALES PARA NARRATIVA:
 {{#each meses}}
-- {{month}}: {{cups}} CUPS, Valor \$ {{value}}.
+- {{month}}: {{cups}} CUPS, Valor $ {{value}}.
 {{/each}}
 
 {{#if conclusionesAdicionales}}
@@ -84,8 +84,9 @@ Utiliza terminología técnica como "morbilidad trazadora", "mezcla de procedimi
 
 export async function generateReportAnalysis(input: ReportAnalysisInput): Promise<ReportAnalysisOutput> {
   try {
+    // Inicializar modelo con API Key dinámica si se proporciona
     const model = input.apiKey 
-      ? googleAI.model('gemini-1.5-flash', { apiKey: input.apiKey })
+      ? googleAI({ apiKey: input.apiKey }).model('gemini-1.5-flash')
       : 'googleai/gemini-1.5-flash';
 
     const { output } = await seniorReportPrompt(input, { model });
@@ -93,6 +94,8 @@ export async function generateReportAnalysis(input: ReportAnalysisInput): Promis
     return output;
   } catch (error: any) {
     console.error(`Error crítico en redacción senior:`, error);
-    throw new Error('Error al conectar con el motor de IA. Verifique que su API Key sea válida.');
+    // Extraer mensaje real de la API para mejor diagnóstico
+    const errorMessage = error?.message || 'Error de conexión con el motor de IA.';
+    throw new Error(`${errorMessage}. Verifique que su API Key sea válida y tenga cuota disponible.`);
   }
 }
