@@ -154,6 +154,7 @@ export default function PrimeraInfanciaDashboard() {
   const [datosRestaurados, setDatosRestaurados] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [indPorMunicipio, setIndPorMunicipio] = useState<Record<string, IndPorGrupo> | null>(null);
+  const [colMunicipio, setColMunicipio] = useState<string>('B');
 
   // ── Detecta la columna del Excel que contiene el municipio ───────────────
   function detectarColumnaMunicipio(rawRows: Record<string, unknown>[], startIdx: number): string {
@@ -194,8 +195,9 @@ export default function PrimeraInfanciaDashboard() {
       setIndicadoresExcel(indicadores);
       setDatosRestaurados(true);
     }
-    const { indPorMun } = recuperarIndPorMunicipio();
+    const { indPorMun, colMunicipio: col } = recuperarIndPorMunicipio();
     if (indPorMun) setIndPorMunicipio(indPorMun);
+    if (col) setColMunicipio(col);
     setHistorial(recuperarHistorial());
     setMounted(true);
   }, []);
@@ -225,10 +227,10 @@ export default function PrimeraInfanciaDashboard() {
   const indicadoresFiltrados = useMemo(() => {
     const todosSeleccionados = municipiosSel.length === MUNICIPIOS.length;
 
-    // Si tenemos rawRows en sesión: calcular dinámicamente
+    // Si tenemos rawRows en sesión: calcular dinámicamente con la columna detectada
     if (rawExcelRows) {
-      if (todosSeleccionados) return calcularIndicadoresDesdeExcel(rawExcelRows, 4);
-      return calcularIndicadoresDesdeExcel(rawExcelRows, 4, municipiosNombresNorm);
+      if (todosSeleccionados) return calcularIndicadoresDesdeExcel(rawExcelRows, 4, undefined, colMunicipio);
+      return calcularIndicadoresDesdeExcel(rawExcelRows, 4, municipiosNombresNorm, colMunicipio);
     }
 
     // Sin rawRows: usar pre-computados por municipio (guardados al cargar Excel)
@@ -245,20 +247,24 @@ export default function PrimeraInfanciaDashboard() {
       for (const ge of gruposEtarios) {
         const partes = grupos.map(g => g[ge]).filter(Boolean);
         if (partes.length === 0) continue;
-        // Sumar todos los campos numéricos
-        const base = { ...partes[0] };
+        // Deep copy para no mutar el objeto guardado en indPorMunicipio
+        const base = {
+          ...partes[0],
+          clasif: { ...partes[0].clasif },
+          controles: partes[0].controles.map(c => ({ ...c })),
+        };
         for (let i = 1; i < partes.length; i++) {
           const p = partes[i];
-          base.total += p.total;
-          base.total_controles += p.total_controles;
+          base.total               += p.total;
+          base.total_controles     += p.total_controles;
           base.vacunacion_completa += p.vacunacion_completa;
-          base.tamizaje_hemoglobina += p.tamizaje_hemoglobina;
-          base.hierro += p.hierro;
-          base.desparasitacion += p.desparasitacion;
-          base.consejeria_lactancia += p.consejeria_lactancia;
+          base.tamizaje_hemoglobina+= p.tamizaje_hemoglobina;
+          base.hierro              += p.hierro;
+          base.desparasitacion     += p.desparasitacion;
+          base.consejeria_lactancia+= p.consejeria_lactancia;
           base.lactancia_exclusiva_6m += p.lactancia_exclusiva_6m;
-          base.bajo_peso_nacer += p.bajo_peso_nacer;
-          base.ninos_wayuu += p.ninos_wayuu;
+          base.bajo_peso_nacer     += p.bajo_peso_nacer;
+          base.ninos_wayuu         += p.ninos_wayuu;
           base.zona_rural_dispersa += p.zona_rural_dispersa;
           base.clasif.adecuado     += p.clasif.adecuado;
           base.clasif.riesgo       += p.clasif.riesgo;
@@ -266,6 +272,13 @@ export default function PrimeraInfanciaDashboard() {
           base.clasif.dnt_severa   += p.clasif.dnt_severa;
           base.clasif.sobrepeso    += p.clasif.sobrepeso;
           base.clasif.sin_dato     += p.clasif.sin_dato;
+          // Sumar controles por visita si coinciden
+          p.controles.forEach((ctrl, idx) => {
+            if (base.controles[idx]) {
+              base.controles[idx].realizados      += ctrl.realizados;
+              base.controles[idx].con_peso_talla  += ctrl.con_peso_talla;
+            }
+          });
         }
         result[ge] = base;
       }
@@ -273,7 +286,7 @@ export default function PrimeraInfanciaDashboard() {
     }
 
     return indicadoresExcel; // fallback: datos completos sin filtrar
-  }, [rawExcelRows, municipiosSel, municipiosNombresNorm, indicadoresExcel, indPorMunicipio]);
+  }, [rawExcelRows, municipiosSel, municipiosNombresNorm, indicadoresExcel, indPorMunicipio, colMunicipio]);
 
   // ── Grupos de edad filtrados por municipio ───────────────────────────────
   const gruposEdadFiltrados = useMemo(() => {
@@ -793,6 +806,7 @@ export default function PrimeraInfanciaDashboard() {
                   setDatosRestaurados(false);
                   // Detectar columna municipio y pre-computar por municipio
                   const colMun = detectarColumnaMunicipio(rawRows, 4);
+                  setColMunicipio(colMun);
                   computarYGuardarPorMunicipio(rawRows, colMun);
                 }}
                 onGuardar={() => {

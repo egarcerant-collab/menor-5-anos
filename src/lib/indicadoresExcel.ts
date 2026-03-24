@@ -354,12 +354,14 @@ export const COLUMNA_MUNICIPIO = 'B';
 /**
  * Recorre todas las filas del Excel y calcula los indicadores RIAS
  * agrupados por rango de edad (calculado desde la columna H = fecha de nacimiento).
- * @param municipiosFiltro  Si se provee, solo procesa filas cuyo municipio (col B) coincida.
+ * @param municipiosFiltro  Si se provee, solo procesa filas cuyo municipio coincida.
+ * @param colMun  Columna Excel que contiene el municipio (detectada automáticamente, por defecto 'B')
  */
 export function calcularIndicadoresDesdeExcel(
   rawRows: Record<string, unknown>[],
   startRowIndex = 4,
   municipiosFiltro?: string[],   // nombres en mayúsculas normalizados
+  colMun: string = COLUMNA_MUNICIPIO,
 ): IndPorGrupo {
   const filtrarMunicipio = municipiosFiltro && municipiosFiltro.length > 0;
   const hoy = new Date();
@@ -386,7 +388,7 @@ export function calcularIndicadoresDesdeExcel(
 
     // Filtrar por municipio si se especificó
     if (filtrarMunicipio) {
-      const munVal = String(row[COLUMNA_MUNICIPIO] ?? '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const munVal = String(row[colMun] ?? '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       if (!municipiosFiltro!.some(m => munVal.includes(m) || m.includes(munVal))) continue;
     }
 
