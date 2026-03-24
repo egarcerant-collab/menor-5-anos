@@ -322,13 +322,13 @@ export default function PrimeraInfanciaDashboard() {
     ? indExcel.clasif.dnt_moderada + indExcel.clasif.dnt_severa
     : 0;
 
-  // ── Datos para gráficas ──────────────────────────────────────────────────
+  // ── Datos para gráficas — todos usan indicadoresFiltrados ────────────────
   // Barra controles por grupo
-  const controlesBarData = indicadoresExcel ? [
-    { grupo:"0–6m",   realizados: indicadoresExcel["0-6m"].total_controles,   color: GRUPO_COLORS["0-6m"] },
-    { grupo:"7–12m",  realizados: indicadoresExcel["7-12m"].total_controles,  color: GRUPO_COLORS["7-12m"] },
-    { grupo:"13–24m", realizados: indicadoresExcel["13-24m"].total_controles, color: GRUPO_COLORS["13-24m"] },
-    { grupo:"25–59m", realizados: indicadoresExcel["25-59m"].total_controles, color: GRUPO_COLORS["25-59m"] },
+  const controlesBarData = indicadoresFiltrados ? [
+    { grupo:"0–6m",   realizados: indicadoresFiltrados["0-6m"].total_controles,   color: GRUPO_COLORS["0-6m"] },
+    { grupo:"7–12m",  realizados: indicadoresFiltrados["7-12m"].total_controles,  color: GRUPO_COLORS["7-12m"] },
+    { grupo:"13–24m", realizados: indicadoresFiltrados["13-24m"].total_controles, color: GRUPO_COLORS["13-24m"] },
+    { grupo:"25–59m", realizados: indicadoresFiltrados["25-59m"].total_controles, color: GRUPO_COLORS["25-59m"] },
   ] : null;
 
   // Pie clasificación nutricional
@@ -341,11 +341,11 @@ export default function PrimeraInfanciaDashboard() {
   ].filter(d => d.value > 0) : null;
 
   // Barra vacunación por grupo
-  const vacBarData = indicadoresExcel ? (["0-6m","7-12m","13-24m","25-59m"] as const).map(g => ({
+  const vacBarData = indicadoresFiltrados ? (["0-6m","7-12m","13-24m","25-59m"] as const).map(g => ({
     grupo: g,
-    vacunados:    indicadoresExcel[g].vacunacion_completa,
-    noVacunados:  indicadoresExcel[g].total - indicadoresExcel[g].vacunacion_completa,
-    pct:          pct(indicadoresExcel[g].vacunacion_completa, indicadoresExcel[g].total),
+    vacunados:    indicadoresFiltrados[g].vacunacion_completa,
+    noVacunados:  indicadoresFiltrados[g].total - indicadoresFiltrados[g].vacunacion_completa,
+    pct:          pct(indicadoresFiltrados[g].vacunacion_completa, indicadoresFiltrados[g].total),
   })) : null;
 
   // Controles por visita del grupo seleccionado
@@ -664,7 +664,7 @@ export default function PrimeraInfanciaDashboard() {
 
         {/* ─── RIAS NUTRICIÓN ───────────────────────────────────────────────── */}
         {pestana==="rias" && (
-          <RIASSection municipios={municipiosFiltrados} grupoFiltro={grupoEdad} indicadoresExcel={indicadoresExcel} />
+          <RIASSection municipios={municipiosFiltrados} grupoFiltro={grupoEdad} indicadoresExcel={indicadoresFiltrados} />
         )}
 
         {/* ─── VACUNACIÓN ────────────────────────────────────────────────────── */}
