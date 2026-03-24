@@ -102,6 +102,7 @@ export interface ReportData {
   notaTecnica: {
     min90: number;
     valor3m: number;
+    valorAnual: number;
     max110: number;
     anticipos: number;
     totalPagar: number;
@@ -296,7 +297,7 @@ const PgPsearchForm = forwardRef<
         month: getMonthName(m), cups: d.summary.numConsultas + d.summary.numProcedimientos, valueCOP: d.totalRealValue
       })),
       notaTecnica: {
-        min90: globalSummary.costoMinimoPeriodo, valor3m: globalSummary.totalPeriodo, max110: globalSummary.costoMaximoPeriodo,
+        min90: globalSummary.costoMinimoPeriodo, valor3m: globalSummary.totalPeriodo, valorAnual: globalSummary.totalAnual, max110: globalSummary.costoMaximoPeriodo,
         anticipos: 0, totalPagar: sumaMensual,
         totalFinal: sumaMensual - totalDescuentoCalculado, 
         descuentoAplicado: totalDescuentoCalculado
@@ -384,16 +385,18 @@ const PgPsearchForm = forwardRef<
   }, []);
 
   useEffect(() => {
-    if (jsonPrestadorCode && prestadores.length > 0 && !loading && !isDataLoaded) {
+    if (jsonPrestadorCode && prestadores.length > 0 && !loading) {
+      // Auto-seleccionar siempre que el código del JSON no coincida con el prestador actual
       if (!selectedPrestador || selectedPrestador['ID DE ZONA'] !== jsonPrestadorCode) {
         const suggested = prestadores.find(p => p['ID DE ZONA'] === jsonPrestadorCode);
         if (suggested) {
-          toast({ title: "Nota Sugerida", description: `Analizaré con (${suggested.PRESTADOR}) automáticamente.` });
+          toast({ title: "Prestador Detectado", description: `Cargando nota técnica de: ${suggested.PRESTADOR}` });
+          setIsDataLoaded(false);
           handleSelectPrestador(suggested);
         }
       }
     }
-  }, [jsonPrestadorCode, prestadores, selectedPrestador, handleSelectPrestador, toast, loading, isDataLoaded]);
+  }, [jsonPrestadorCode, prestadores, handleSelectPrestador, toast, loading]);
 
   return (
     <Card className="w-full">

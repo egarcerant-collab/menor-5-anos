@@ -36,6 +36,14 @@ export interface QuarterlyRow {
     status: string;
 }
 
+export interface GraficosInforme {
+    ejecucion: string;
+    acumulado: string;
+    cups: string;
+    trimestral: string;
+    cumplimiento: string;
+}
+
 export interface InformeDatosSenior {
     header: {
         prestador: string;
@@ -50,12 +58,16 @@ export interface InformeDatosSenior {
     totalCups: number;
     meses: MonthlyRow[];
     trimestres: QuarterlyRow[];
+    graficos?: GraficosInforme;
     narrativa: {
         resumenEjecutivo: string;
+        contextoContractual?: string;
+        analisisFinanciero?: string;
         analisisT1: string;
         analisisT2: string;
         analisisT3: string;
         analisisT4: string;
+        analisisRiesgo?: string;
         hallazgosClave: string[];
         accionesMejora: string[];
         conclusiones: string;
@@ -125,18 +137,20 @@ function buildDocDefinition(data: InformeDatosSenior, backgroundImageBase64: str
                 margin: [15, 0, 0, 20]
             },
 
-            { text: '2. OBJETIVO, ALCANCE Y METODOLOGÍA', style: 'h2' },
-            { text: '2.1 Objetivo', style: 'h3' },
-            { text: 'Evaluar la ejecución del Acuerdo de Pago Global Prospectivo (PGP) durante la vigencia 2025 en Riohacha (La Guajira), consolidando mensualmente el volumen (actividades/CUPS) y el valor ejecutado para sustentar decisiones institucionales de control del gasto y cierre verificable.', style: 'p' },
-            { text: '2.2 Alcance', style: 'h3' },
-            { text: 'Consolidado anual (enero–diciembre de 2025). Información presentada por territorio conforme a los lineamientos de la Dirección Nacional de Gestión del Riesgo en Salud.', style: 'p' },
-            { text: '2.3 Fuente de información', style: 'h3' },
-            { text: `Certificados e informes trimestrales radicados por el prestador ${data.header.prestador} en la plataforma institucional.`, style: 'p' },
-            { text: '2.4 Metodología', style: 'h3' },
-            { text: 'Extracción mensual de datos reales JSON; consolidación anual; cálculo de desviaciones vs Nota Técnica; análisis de costo promedio y porcentaje de avance.', style: 'p' },
-            
-            { text: '3. PARÁMETROS DEL PGP Y CONTROL DE GESTIÓN', style: 'h2' },
-            { text: 'Se contempla una banda de control técnica del 90% al 110% sobre la meta trimestral programada.', style: 'p' },
+            { text: '2. CONTEXTO CONTRACTUAL Y MARCO DE REFERENCIA', style: 'h2' },
+            ...(data.narrativa.contextoContractual ? [{ text: data.narrativa.contextoContractual, style: 'p' }] : [
+                { text: '2.1 Objetivo', style: 'h3' },
+                { text: 'Evaluar la ejecución del Acuerdo de Pago Global Prospectivo (PGP) durante la vigencia 2025 en Riohacha (La Guajira), consolidando mensualmente el volumen (actividades/CUPS) y el valor ejecutado para sustentar decisiones institucionales de control del gasto y cierre verificable.', style: 'p' },
+                { text: '2.2 Alcance', style: 'h3' },
+                { text: 'Consolidado anual (enero–diciembre de 2025). Información presentada por territorio conforme a los lineamientos de la Dirección Nacional de Gestión del Riesgo en Salud.', style: 'p' },
+                { text: '2.3 Fuente de información', style: 'h3' },
+                { text: `Certificados e informes trimestrales radicados por el prestador ${data.header.prestador} en la plataforma institucional.`, style: 'p' },
+                { text: '2.4 Metodología', style: 'h3' },
+                { text: 'Extracción mensual de datos reales JSON; consolidación anual; cálculo de desviaciones vs Nota Técnica; análisis de costo promedio y porcentaje de avance.', style: 'p' },
+            ] as any[]),
+
+            { text: '3. ANÁLISIS FINANCIERO CONSOLIDADO', style: 'h2' },
+            ...(data.narrativa.analisisFinanciero ? [{ text: data.narrativa.analisisFinanciero, style: 'p' }] : [{ text: 'Se contempla una banda de control técnica del 90% al 110% sobre la meta trimestral programada.', style: 'p' }] as any[]),
             { text: '3.1 Resumen trimestral vs referencia técnica', style: 'h3' },
             {
                 table: {
@@ -163,6 +177,12 @@ function buildDocDefinition(data: InformeDatosSenior, backgroundImageBase64: str
                 },
                 layout: 'lightHorizontalLines'
             },
+
+            // Gráfico: Distribución trimestral
+            ...(data.graficos ? [
+                { text: '3.2 Distribución Trimestral del Gasto', style: 'h3', margin: [0, 15, 0, 5] },
+                { image: data.graficos.trimestral, width: 350, alignment: 'center', margin: [0, 0, 0, 15] },
+            ] : [] as any[]),
 
             { text: '4. EJECUCIÓN MENSUAL CONSOLIDADA — 2025 (TABLA VERIFICABLE)', style: 'h2', pageBreak: 'before' },
             {
@@ -192,26 +212,60 @@ function buildDocDefinition(data: InformeDatosSenior, backgroundImageBase64: str
                 },
                 layout: 'lightHorizontalLines'
             },
+            // Gráfico: Ejecución mensual financiera
+            ...(data.graficos ? [
+                { text: '4.1 Comportamiento Financiero Mensual', style: 'h3', margin: [0, 15, 0, 5] },
+                { image: data.graficos.ejecucion, width: 480, alignment: 'center', margin: [0, 0, 0, 10] },
+                { text: '4.2 CUPS Atendidas por Mes', style: 'h3', margin: [0, 10, 0, 5] },
+                { image: data.graficos.cups, width: 480, alignment: 'center', margin: [0, 0, 0, 10] },
+                { text: '4.3 Curva de Acumulación Anual vs Meta', style: 'h3', margin: [0, 10, 0, 5], pageBreak: 'before' },
+                { image: data.graficos.acumulado, width: 480, alignment: 'center', margin: [0, 0, 0, 10] },
+                { text: '4.4 Cumplimiento Mensual vs Banda de Control (90%-110%)', style: 'h3', margin: [0, 10, 0, 5] },
+                { image: data.graficos.cumplimiento, width: 480, alignment: 'center', margin: [0, 0, 0, 15] },
+            ] : [] as any[]),
 
-            { text: '5. ANÁLISIS NARRATIVO — TRIMESTRE I (ENE, FEB, MAR)', style: 'h2', pageBreak: 'before' },
+            { text: '5. ANÁLISIS NARRATIVO — TRIMESTRE I (ENERO, FEBRERO, MARZO)', style: 'h2', pageBreak: 'before' },
             { text: data.narrativa.analisisT1, style: 'p' },
 
-            { text: '6. ANÁLISIS NARRATIVO — TRIMESTRE II (ABR, MAY, JUN)', style: 'h2' },
+            { text: '6. ANÁLISIS NARRATIVO — TRIMESTRE II (ABRIL, MAYO, JUNIO)', style: 'h2', pageBreak: 'before' },
             { text: data.narrativa.analisisT2, style: 'p' },
 
-            { text: '7. ANÁLISIS NARRATIVO — TRIMESTRE III (JUL, AGO, SEP)', style: 'h2', pageBreak: 'before' },
+            { text: '7. ANÁLISIS NARRATIVO — TRIMESTRE III (JULIO, AGOSTO, SEPTIEMBRE)', style: 'h2', pageBreak: 'before' },
             { text: data.narrativa.analisisT3, style: 'p' },
 
-            { text: '8. ANÁLISIS NARRATIVO — TRIMESTRE IV (OCT, NOV, DIC)', style: 'h2' },
+            { text: '8. ANÁLISIS NARRATIVO — TRIMESTRE IV (OCTUBRE, NOVIEMBRE, DICIEMBRE)', style: 'h2', pageBreak: 'before' },
             { text: data.narrativa.analisisT4, style: 'p' },
 
-            { text: '9. HALLAZGOS CLAVE (IMPACTO ADMINISTRATIVO Y FINANCIERO)', style: 'h2', pageBreak: 'before' },
-            { ul: data.narrativa.hallazgosClave.map(h => ({ text: h, style: 'p' })), margin: [15, 0, 0, 15] },
+            ...(data.narrativa.analisisRiesgo ? [
+                { text: '9. ANÁLISIS DE RIESGO E IMPACTO INSTITUCIONAL', style: 'h2', pageBreak: 'before' as any },
+                { text: data.narrativa.analisisRiesgo, style: 'p' }
+            ] : [] as any[]),
 
-            { text: '10. DESVIACIONES Y ACCIONES DE MEJORA', style: 'h2' },
-            { ul: data.narrativa.accionesMejora.map(a => ({ text: a, style: 'p' })), margin: [15, 0, 0, 15] },
+            { text: '10. HALLAZGOS CLAVE (IMPACTO ADMINISTRATIVO, FINANCIERO Y ASISTENCIAL)', style: 'h2', pageBreak: 'before' },
+            {
+                stack: data.narrativa.hallazgosClave.map((h, i) => ({
+                    stack: [
+                        { text: `Hallazgo ${i + 1}`, style: 'h3' },
+                        { text: h, style: 'p' }
+                    ],
+                    margin: [0, 0, 0, 10]
+                })),
+                margin: [5, 0, 0, 15]
+            },
 
-            { text: '11. CONCLUSIONES Y RECOMENDACIONES', style: 'h2' },
+            { text: '11. DESVIACIONES Y ACCIONES DE MEJORA ESTRATÉGICAS', style: 'h2', pageBreak: 'before' },
+            {
+                stack: data.narrativa.accionesMejora.map((a, i) => ({
+                    stack: [
+                        { text: `Acción ${i + 1}`, style: 'h3' },
+                        { text: a, style: 'p' }
+                    ],
+                    margin: [0, 0, 0, 10]
+                })),
+                margin: [5, 0, 0, 15]
+            },
+
+            { text: '12. CONCLUSIONES Y RECOMENDACIONES INSTITUCIONALES', style: 'h2', pageBreak: 'before' },
             { text: data.narrativa.conclusiones, style: 'p' },
 
             {

@@ -9,10 +9,12 @@ import type { GrupoConteoExcel } from "@/lib/gruposEdadExcel";
 import type { IndPorGrupo, IndicadoresGrupoExcel } from "@/lib/indicadoresExcel";
 
 // ─── Claves localStorage ──────────────────────────────────────────────────────
-const KEY_META       = "pi_excel_meta";
-const KEY_GRUPOS     = "pi_grupos_edad";
-const KEY_INDICADORES = "pi_indicadores";
-const KEY_HISTORIAL  = "pi_historial_cargas";
+const KEY_META            = "pi_excel_meta";
+const KEY_GRUPOS          = "pi_grupos_edad";
+const KEY_INDICADORES     = "pi_indicadores";
+const KEY_HISTORIAL       = "pi_historial_cargas";
+const KEY_IND_POR_MUN     = "pi_ind_por_municipio";
+const KEY_COL_MUNICIPIO   = "pi_col_municipio";
 
 export interface ExcelMeta {
   filename: string;
@@ -103,11 +105,41 @@ export function hayDatosGuardados(): boolean {
   return !!localStorage.getItem(KEY_META);
 }
 
+// ─── Indicadores por municipio ────────────────────────────────────────────────
+/** Guarda indicadores pre-computados por municipio y la columna detectada */
+export function guardarIndPorMunicipio(
+  indPorMun: Record<string, IndPorGrupo>,
+  colMunicipio: string,
+): void {
+  try {
+    localStorage.setItem(KEY_IND_POR_MUN,   JSON.stringify(indPorMun));
+    localStorage.setItem(KEY_COL_MUNICIPIO, colMunicipio);
+  } catch (e) {
+    console.error("[DataStore] Error guardando por municipio:", e);
+  }
+}
+
+export function recuperarIndPorMunicipio(): {
+  indPorMun: Record<string, IndPorGrupo> | null;
+  colMunicipio: string | null;
+} {
+  try {
+    const rawInd = localStorage.getItem(KEY_IND_POR_MUN);
+    const col    = localStorage.getItem(KEY_COL_MUNICIPIO);
+    return {
+      indPorMun:    rawInd ? JSON.parse(rawInd) : null,
+      colMunicipio: col ?? null,
+    };
+  } catch { return { indPorMun: null, colMunicipio: null }; }
+}
+
 // ─── Limpiar ──────────────────────────────────────────────────────────────────
 export function limpiarDatos(): void {
   localStorage.removeItem(KEY_META);
   localStorage.removeItem(KEY_GRUPOS);
   localStorage.removeItem(KEY_INDICADORES);
+  localStorage.removeItem(KEY_IND_POR_MUN);
+  localStorage.removeItem(KEY_COL_MUNICIPIO);
 }
 
 export function limpiarHistorial(): void {

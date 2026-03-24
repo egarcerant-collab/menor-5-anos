@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   BarChart, Bar, PieChart, Pie, Cell, RadarChart, Radar,
   PolarGrid, PolarAngleAxis,
@@ -21,10 +21,11 @@ import { ContadorControles } from "@/components/pi/ContadorControles";
 import { MUNICIPIOS, GRUPO_COLORS } from "@/components/pi/sampleData";
 import type { GrupoEdadFiltro } from "@/components/pi/types";
 import { calcularGruposEdadDesdeExcel, type GrupoConteoExcel } from "@/lib/gruposEdadExcel";
-import { calcularIndicadoresDesdeExcel, type IndPorGrupo, type IndicadoresGrupoExcel } from "@/lib/indicadoresExcel";
+import { calcularIndicadoresDesdeExcel, type IndPorGrupo, type IndicadoresGrupoExcel, COLUMNA_MUNICIPIO } from "@/lib/indicadoresExcel";
 import {
   guardarDatos, recuperarDatos, limpiarDatos,
   recuperarHistorial, exportarCSVIndicadores, exportarCSVFilasCrudas, exportarJSON,
+  guardarIndPorMunicipio, recuperarIndPorMunicipio,
   type HistorialCarga,
 } from "@/lib/dataStore";
 
@@ -152,6 +153,37 @@ export default function PrimeraInfanciaDashboard() {
   const [historial, setHistorial] = useState<HistorialCarga[]>([]);
   const [datosRestaurados, setDatosRestaurados] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [indPorMunicipio, setIndPorMunicipio] = useState<Record<string, IndPorGrupo> | null>(null);
+
+  // ── Detecta la columna del Excel que contiene el municipio ───────────────
+  function detectarColumnaMunicipio(rawRows: Record<string, unknown>[], startIdx: number): string {
+    const cols = ['B','A','C','D','E','F','G'];
+    const nombresNorm = MUNICIPIOS.map(m =>
+      m.nombre.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    );
+    let bestCol = 'B';
+    let bestScore = 0;
+    for (const col of cols) {
+      let score = 0;
+      for (let r = startIdx; r < Math.min(startIdx + 200, rawRows.length); r++) {
+        const val = String(rawRows[r]?.[col] ?? '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+        if (val && nombresNorm.some(n => val.includes(n) || n.includes(val))) score++;
+      }
+      if (score > bestScore) { bestScore = score; bestCol = col; }
+    }
+    return bestCol;
+  }
+
+  // ── Computa y guarda indicadores pre-segmentados por municipio ───────────
+  function computarYGuardarPorMunicipio(rawRows: Record<string, unknown>[], colMun: string) {
+    const result: Record<string, IndPorGrupo> = {};
+    for (const mun of MUNICIPIOS) {
+      const nombreNorm = mun.nombre.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+      result[mun.id] = calcularIndicadoresDesdeExcel(rawRows, 4, [nombreNorm]);
+    }
+    setIndPorMunicipio(result);
+    guardarIndPorMunicipio(result, colMun);
+  }
 
   // Restaurar desde localStorage al montar
   useEffect(() => {
@@ -162,6 +194,8 @@ export default function PrimeraInfanciaDashboard() {
       setIndicadoresExcel(indicadores);
       setDatosRestaurados(true);
     }
+    const { indPorMun } = recuperarIndPorMunicipio();
+    if (indPorMun) setIndPorMunicipio(indPorMun);
     setHistorial(recuperarHistorial());
     setMounted(true);
   }, []);
@@ -180,22 +214,99 @@ export default function PrimeraInfanciaDashboard() {
     return ipsSel.some(ips => m.ips_atiende.includes(ips));
   });
 
+  // ── Nombres normalizados de municipios seleccionados (para filtro Excel) ────
+  const municipiosNombresNorm = useMemo(() =>
+    MUNICIPIOS
+      .filter(m => municipiosSel.includes(m.id))
+      .map(m => m.nombre.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+  , [municipiosSel]);
+
+  // ── Indicadores filtrados por municipio (recalcula cuando cambia el filtro) ─
+  const indicadoresFiltrados = useMemo(() => {
+    const todosSeleccionados = municipiosSel.length === MUNICIPIOS.length;
+
+    // Si tenemos rawRows en sesión: calcular dinámicamente
+    if (rawExcelRows) {
+      if (todosSeleccionados) return calcularIndicadoresDesdeExcel(rawExcelRows, 4);
+      return calcularIndicadoresDesdeExcel(rawExcelRows, 4, municipiosNombresNorm);
+    }
+
+    // Sin rawRows: usar pre-computados por municipio (guardados al cargar Excel)
+    if (indPorMunicipio) {
+      if (todosSeleccionados) return indicadoresExcel;
+      // Sumar los municipios seleccionados desde los pre-computados
+      const grupos = municipiosSel
+        .map(id => indPorMunicipio[id])
+        .filter(Boolean) as IndPorGrupo[];
+      if (grupos.length === 0) return indicadoresExcel;
+      // Agregar cada grupo etario sumando los municipios seleccionados
+      const gruposEtarios = ["0-6m","7-12m","13-24m","25-59m","60m+","todos"] as const;
+      const result = {} as IndPorGrupo;
+      for (const ge of gruposEtarios) {
+        const partes = grupos.map(g => g[ge]).filter(Boolean);
+        if (partes.length === 0) continue;
+        // Sumar todos los campos numéricos
+        const base = { ...partes[0] };
+        for (let i = 1; i < partes.length; i++) {
+          const p = partes[i];
+          base.total += p.total;
+          base.total_controles += p.total_controles;
+          base.vacunacion_completa += p.vacunacion_completa;
+          base.tamizaje_hemoglobina += p.tamizaje_hemoglobina;
+          base.hierro += p.hierro;
+          base.desparasitacion += p.desparasitacion;
+          base.consejeria_lactancia += p.consejeria_lactancia;
+          base.lactancia_exclusiva_6m += p.lactancia_exclusiva_6m;
+          base.bajo_peso_nacer += p.bajo_peso_nacer;
+          base.ninos_wayuu += p.ninos_wayuu;
+          base.zona_rural_dispersa += p.zona_rural_dispersa;
+          base.clasif.adecuado     += p.clasif.adecuado;
+          base.clasif.riesgo       += p.clasif.riesgo;
+          base.clasif.dnt_moderada += p.clasif.dnt_moderada;
+          base.clasif.dnt_severa   += p.clasif.dnt_severa;
+          base.clasif.sobrepeso    += p.clasif.sobrepeso;
+          base.clasif.sin_dato     += p.clasif.sin_dato;
+        }
+        result[ge] = base;
+      }
+      return result;
+    }
+
+    return indicadoresExcel; // fallback: datos completos sin filtrar
+  }, [rawExcelRows, municipiosSel, municipiosNombresNorm, indicadoresExcel, indPorMunicipio]);
+
+  // ── Grupos de edad filtrados por municipio ───────────────────────────────
+  const gruposEdadFiltrados = useMemo(() => {
+    if (!rawExcelRows) return gruposEdadExcel;
+    const todosSeleccionados = municipiosSel.length === MUNICIPIOS.length;
+    if (todosSeleccionados) return calcularGruposEdadDesdeExcel(rawExcelRows, 4);
+    // Filtrar rawRows por municipio y recalcular
+    const filtradas = rawExcelRows.filter((row, i) => {
+      if (i < 4) return false;
+      const munVal = String(row[COLUMNA_MUNICIPIO] ?? '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      return municipiosNombresNorm.some(m => munVal.includes(m) || m.includes(munVal));
+    });
+    return calcularGruposEdadDesdeExcel([...rawExcelRows.slice(0, 4), ...filtradas.slice()], 4);
+  }, [rawExcelRows, municipiosSel, municipiosNombresNorm, gruposEdadExcel]);
+
   // ── Indicadores del grupo seleccionado (desde Excel) ─────────────────────
-  const indExcel: IndicadoresGrupoExcel | null = indicadoresExcel
-    ? (indicadoresExcel[grupoEdad as keyof IndPorGrupo] ?? indicadoresExcel["todos"])
+  const indExcel: IndicadoresGrupoExcel | null = indicadoresFiltrados
+    ? (indicadoresFiltrados[grupoEdad as keyof IndPorGrupo] ?? indicadoresFiltrados["todos"])
     : null;
 
   const tieneExcel = !!indicadoresExcel;
 
   // ── KPIs calculados desde Excel ──────────────────────────────────────────
+  // Niños registrados = siempre la población del territorio (datos MUNICIPIOS)
+  // filtrada por municipios y grupo de edad seleccionados
   const ninosRegistrados: number = (() => {
-    if (gruposEdadExcel) {
-      if (grupoEdad === "todos")
-        return gruposEdadExcel["0-6m"] + gruposEdadExcel["7-12m"] + gruposEdadExcel["13-24m"] + gruposEdadExcel["25-59m"] + gruposEdadExcel["60m+"];
-      const v = gruposEdadExcel[grupoEdad as keyof typeof gruposEdadExcel];
+    const pobTotal = municipiosFiltrados.reduce((s, m) => s + m.poblacion_total_0_59m, 0);
+    if (grupoEdad === "todos") return pobTotal;
+    // Para grupo específico: usar Excel si hay datos filtrados, sino estimación proporcional
+    if (gruposEdadFiltrados) {
+      const v = gruposEdadFiltrados[grupoEdad as keyof typeof gruposEdadFiltrados];
       return typeof v === "number" ? v : 0;
     }
-    if (grupoEdad === "todos") return MUNICIPIOS.reduce((s, m) => s + m.poblacion_total_0_59m, 0);
     return 0;
   })();
 
@@ -378,7 +489,7 @@ export default function PrimeraInfanciaDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <MunicipioFilter seleccionados={municipiosSel} onChange={setMunicipiosSel} ipsSel={ipsSel} onIpsChange={setIpsSel} />
               <div className="space-y-4">
-                <AgeRangeSelector valor={grupoEdad} onChange={setGrupoEdad} conteos={gruposEdadExcel} />
+                <AgeRangeSelector valor={grupoEdad} onChange={setGrupoEdad} conteos={gruposEdadFiltrados} />
                 <ContadorControles rawRows={rawExcelRows} />
               </div>
             </div>
@@ -680,6 +791,9 @@ export default function PrimeraInfanciaDashboard() {
                   setGruposEdadExcel(calcularGruposEdadDesdeExcel(rawRows, 4));
                   setIndicadoresExcel(calcularIndicadoresDesdeExcel(rawRows, 4));
                   setDatosRestaurados(false);
+                  // Detectar columna municipio y pre-computar por municipio
+                  const colMun = detectarColumnaMunicipio(rawRows, 4);
+                  computarYGuardarPorMunicipio(rawRows, colMun);
                 }}
                 onGuardar={() => {
                   if (excelCargado && gruposEdadExcel && indicadoresExcel) {

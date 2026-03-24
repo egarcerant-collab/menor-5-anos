@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "../ui/textarea";
 import { generateReportAnalysis, type ReportAnalysisInput } from "@/ai/flows/generate-report-analysis-flow";
 import { descargarInformeSeniorPDF, generarURLInformeSeniorPDF, type InformeDatosSenior, type MonthlyRow, type QuarterlyRow } from "@/lib/pdf-definitions";
+import { generarTodosLosGraficos } from "@/lib/chart-generator";
 
 async function loadImageAsBase64(url: string): Promise<string> {
     try {
@@ -39,17 +40,12 @@ export default function InformePGP({ data, comparisonSummary, apiKey: initialApi
   const { toast } = useToast();
 
   const handleGenerate = async (action: 'preview' | 'download') => {
-    if (!localApiKey) {
-      toast({ title: "Falta API Key", description: "Por favor, introduce tu Gemini API Key para la redacción senior.", variant: "destructive" });
-      return;
-    }
-    
     if (!data || !comparisonSummary) return;
     setIsGenerating(true);
-    toast({ title: "Generando Informe Senior...", description: "Redactando informe anual de 12 páginas (Arial)." });
+    toast({ title: "Generando Informe Senior con Claude...", description: "Redactando informe anual extenso (~15 páginas). Puede tomar 30-60 segundos." });
 
     try {
-        const metaAnual = data.notaTecnica.valor3m * 4; 
+        const metaAnual = data.notaTecnica.valorAnual ?? data.notaTecnica.valor3m * 12;
         const ejecucionAnual = comparisonSummary.monthlyFinancials.reduce((acc: number, m: any) => acc + m.totalValorEjecutado, 0);
         const totalCups = comparisonSummary.overExecutedCups.reduce((acc: number, c: any) => acc + c.realFrequency, 0) +
                          comparisonSummary.normalExecutionCups.reduce((acc: number, c: any) => acc + c.realFrequency, 0) +
@@ -97,6 +93,10 @@ export default function InformePGP({ data, comparisonSummary, apiKey: initialApi
             apiKey: localApiKey
         });
 
+        // Generar gráficos estadísticos
+        toast({ title: "Generando gráficos estadísticos...", description: "Procesando 5 gráficos de análisis financiero." });
+        const graficos = await generarTodosLosGraficos(meses, metaAnual, referenciaMensual);
+
         const reportData: InformeDatosSenior = {
             header: {
                 prestador: data.header.ipsNombre,
@@ -111,12 +111,16 @@ export default function InformePGP({ data, comparisonSummary, apiKey: initialApi
             totalCups,
             meses,
             trimestres,
+            graficos,
             narrativa: {
                 resumenEjecutivo: analysis.resumenEjecutivo,
+                contextoContractual: analysis.contextoContractual,
+                analisisFinanciero: analysis.analisisFinanciero,
                 analisisT1: analysis.analisisT1,
                 analisisT2: analysis.analisisT2,
                 analisisT3: analysis.analisisT3,
                 analisisT4: analysis.analisisT4,
+                analisisRiesgo: analysis.analisisRiesgo,
                 hallazgosClave: analysis.hallazgosClave,
                 accionesMejora: analysis.accionesMejora,
                 conclusiones: analysis.conclusionesFinales
@@ -142,30 +146,10 @@ export default function InformePGP({ data, comparisonSummary, apiKey: initialApi
             <Landmark className="h-6 w-6 text-primary" />
             Informe de Gestión Anual Senior (12 Páginas)
         </CardTitle>
-        <CardDescription>Genera el documento oficial con análisis narrativo trimestral y tablas de control.</CardDescription>
+        <CardDescription>Genera el documento oficial con análisis narrativo trimestral y tablas de control. Powered by Claude (Anthropic).</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         
-        <div className="p-4 bg-white rounded-lg border border-primary/20 shadow-sm space-y-4">
-            <div className="flex items-center gap-2 text-primary font-semibold mb-2">
-                <Key className="h-4 w-4" /> Configuración de Redacción IA
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="gemini-key" className="text-xs">Introduce tu Gemini API Key</Label>
-                <div className="relative">
-                    <Input 
-                      id="gemini-key"
-                      type="password" 
-                      placeholder="AIzaSy..." 
-                      value={localApiKey} 
-                      onChange={e => setLocalApiKey(e.target.value)}
-                      className="pr-10"
-                    />
-                    {localApiKey.length > 10 && <ShieldCheck className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />}
-                </div>
-                <p className="text-[10px] text-muted-foreground">Esta clave se usa exclusivamente para procesar la narrativa técnica del informe.</p>
-            </div>
-        </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">

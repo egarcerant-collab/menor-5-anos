@@ -1,7 +1,7 @@
-import type {Metadata} from 'next';
-import { Inter, Source_Code_Pro } from 'next/font/google';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({
   subsets: ['latin'],
@@ -9,27 +9,20 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
-const sourceCodePro = Source_Code_Pro({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-source-code-pro',
-});
-
 export const metadata: Metadata = {
-  title: 'Buscador PGP',
-  description: 'Busca y visualiza datos desde la base de datos PGP.',
+  title: 'Indicadores Primera Infancia',
+  description: 'Dashboard de indicadores de salud y desarrollo para la Primera Infancia',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" suppressHydrationWarning className={`${inter.variable} ${sourceCodePro.variable}`}>
-      <body suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning className={inter.variable}>
+      <body suppressHydrationWarning className="font-sans antialiased">
+        <Script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js" strategy="beforeInteractive" />
+        <Script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.min.js" strategy="beforeInteractive" />
         {children}
-        <Toaster />
       </body>
     </html>
   );

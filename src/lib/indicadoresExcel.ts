@@ -345,16 +345,23 @@ function sumGrupos(gs: IndicadoresGrupoExcel[]): IndicadoresGrupoExcel {
   return base;
 }
 
+// ─── Columna municipio ─────────────────────────────────────────────────────────
+/** Columna del Excel que contiene el nombre del municipio (ajustar si difiere) */
+export const COLUMNA_MUNICIPIO = 'B';
+
 // ─── Función principal ─────────────────────────────────────────────────────────
 
 /**
  * Recorre todas las filas del Excel y calcula los indicadores RIAS
  * agrupados por rango de edad (calculado desde la columna H = fecha de nacimiento).
+ * @param municipiosFiltro  Si se provee, solo procesa filas cuyo municipio (col B) coincida.
  */
 export function calcularIndicadoresDesdeExcel(
   rawRows: Record<string, unknown>[],
   startRowIndex = 4,
+  municipiosFiltro?: string[],   // nombres en mayúsculas normalizados
 ): IndPorGrupo {
+  const filtrarMunicipio = municipiosFiltro && municipiosFiltro.length > 0;
   const hoy = new Date();
 
   // Inicializar acumuladores
@@ -376,6 +383,12 @@ export function calcularIndicadoresDesdeExcel(
   for (let r = startRowIndex; r < rawRows.length; r++) {
     const row = rawRows[r];
     if (!row) continue;
+
+    // Filtrar por municipio si se especificó
+    if (filtrarMunicipio) {
+      const munVal = String(row[COLUMNA_MUNICIPIO] ?? '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      if (!municipiosFiltro!.some(m => munVal.includes(m) || m.includes(munVal))) continue;
+    }
 
     // Calcular edad y grupo
     const fechaNac = parseExcelDate(row[C.FECHA_NAC]);
