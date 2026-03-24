@@ -15,6 +15,9 @@ const KEY_INDICADORES     = "pi_indicadores";
 const KEY_HISTORIAL       = "pi_historial_cargas";
 const KEY_IND_POR_MUN     = "pi_ind_por_municipio";
 const KEY_COL_MUNICIPIO   = "pi_col_municipio";
+/** Versión del esquema — incrementar para invalidar cache viejo automáticamente */
+const CACHE_VERSION       = "v3";
+const KEY_CACHE_VERSION   = "pi_cache_version";
 
 export interface ExcelMeta {
   filename: string;
@@ -114,6 +117,7 @@ export function guardarIndPorMunicipio(
   try {
     localStorage.setItem(KEY_IND_POR_MUN,   JSON.stringify(indPorMun));
     localStorage.setItem(KEY_COL_MUNICIPIO, colMunicipio);
+    localStorage.setItem(KEY_CACHE_VERSION, CACHE_VERSION);
   } catch (e) {
     console.error("[DataStore] Error guardando por municipio:", e);
   }
@@ -124,6 +128,13 @@ export function recuperarIndPorMunicipio(): {
   colMunicipio: string | null;
 } {
   try {
+    // Si la versión del cache no coincide, descartar datos viejos
+    const version = localStorage.getItem(KEY_CACHE_VERSION);
+    if (version !== CACHE_VERSION) {
+      localStorage.removeItem(KEY_IND_POR_MUN);
+      localStorage.removeItem(KEY_COL_MUNICIPIO);
+      return { indPorMun: null, colMunicipio: null };
+    }
     const rawInd = localStorage.getItem(KEY_IND_POR_MUN);
     const col    = localStorage.getItem(KEY_COL_MUNICIPIO);
     return {

@@ -180,7 +180,7 @@ export default function PrimeraInfanciaDashboard() {
     const result: Record<string, IndPorGrupo> = {};
     for (const mun of MUNICIPIOS) {
       const nombreNorm = mun.nombre.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-      result[mun.id] = calcularIndicadoresDesdeExcel(rawRows, 4, [nombreNorm]);
+      result[mun.id] = calcularIndicadoresDesdeExcel(rawRows, 4, [nombreNorm], colMun);
     }
     setIndPorMunicipio(result);
     guardarIndPorMunicipio(result, colMun);
