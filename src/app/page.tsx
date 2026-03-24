@@ -296,7 +296,7 @@ export default function PrimeraInfanciaDashboard() {
     // Filtrar rawRows por municipio y recalcular
     const filtradas = rawExcelRows.filter((row, i) => {
       if (i < 4) return false;
-      const munVal = String(row[COLUMNA_MUNICIPIO] ?? '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const munVal = String(row[colMunicipio] ?? '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       return municipiosNombresNorm.some(m => munVal.includes(m) || m.includes(munVal));
     });
     return calcularGruposEdadDesdeExcel([...rawExcelRows.slice(0, 4), ...filtradas.slice()], 4);
@@ -510,6 +510,23 @@ export default function PrimeraInfanciaDashboard() {
           </div>
         )}
 
+        {/* Aviso filtro sin rawRows */}
+        {pestana !== "datos" && !rawExcelRows && municipiosSel.length < MUNICIPIOS.length && indicadoresExcel && (
+          <div className="flex items-center gap-3 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700 text-sm text-amber-900 dark:text-amber-200">
+            <span className="text-2xl flex-shrink-0">⚠️</span>
+            <div>
+              <p className="font-bold">Recargue el Excel para filtrar por municipio</p>
+              <p className="text-xs mt-0.5 opacity-80">Los datos guardados muestran el total. Cargue el Excel nuevamente para ver solo los municipios seleccionados.</p>
+            </div>
+            <button
+              onClick={() => setPestana("datos")}
+              className="ml-auto flex-shrink-0 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-colors"
+            >
+              Ir a Cargar Excel →
+            </button>
+          </div>
+        )}
+
         {/* KPIs */}
         {pestana !== "datos" && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -564,11 +581,19 @@ export default function PrimeraInfanciaDashboard() {
               {/* Clasificación nutricional */}
               <div className="bg-card rounded-2xl p-5 border border-border shadow-sm card-hover fade-in-up fade-delay-1">
                 <SectionTitle icon={Scale}>Clasificación Nutricional</SectionTitle>
+                {/* Aviso cuando el filtro no puede aplicarse sin rawRows */}
+                {!rawExcelRows && municipiosSel.length < MUNICIPIOS.length && (
+                  <div className="mb-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700 text-xs text-amber-800 dark:text-amber-300 flex items-center gap-2">
+                    <span>⚠️</span>
+                    <span>Para filtrar por municipio, <strong>recargue el archivo Excel</strong> — los datos guardados no tienen el desglose por municipio.</span>
+                  </div>
+                )}
                 {nutPieData ? (
                   <>
                     <ResponsiveContainer width="100%" height={220}>
                       <PieChart>
-                        <Pie data={nutPieData} cx="50%" cy="50%" outerRadius={90} dataKey="value" labelLine={false} label={CustomLabel}>
+                        <Pie data={nutPieData} cx="50%" cy="50%" outerRadius={90} dataKey="value" labelLine={false}
+                          label={nutPieData.reduce((s,d)=>s+d.value,0) >= 10 ? CustomLabel : false}>
                           {nutPieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                         </Pie>
                         <Tooltip formatter={(v:any) => [fmtN(v), ""]} />
@@ -578,6 +603,7 @@ export default function PrimeraInfanciaDashboard() {
                     <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
                       Desde clasificación P/T del último control · {fmtN(indExcel?.clasif.sin_dato ?? 0)} sin dato
+                      {indExcel && <span className="ml-2 font-medium text-foreground">· Total con dato: {fmtN(indExcel.total - indExcel.clasif.sin_dato)}</span>}
                     </p>
                   </>
                 ) : (
