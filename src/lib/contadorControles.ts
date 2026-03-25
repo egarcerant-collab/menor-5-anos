@@ -9,6 +9,31 @@
 // Columnas de fecha según la fórmula (letras de columna Excel)
 export const COLS_FECHA = ['AM', 'AX', 'BG', 'BP', 'CA', 'CL', 'CW', 'DH', 'DS', 'ED', 'EO', 'EZ'] as const;
 
+export type ProfesionalTipo = 'Enfermería' | 'Medicina';
+
+/** Descripción de cada control RIAS según los rangos de edad definidos */
+export interface DescripcionControl {
+  col: typeof COLS_FECHA[number];
+  numero: number;           // 1-12
+  rango: string;            // "1 mes", "2 a 3 meses", etc.
+  profesional: ProfesionalTipo;
+}
+
+export const DESCRIPCION_CONTROLES: DescripcionControl[] = [
+  { col: 'AM', numero:  1, rango: '1 mes',        profesional: 'Enfermería' },
+  { col: 'AX', numero:  2, rango: '2 a 3 meses',  profesional: 'Enfermería' },
+  { col: 'BG', numero:  3, rango: '4 a 5 meses',  profesional: 'Medicina'   },
+  { col: 'BP', numero:  4, rango: '6 a 8 meses',  profesional: 'Enfermería' },
+  { col: 'CA', numero:  5, rango: '9 a 11 meses', profesional: 'Enfermería' },
+  { col: 'CL', numero:  6, rango: '12 a 18 meses',profesional: 'Medicina'   },
+  { col: 'CW', numero:  7, rango: '19 a 23 meses',profesional: 'Enfermería' },
+  { col: 'DH', numero:  8, rango: '24 a 29 meses',profesional: 'Medicina'   },
+  { col: 'DS', numero:  9, rango: '30 a 35 meses',profesional: 'Enfermería' },
+  { col: 'ED', numero: 10, rango: '3 años',        profesional: 'Medicina'   },
+  { col: 'EO', numero: 11, rango: '4 años',        profesional: 'Enfermería' },
+  { col: 'EZ', numero: 12, rango: '5 años',        profesional: 'Medicina'   },
+];
+
 export const MESES_ES = [
   'ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
   'JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE',
@@ -66,6 +91,36 @@ function parseExcelDate(val: unknown): Date | null {
  * startRowIndex: índice 0-based donde empiezan los datos (fórmula usa AM5, o sea índice 4)
  * anio: año a filtrar (por defecto 2026, igual que la fórmula)
  */
+export interface ConteoVisita {
+  col: typeof COLS_FECHA[number];
+  numero: number;
+  rango: string;
+  profesional: ProfesionalTipo;
+  conteo: number;
+}
+
+/**
+ * Cuenta cuántos niños tienen fecha registrada en cada columna de control.
+ * Retorna un array con 12 entradas (una por visita RIAS).
+ */
+export function contarControlesPorVisita(
+  rawRows: Record<string, unknown>[],
+  startRowIndex = 4,
+): ConteoVisita[] {
+  const resultado: ConteoVisita[] = DESCRIPCION_CONTROLES.map(d => ({ ...d, conteo: 0 }));
+
+  for (let r = startRowIndex; r < rawRows.length; r++) {
+    const row = rawRows[r];
+    if (!row) continue;
+    for (let i = 0; i < DESCRIPCION_CONTROLES.length; i++) {
+      const col = DESCRIPCION_CONTROLES[i].col;
+      const fecha = parseExcelDate(row[col]);
+      if (fecha) resultado[i].conteo++;
+    }
+  }
+  return resultado;
+}
+
 export function contarControlesPorMes(
   rawRows: Record<string, unknown>[],
   startRowIndex = 4,
