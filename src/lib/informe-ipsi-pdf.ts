@@ -168,6 +168,7 @@ export function buildIPSIDoc(inf: InformeIPSI, membreteBase64?: string | null): 
   // ── Visitas RIAS (12 controles Valoración Integral) ───────────────────
   const seccionVisitas: any[] = [];
   if (inf.controlesVisita && inf.controlesVisita.length > 0) {
+    // Meta = 100% de la población total registrada
     const totalNinos = inf.totalNinosMunicipio ?? 1;
     const totalVisitas = inf.controlesVisita.reduce((s, v) => s + v.conteo, 0);
 
@@ -177,8 +178,8 @@ export function buildIPSIDoc(inf: InformeIPSI, membreteBase64?: string | null): 
         text: [
           { text: "Fuente: ", bold: true, fontSize: 8 },
           { text: "Columnas AM, AX, BG, BP, CA, CL, CW, DH, DS, ED, EO, EZ del Excel. ", fontSize: 8, color: "#555" },
-          { text: "Meta: ≥90% según Resolución 3202/2016 MinSalud. ", fontSize: 8, color: "#555" },
-          { text: `Total visitas registradas: ${num(totalVisitas)}`, fontSize: 8, bold: true, color: "#0a3d62" },
+          { text: `Meta: 100% de la población (${num(totalNinos)} niños registrados). `, fontSize: 8, color: "#555" },
+          { text: `Total visitas ejecutadas: ${num(totalVisitas)}`, fontSize: 8, bold: true, color: "#0a3d62" },
         ],
         margin: [0, 0, 0, 6] as [number,number,number,number],
       },
@@ -191,13 +192,14 @@ export function buildIPSIDoc(inf: InformeIPSI, membreteBase64?: string | null): 
               hCell("#"),
               hCell("Rango de edad · Visita"),
               hCell("Profesional"),
-              hCell("Realizados"),
-              hCell(`Meta (≥${META_VISITA_RIAS}%)`),
-              hCell("Estado"),
+              hCell("Ejecutados"),
+              hCell(`Meta (100% = ${num(totalNinos)})`),
+              hCell("% Cobertura"),
             ],
             ...inf.controlesVisita.map(v => {
               const pcV = totalNinos > 0 ? (v.conteo / totalNinos) * 100 : 0;
               const esMed = v.profesional === 'Medicina';
+              const colorPct = pcV >= 90 ? "#1a7a3c" : pcV >= 70 ? "#e07b39" : "#c0392b";
               return [
                 cell(String(v.numero), true, "#0a3d62", "center"),
                 cell(v.rango),
@@ -208,24 +210,27 @@ export function buildIPSIDoc(inf: InformeIPSI, membreteBase64?: string | null): 
                   color: esMed ? "#1d4ed8" : "#065f46",
                   margin: [2,2,2,2] as [number,number,number,number],
                 },
-                cell(num(v.conteo), true, "black", "center"),
-                cell(`${META_VISITA_RIAS}%`, false, "black", "center"),
+                cell(num(v.conteo), true, v.conteo > 0 ? "black" : "#9ca3af", "center"),
+                cell(num(totalNinos), false, "#555", "center"),
                 cell(
-                  v.conteo > 0 ? (pcV >= META_VISITA_RIAS ? "✓ CUMPLE" : "✗ BAJO") : "SIN DATO",
+                  v.conteo > 0 ? `${pcV.toFixed(1)}%` : "—",
                   true,
-                  v.conteo === 0 ? "#9ca3af" : pcV >= META_VISITA_RIAS ? "#1a7a3c" : "#c0392b",
+                  v.conteo === 0 ? "#9ca3af" : colorPct,
                   "center"
                 ),
               ];
             }),
-            // Fila total
+            // Fila resumen
             [
               cell("", false, "black", "center"),
-              cell("TOTAL VISITAS REGISTRADAS", true, "#0a3d62"),
+              cell("TOTAL EJECUTADO", true, "#0a3d62"),
               cell("", false, "black", "center"),
               cell(num(totalVisitas), true, "#0a3d62", "center"),
-              cell("—", false, "black", "center"),
-              cell("", false, "black", "center"),
+              cell(num(totalNinos * 12) + " (12 vis.)", false, "#555", "center"),
+              cell(
+                totalNinos > 0 ? `${((totalVisitas / (totalNinos * 12)) * 100).toFixed(1)}%` : "—",
+                true, "#0a3d62", "center"
+              ),
             ],
           ],
         },
