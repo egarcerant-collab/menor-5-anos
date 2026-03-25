@@ -386,10 +386,10 @@ export function calcularIndicadoresDesdeExcel(
     const row = rawRows[r];
     if (!row) continue;
 
-    // Filtrar por municipio si se especificó
+    // Filtrar por municipio si se especificó (match directo: celda contiene nombre)
     if (filtrarMunicipio) {
-      const munVal = String(row[colMun] ?? '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      if (!municipiosFiltro!.some(m => munVal.includes(m) || m.includes(munVal))) continue;
+      const munVal = String(row[colMun] ?? '').trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      if (!munVal || !municipiosFiltro!.some(m => m.length >= 3 && (munVal === m || munVal.includes(m)))) continue;
     }
 
     // Calcular edad y grupo

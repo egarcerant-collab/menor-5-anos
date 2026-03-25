@@ -158,20 +158,36 @@ export default function PrimeraInfanciaDashboard() {
 
   // ── Detecta la columna del Excel que contiene el municipio ───────────────
   function detectarColumnaMunicipio(rawRows: Record<string, unknown>[], startIdx: number): string {
-    const cols = ['B','A','C','D','E','F','G'];
+    // Revisamos más columnas (hasta la S) para cubrir diferentes estructuras de Excel
+    const cols = ['B','C','D','E','F','G','H','A','I','J','K','L','M','N','O','P','Q','R','S'];
     const nombresNorm = MUNICIPIOS.map(m =>
       m.nombre.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
     );
     let bestCol = 'B';
     let bestScore = 0;
+    const sampleSize = Math.min(500, rawRows.length - startIdx);
     for (const col of cols) {
+      // Contar cuántos valores únicos distintos matchean municipios conocidos
+      const valoresUnicos = new Set<string>();
       let score = 0;
-      for (let r = startIdx; r < Math.min(startIdx + 200, rawRows.length); r++) {
-        const val = String(rawRows[r]?.[col] ?? '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-        if (val && nombresNorm.some(n => val.includes(n) || n.includes(val))) score++;
+      for (let r = startIdx; r < startIdx + sampleSize; r++) {
+        const val = String(rawRows[r]?.[col] ?? '').trim().toUpperCase()
+          .normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+        if (!val || val.length < 3) continue;
+        // Solo match directo: el valor de la celda CONTIENE el nombre del municipio (no al revés)
+        // Esto evita falsos positivos con strings cortos
+        const matched = nombresNorm.some(n => n.length >= 4 && (val === n || val.includes(n)));
+        if (matched) {
+          score++;
+          valoresUnicos.add(val);
+        }
       }
-      if (score > bestScore) { bestScore = score; bestCol = col; }
+      // Bonus si hay múltiples municipios distintos en la misma columna
+      const diversidad = valoresUnicos.size;
+      const scoreAjustado = score * (diversidad > 1 ? diversidad : 0.1);
+      if (scoreAjustado > bestScore) { bestScore = scoreAjustado; bestCol = col; }
     }
+    console.log(`[ColMunicipio] Detectada: ${bestCol} (score=${bestScore.toFixed(1)})`);
     return bestCol;
   }
 
@@ -296,8 +312,8 @@ export default function PrimeraInfanciaDashboard() {
     // Filtrar rawRows por municipio y recalcular
     const filtradas = rawExcelRows.filter((row, i) => {
       if (i < 4) return false;
-      const munVal = String(row[colMunicipio] ?? '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      return municipiosNombresNorm.some(m => munVal.includes(m) || m.includes(munVal));
+      const munVal = String(row[colMunicipio] ?? '').trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      return !!munVal && municipiosNombresNorm.some(m => m.length >= 3 && (munVal === m || munVal.includes(m)));
     });
     return calcularGruposEdadDesdeExcel([...rawExcelRows.slice(0, 4), ...filtradas.slice()], 4);
   }, [rawExcelRows, municipiosSel, municipiosNombresNorm, gruposEdadExcel]);

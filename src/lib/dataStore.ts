@@ -16,7 +16,7 @@ const KEY_HISTORIAL       = "pi_historial_cargas";
 const KEY_IND_POR_MUN     = "pi_ind_por_municipio";
 const KEY_COL_MUNICIPIO   = "pi_col_municipio";
 /** Versión del esquema — incrementar para invalidar cache viejo automáticamente */
-const CACHE_VERSION       = "v3";
+const CACHE_VERSION       = "v4";
 const KEY_CACHE_VERSION   = "pi_cache_version";
 
 export interface ExcelMeta {
