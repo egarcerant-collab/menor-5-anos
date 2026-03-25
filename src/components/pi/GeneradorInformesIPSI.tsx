@@ -1,20 +1,29 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { FileText, Download, Loader2, CheckCircle2, Package, ChevronDown, ChevronUp } from "lucide-react";
 import type { MunicipioData } from "./types";
 import { generarInformeIPSI, generarPaqueteIPSI, cargarMembrete } from "@/lib/informe-ipsi-pdf";
+import { contarControlesPorVisita } from "@/lib/contadorControles";
 
 interface Props {
-  municipios: MunicipioData[];   // municipios actualmente filtrados
-  fecha: string;                  // p.ej. "Marzo 2026"
-  vigencia: string;               // p.ej. "2026"
+  municipios: MunicipioData[];                         // municipios actualmente filtrados
+  fecha: string;                                        // p.ej. "Marzo 2026"
+  vigencia: string;                                     // p.ej. "2026"
+  rawExcelRows?: Record<string, unknown>[] | null;      // filas crudas del Excel
+  totalNinos?: number;                                  // total niños seleccionados
 }
 
-export function GeneradorInformesIPSI({ municipios, fecha, vigencia }: Props) {
+export function GeneradorInformesIPSI({ municipios, fecha, vigencia, rawExcelRows, totalNinos }: Props) {
   const [abierto, setAbierto] = useState(false);
   const [generando, setGenerando] = useState(false);
   const [progreso, setProgreso] = useState({ actual: 0, total: 0, nombre: "" });
   const [listo, setListo] = useState(false);
+
+  // Pre-computar visitas RIAS desde el Excel (se pasan a cada informe)
+  const controlesVisita = useMemo(() => {
+    if (!rawExcelRows || rawExcelRows.length === 0) return undefined;
+    return contarControlesPorVisita(rawExcelRows, 4);
+  }, [rawExcelRows]);
 
   // Combos únicos IPS × municipio
   const combos = municipios.flatMap(m =>
@@ -34,7 +43,15 @@ export function GeneradorInformesIPSI({ municipios, fecha, vigencia }: Props) {
       setGenerando(true);
       const membrete = await cargarMembrete();
       await generarInformeIPSI(
-        { ips, municipio: muni.nombre, departamento: muni.departamento, fecha, vigencia, municipioData: muni },
+        {
+          ips,
+          municipio: muni.nombre,
+          departamento: muni.departamento,
+          fecha, vigencia,
+          municipioData: muni,
+          controlesVisita,
+          totalNinosMunicipio: totalNinos ?? muni.poblacion_total_0_59m,
+        },
         undefined,
         membrete
       );
@@ -56,7 +73,9 @@ export function GeneradorInformesIPSI({ municipios, fecha, vigencia }: Props) {
         municipios, fecha, vigencia,
         "Primera Infancia — Caribe Colombiano",
         undefined,
-        (actual, total, nombre) => setProgreso({ actual, total, nombre })
+        (actual, total, nombre) => setProgreso({ actual, total, nombre }),
+        controlesVisita,
+        totalNinos,
       );
       setListo(true);
       setTimeout(() => setListo(false), 4000);

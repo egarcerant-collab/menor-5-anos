@@ -5,6 +5,11 @@
 
 import type { MunicipioData } from "@/components/pi/types";
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
+import { contarControlesPorVisita, type ConteoVisita } from "@/lib/contadorControles";
+
+// ─── Metas oficiales RIAS — Resolución 3202/2016 MinSalud ──────────────────
+// Meta de cobertura para cada visita de Valoración Integral: ≥ 90%
+const META_VISITA_RIAS = 90;
 
 // ─── Helpers de formato ────────────────────────────────────────────────────
 const pct = (n: number) => `${n.toFixed(1)}%`;
@@ -48,6 +53,8 @@ export interface InformeIPSI {
   entidadEvaluadora?: string;
   firmante?: { nombre: string; cargo: string };
   municipioData: MunicipioData;
+  controlesVisita?: ConteoVisita[];  // 12 visitas RIAS desde el Excel
+  totalNinosMunicipio?: number;      // total niños del municipio (para calcular cobertura)
 }
 
 // ─── Constructor del documento PDF ─────────────────────────────────────────
@@ -157,6 +164,81 @@ export function buildIPSIDoc(inf: InformeIPSI, membreteBase64?: string | null): 
       margin: [0, 0, 0, 6] as [number,number,number,number],
     });
   });
+
+  // ── Visitas RIAS (12 controles Valoración Integral) ───────────────────
+  const seccionVisitas: any[] = [];
+  if (inf.controlesVisita && inf.controlesVisita.length > 0) {
+    const totalNinos = inf.totalNinosMunicipio ?? 1;
+    const totalVisitas = inf.controlesVisita.reduce((s, v) => s + v.conteo, 0);
+
+    seccionVisitas.push(
+      h1("Controles RIAS · Valoración Integral por Visita", true),
+      {
+        text: [
+          { text: "Fuente: ", bold: true, fontSize: 8 },
+          { text: "Columnas AM, AX, BG, BP, CA, CL, CW, DH, DS, ED, EO, EZ del Excel. ", fontSize: 8, color: "#555" },
+          { text: "Meta: ≥90% según Resolución 3202/2016 MinSalud. ", fontSize: 8, color: "#555" },
+          { text: `Total visitas registradas: ${num(totalVisitas)}`, fontSize: 8, bold: true, color: "#0a3d62" },
+        ],
+        margin: [0, 0, 0, 6] as [number,number,number,number],
+      },
+      {
+        table: {
+          headerRows: 1,
+          widths: ["auto", "*", "auto", "auto", "auto", "auto"],
+          body: [
+            [
+              hCell("#"),
+              hCell("Rango de edad · Visita"),
+              hCell("Profesional"),
+              hCell("Realizados"),
+              hCell(`Meta (≥${META_VISITA_RIAS}%)`),
+              hCell("Estado"),
+            ],
+            ...inf.controlesVisita.map(v => {
+              const pcV = totalNinos > 0 ? (v.conteo / totalNinos) * 100 : 0;
+              const esMed = v.profesional === 'Medicina';
+              return [
+                cell(String(v.numero), true, "#0a3d62", "center"),
+                cell(v.rango),
+                {
+                  text: v.profesional,
+                  fontSize: 9,
+                  bold: true,
+                  color: esMed ? "#1d4ed8" : "#065f46",
+                  margin: [2,2,2,2] as [number,number,number,number],
+                },
+                cell(num(v.conteo), true, "black", "center"),
+                cell(`${META_VISITA_RIAS}%`, false, "black", "center"),
+                cell(
+                  v.conteo > 0 ? (pcV >= META_VISITA_RIAS ? "✓ CUMPLE" : "✗ BAJO") : "SIN DATO",
+                  true,
+                  v.conteo === 0 ? "#9ca3af" : pcV >= META_VISITA_RIAS ? "#1a7a3c" : "#c0392b",
+                  "center"
+                ),
+              ];
+            }),
+            // Fila total
+            [
+              cell("", false, "black", "center"),
+              cell("TOTAL VISITAS REGISTRADAS", true, "#0a3d62"),
+              cell("", false, "black", "center"),
+              cell(num(totalVisitas), true, "#0a3d62", "center"),
+              cell("—", false, "black", "center"),
+              cell("", false, "black", "center"),
+            ],
+          ],
+        },
+        layout: {
+          hLineWidth: () => 0.4,
+          vLineWidth: () => 0.4,
+          hLineColor: () => "#d0d7de",
+          vLineColor: () => "#d0d7de",
+        },
+        margin: [0, 0, 0, 10] as [number,number,number,number],
+      }
+    );
+  }
 
   // ── Sentencia T-302 ────────────────────────────────────────────────────
   const t302Seccion: any[] = [];
@@ -336,11 +418,14 @@ export function buildIPSIDoc(inf: InformeIPSI, membreteBase64?: string | null): 
         margin: [0, 0, 0, 10] as [number,number,number,number],
       },
 
-      // ── 3. Indicadores RIAS ──────────────────────────────────────────
-      h1("3. Indicadores RIAS por Grupo Etario"),
+      // ── 3. Visitas RIAS · Valoración Integral (datos reales Excel) ───
+      ...seccionVisitas,
+
+      // ── 4. Indicadores RIAS por grupo etario ─────────────────────────
+      h1("4. Indicadores RIAS por Grupo Etario"),
       ...seccionIndicadores,
 
-      // ── 4. T-302 ─────────────────────────────────────────────────────
+      // ── 5. T-302 ─────────────────────────────────────────────────────
       ...t302Seccion,
 
       // ── Firma ────────────────────────────────────────────────────────
@@ -371,7 +456,9 @@ export async function generarPaqueteIPSI(
   vigencia: string,
   entidadEvaluadora?: string,
   firmante?: { nombre: string; cargo: string },
-  onProgress?: (actual: number, total: number, nombre: string) => void
+  onProgress?: (actual: number, total: number, nombre: string) => void,
+  controlesVisita?: ConteoVisita[],
+  totalNinos?: number,
 ): Promise<void> {
   const pdfMake = (window as any).pdfMake;
   if (!pdfMake) throw new Error("pdfMake no disponible. Recarga la página.");
@@ -401,6 +488,8 @@ export async function generarPaqueteIPSI(
       entidadEvaluadora,
       firmante,
       municipioData: muni,
+      controlesVisita,
+      totalNinosMunicipio: totalNinos ?? muni.poblacion_total_0_59m,
     };
     const doc = buildIPSIDoc(inf, membrete);
 

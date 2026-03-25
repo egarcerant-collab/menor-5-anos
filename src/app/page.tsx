@@ -522,7 +522,13 @@ export default function PrimeraInfanciaDashboard() {
                 <ContadorControles rawRows={rawExcelRows} />
               </div>
             </div>
-            <GeneradorInformesIPSI municipios={municipiosFiltrados} fecha={`${mesSel === "Todos" ? "2026" : mesSel + " 2026"}`} vigencia={periodo} />
+            <GeneradorInformesIPSI
+              municipios={municipiosFiltrados}
+              fecha={`${mesSel === "Todos" ? "2026" : mesSel + " 2026"}`}
+              vigencia={periodo}
+              rawExcelRows={rawExcelRows}
+              totalNinos={indExcel?.total}
+            />
           </div>
         )}
 
