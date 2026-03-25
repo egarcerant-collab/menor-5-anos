@@ -27,6 +27,7 @@ import {
   guardarDatos, recuperarDatos, limpiarDatos,
   recuperarHistorial, exportarCSVIndicadores, exportarCSVFilasCrudas, exportarJSON,
   guardarIndPorMunicipio, recuperarIndPorMunicipio,
+  guardarMesPrincipal, recuperarMesPrincipal,
   type HistorialCarga,
 } from "@/lib/dataStore";
 
@@ -155,6 +156,7 @@ export default function PrimeraInfanciaDashboard() {
   const [datosRestaurados, setDatosRestaurados] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [indPorMunicipio, setIndPorMunicipio] = useState<Record<string, IndPorGrupo> | null>(null);
+  const [mesPrincipal, setMesPrincipal] = useState<string | null>(null);
   const [colMunicipio, setColMunicipio] = useState<string>('B');
 
   // ── Detecta la columna del Excel que contiene el municipio ───────────────
@@ -215,6 +217,8 @@ export default function PrimeraInfanciaDashboard() {
     const { indPorMun, colMunicipio: col } = recuperarIndPorMunicipio();
     if (indPorMun) setIndPorMunicipio(indPorMun);
     if (col) setColMunicipio(col);
+    const mesSaved = recuperarMesPrincipal();
+    if (mesSaved) setMesPrincipal(mesSaved);
     setHistorial(recuperarHistorial());
     setMounted(true);
   }, []);
@@ -329,15 +333,19 @@ export default function PrimeraInfanciaDashboard() {
   // ── Mes principal: el seleccionado, o el de mayor actividad en el Excel ───
   const fechaInforme = useMemo(() => {
     if (mesSel !== "Todos") return `${mesSel} ${periodo}`;
-    if (!rawExcelRows) return periodo;
-    const conteos = contarControlesPorMes(rawExcelRows, 4, parseInt(periodo));
-    const mejor = conteos.reduce((a, b) => b.conteo > a.conteo ? b : a, conteos[0]);
-    if (mejor && mejor.conteo > 0) {
-      const cap = mejor.mes.charAt(0) + mejor.mes.slice(1).toLowerCase();
-      return `${cap} ${periodo}`;
+    // Con rawRows: detectar en tiempo real
+    if (rawExcelRows) {
+      const conteos = contarControlesPorMes(rawExcelRows, 4, parseInt(periodo));
+      const mejor = conteos.reduce((a, b) => b.conteo > a.conteo ? b : a, conteos[0]);
+      if (mejor && mejor.conteo > 0) {
+        const cap = mejor.mes.charAt(0) + mejor.mes.slice(1).toLowerCase();
+        return `${cap} ${periodo}`;
+      }
     }
+    // Sin rawRows: usar el mes guardado en localStorage
+    if (mesPrincipal) return `${mesPrincipal} ${periodo}`;
     return periodo;
-  }, [mesSel, periodo, rawExcelRows]);
+  }, [mesSel, periodo, rawExcelRows, mesPrincipal]);
 
   // ── KPIs calculados desde Excel ──────────────────────────────────────────
   // Niños registrados = siempre la población del territorio (datos MUNICIPIOS)
@@ -870,6 +878,14 @@ export default function PrimeraInfanciaDashboard() {
                   const colMun = detectarColumnaMunicipio(rawRows, 4);
                   setColMunicipio(colMun);
                   computarYGuardarPorMunicipio(rawRows, colMun);
+                  // Detectar y guardar mes principal
+                  const conteosMes = contarControlesPorMes(rawRows, 4, parseInt(periodo));
+                  const mejorMes = conteosMes.reduce((a, b) => b.conteo > a.conteo ? b : a, conteosMes[0]);
+                  if (mejorMes && mejorMes.conteo > 0) {
+                    const mesNom = mejorMes.mes.charAt(0) + mejorMes.mes.slice(1).toLowerCase();
+                    setMesPrincipal(mesNom);
+                    guardarMesPrincipal(mesNom);
+                  }
                 }}
                 onGuardar={() => {
                   if (excelCargado && gruposEdadExcel && indicadoresExcel) {

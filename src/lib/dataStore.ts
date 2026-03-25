@@ -15,6 +15,7 @@ const KEY_INDICADORES     = "pi_indicadores";
 const KEY_HISTORIAL       = "pi_historial_cargas";
 const KEY_IND_POR_MUN     = "pi_ind_por_municipio";
 const KEY_COL_MUNICIPIO   = "pi_col_municipio";
+const KEY_MES_PRINCIPAL   = "pi_mes_principal";
 /** Versión del esquema — incrementar para invalidar cache viejo automáticamente */
 const CACHE_VERSION       = "v4";
 const KEY_CACHE_VERSION   = "pi_cache_version";
@@ -121,6 +122,14 @@ export function guardarIndPorMunicipio(
   } catch (e) {
     console.error("[DataStore] Error guardando por municipio:", e);
   }
+}
+
+export function guardarMesPrincipal(mes: string): void {
+  try { localStorage.setItem(KEY_MES_PRINCIPAL, mes); } catch { /* ignore */ }
+}
+
+export function recuperarMesPrincipal(): string | null {
+  try { return localStorage.getItem(KEY_MES_PRINCIPAL); } catch { return null; }
 }
 
 export function recuperarIndPorMunicipio(): {
