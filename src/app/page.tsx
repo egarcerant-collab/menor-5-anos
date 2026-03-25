@@ -22,6 +22,7 @@ import { MUNICIPIOS, GRUPO_COLORS } from "@/components/pi/sampleData";
 import type { GrupoEdadFiltro } from "@/components/pi/types";
 import { calcularGruposEdadDesdeExcel, type GrupoConteoExcel } from "@/lib/gruposEdadExcel";
 import { calcularIndicadoresDesdeExcel, type IndPorGrupo, type IndicadoresGrupoExcel, COLUMNA_MUNICIPIO } from "@/lib/indicadoresExcel";
+import { contarControlesPorMes } from "@/lib/contadorControles";
 import {
   guardarDatos, recuperarDatos, limpiarDatos,
   recuperarHistorial, exportarCSVIndicadores, exportarCSVFilasCrudas, exportarJSON,
@@ -325,6 +326,19 @@ export default function PrimeraInfanciaDashboard() {
 
   const tieneExcel = !!indicadoresExcel;
 
+  // ── Mes principal: el seleccionado, o el de mayor actividad en el Excel ───
+  const fechaInforme = useMemo(() => {
+    if (mesSel !== "Todos") return `${mesSel} ${periodo}`;
+    if (!rawExcelRows) return periodo;
+    const conteos = contarControlesPorMes(rawExcelRows, 4, parseInt(periodo));
+    const mejor = conteos.reduce((a, b) => b.conteo > a.conteo ? b : a, conteos[0]);
+    if (mejor && mejor.conteo > 0) {
+      const cap = mejor.mes.charAt(0) + mejor.mes.slice(1).toLowerCase();
+      return `${cap} ${periodo}`;
+    }
+    return periodo;
+  }, [mesSel, periodo, rawExcelRows]);
+
   // ── KPIs calculados desde Excel ──────────────────────────────────────────
   // Niños registrados = siempre la población del territorio (datos MUNICIPIOS)
   // filtrada por municipios y grupo de edad seleccionados
@@ -524,7 +538,7 @@ export default function PrimeraInfanciaDashboard() {
             </div>
             <GeneradorInformesIPSI
               municipios={municipiosFiltrados}
-              fecha={`${mesSel === "Todos" ? "2026" : mesSel + " 2026"}`}
+              fecha={fechaInforme}
               vigencia={periodo}
               rawExcelRows={rawExcelRows}
               totalNinos={indExcel?.total}
