@@ -8,7 +8,7 @@
  */
 
 // ─── Mapa de columnas del Excel ───────────────────────────────────────────────
-const C = {
+export const C = {
   // Datos del menor
   FECHA_NAC:        'H',   // 8.  Fecha de nacimiento
   ZONA:             'N',   // 14. Zona (urbana/rural disperso)

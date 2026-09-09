@@ -223,6 +223,40 @@ export default function PrimeraInfanciaDashboard() {
     setMounted(true);
   }, []);
 
+  // ── Sincronización automática con Drive: al entrar, trae la matriz más
+  // reciente de la carpeta compartida y actualiza los indicadores. No
+  // reemplaza una sesión con rawRows ya cargados manualmente (para no perder
+  // el detalle interactivo por mes/municipio de esa carga en curso).
+  useEffect(() => {
+    if (rawExcelRows) return;
+    let cancelado = false;
+
+    fetch("/api/drive-sync")
+      .then(r => r.json())
+      .then(data => {
+        if (cancelado || !data?.configured || !data?.found) return;
+
+        const meta = { filename: data.filename, rows: data.rowsCount, fecha: new Date(data.modifiedTime) };
+        setExcelCargado(meta);
+        setGruposEdadExcel(data.grupos);
+        setIndicadoresExcel(data.indicadores);
+        setIndPorMunicipio(data.indPorMunicipio);
+        setColMunicipio(data.colMunicipio);
+        setDatosRestaurados(false);
+        guardarDatos(meta, data.grupos, data.indicadores);
+        guardarIndPorMunicipio(data.indPorMunicipio, data.colMunicipio);
+        if (data.mesPrincipal) {
+          setMesPrincipal(data.mesPrincipal);
+          guardarMesPrincipal(data.mesPrincipal);
+        }
+        setHistorial(recuperarHistorial());
+      })
+      .catch(err => console.error("[DriveSync] Error:", err));
+
+    return () => { cancelado = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Guardar automáticamente cuando cambian los datos
   useEffect(() => {
     if (indicadoresExcel && gruposEdadExcel && excelCargado) {
