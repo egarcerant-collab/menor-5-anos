@@ -101,9 +101,16 @@ export function ExcelLoader({ onDataLoaded, onGuardar }: ExcelLoaderProps) {
       const XLSX = await import("xlsx");
       const buffer = await file.arrayBuffer();
       const workbook = XLSX.read(buffer, { type: "array" });
-      const sheetName = workbook.SheetNames[0];
+      // Las matrices "CONSOLIDADO" oficiales traen los datos reales en la hoja
+      // MODIFICADO (la primera hoja, INSTRUCTIVO, solo tiene el instructivo de
+      // diligenciamiento). Los archivos simples/antiguos de una sola hoja
+      // siguen funcionando igual que antes (fallback a la primera hoja).
+      const esMatrizModificado = workbook.SheetNames.includes("MODIFICADO");
+      const sheetName = esMatrizModificado ? "MODIFICADO" : workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const rows: ExcelRow[] = XLSX.utils.sheet_to_json(worksheet, { defval: null });
+      // En MODIFICADO el encabezado real está en la fila 7 (índice 6); las filas
+      // anteriores son títulos y códigos del formato oficial.
+      const rows: ExcelRow[] = XLSX.utils.sheet_to_json(worksheet, { defval: null, range: esMatrizModificado ? 6 : 0 });
       // rawRows con clave = letra de columna Excel (para acceso por posición, ej: row['AM'])
       const rawRows: Record<string, unknown>[] = XLSX.utils.sheet_to_json(worksheet, { header: 'A', defval: null });
 
