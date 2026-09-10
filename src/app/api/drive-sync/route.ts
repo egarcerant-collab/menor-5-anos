@@ -40,12 +40,11 @@ export async function GET() {
     const grupos = calcularGruposEdadDesdeExcel(rawRows, START_ROW);
     const indicadores = calcularIndicadoresDesdeExcel(rawRows, START_ROW, undefined, colMunicipio);
 
-    const indPorMunicipio: Record<string, ReturnType<typeof calcularIndicadoresDesdeExcel>> = {};
-    for (const mun of MUNICIPIOS) {
-      const nombreNorm = mun.nombre.toUpperCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
-      indPorMunicipio[mun.id] = calcularIndicadoresDesdeExcel(rawRows, START_ROW, [nombreNorm], colMunicipio);
-    }
-
+    // Nota: a propósito NO se recalculan los indicadores por cada uno de los 22
+    // municipios aquí (23 pasadas completas sobre ~44,000 filas excede el
+    // tiempo límite de la función serverless). El filtro por municipio queda
+    // disponible igual en cuanto se hace una carga manual del Excel, que sí
+    // corre en el navegador sin límite de tiempo.
     const conteosMes = contarControlesPorMes(rawRows, START_ROW, new Date().getFullYear());
     const mejorMes = conteosMes.reduce((a, b) => (b.conteo > a.conteo ? b : a), conteosMes[0]);
     const mesPrincipal = mejorMes && mejorMes.conteo > 0
@@ -61,7 +60,6 @@ export async function GET() {
       colMunicipio,
       grupos,
       indicadores,
-      indPorMunicipio,
       mesPrincipal,
     });
   } catch (error: any) {

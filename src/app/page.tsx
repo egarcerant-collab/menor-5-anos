@@ -240,11 +240,9 @@ export default function PrimeraInfanciaDashboard() {
         setExcelCargado(meta);
         setGruposEdadExcel(data.grupos);
         setIndicadoresExcel(data.indicadores);
-        setIndPorMunicipio(data.indPorMunicipio);
         setColMunicipio(data.colMunicipio);
         setDatosRestaurados(false);
         guardarDatos(meta, data.grupos, data.indicadores);
-        guardarIndPorMunicipio(data.indPorMunicipio, data.colMunicipio);
         if (data.mesPrincipal) {
           setMesPrincipal(data.mesPrincipal);
           guardarMesPrincipal(data.mesPrincipal);
