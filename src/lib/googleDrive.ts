@@ -20,10 +20,13 @@ export function isDriveConfigured(): boolean {
 }
 
 function getClient(): JWT {
-  const email = process.env.GOOGLE_DRIVE_CLIENT_EMAIL;
+  const email = (process.env.GOOGLE_DRIVE_CLIENT_EMAIL || "").trim().replace(/^["']|["']$/g, "");
   // Vercel/Next no preservan saltos de línea reales en variables de entorno;
-  // se guardan como "\n" literal y hay que convertirlos de vuelta.
-  const key = (process.env.GOOGLE_DRIVE_PRIVATE_KEY || "").replace(/\\n/g, "\n");
+  // se guardan como "\n" literal y hay que convertirlos de vuelta. También se
+  // toleran comillas envolventes, comunes al copiar el valor directo del JSON
+  // de la cuenta de servicio.
+  const rawKey = (process.env.GOOGLE_DRIVE_PRIVATE_KEY || "").trim().replace(/^["']|["']$/g, "");
+  const key = rawKey.replace(/\\n/g, "\n");
   if (!email || !key) {
     throw new Error("Credenciales de Google Drive no configuradas (GOOGLE_DRIVE_CLIENT_EMAIL / GOOGLE_DRIVE_PRIVATE_KEY).");
   }
