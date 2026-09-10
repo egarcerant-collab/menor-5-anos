@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isDriveConfigured, getLatestMatrizFromDrive } from "@/lib/googleDrive";
-import { parseMatrizWorkbook } from "@/lib/parseMatrizWorkbook";
+import { parseMatrizRawRowsOnly } from "@/lib/parseMatrizWorkbook";
 import { detectarColumnaMunicipio } from "@/lib/municipioDetect";
 import { calcularGruposEdadDesdeExcel } from "@/lib/gruposEdadExcel";
 import { calcularIndicadoresDesdeExcel } from "@/lib/indicadoresExcel";
@@ -34,7 +34,7 @@ export async function GET() {
       return NextResponse.json({ configured: true, found: false });
     }
 
-    const { rawRows } = parseMatrizWorkbook(matriz.buffer);
+    const { rawRows } = parseMatrizRawRowsOnly(matriz.buffer);
     const colMunicipio = detectarColumnaMunicipio(rawRows, START_ROW, MUNICIPIOS);
 
     const grupos = calcularGruposEdadDesdeExcel(rawRows, START_ROW);
