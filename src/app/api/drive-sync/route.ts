@@ -64,8 +64,28 @@ export async function GET() {
   } catch (error: any) {
     console.error("[drive-sync] Error:", error);
     return NextResponse.json(
-      { configured: true, found: false, error: error?.message ?? "Error desconocido" },
+      {
+        configured: true,
+        found: false,
+        error: error?.message ?? "Error desconocido",
+        // Diagnóstico temporal, sin exponer la clave real: solo forma/longitud.
+        keyDebug: diagnosticoClavePrivada(),
+      },
       { status: 500 },
     );
   }
+}
+
+/** Diagnóstico no sensible de GOOGLE_DRIVE_PRIVATE_KEY para depurar el formato guardado en Vercel. */
+function diagnosticoClavePrivada() {
+  const raw = process.env.GOOGLE_DRIVE_PRIVATE_KEY || "";
+  return {
+    length: raw.length,
+    startsWith: raw.slice(0, 15),
+    endsWith: raw.slice(-15),
+    tieneBackslashN: raw.includes("\\n"),
+    tieneNewlineReal: raw.includes("\n"),
+    cantidadBackslashN: (raw.match(/\\n/g) || []).length,
+    cantidadNewlineReal: (raw.match(/\n/g) || []).length,
+  };
 }
