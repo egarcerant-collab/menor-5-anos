@@ -1,0 +1,38 @@
+name: Sincronizar datos de Drive
+
+on:
+  schedule:
+    # Cada 6 horas. Las matrices se actualizan aprox. una vez al mes, así que
+    # esto es más que suficiente para tenerlas frescas sin gastar minutos de
+    # más.
+    - cron: "0 */6 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - name: Descargar y calcular indicadores desde Drive
+        env:
+          GOOGLE_DRIVE_CLIENT_EMAIL: ${{ secrets.GOOGLE_DRIVE_CLIENT_EMAIL }}
+          GOOGLE_DRIVE_PRIVATE_KEY: ${{ secrets.GOOGLE_DRIVE_PRIVATE_KEY }}
+        run: npx tsx scripts/sync-drive-data.ts
+
+      - name: Commit si el resultado cambió
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/data/drive-sync-latest.json
+          git diff --cached --quiet && echo "Sin cambios." || git commit -m "chore: actualizar datos desde Drive [skip ci]"
+          git push

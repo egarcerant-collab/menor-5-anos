@@ -1,92 +1,24 @@
 import { NextResponse } from "next/server";
-import { isDriveConfigured, getLatestMatrizFromDrive } from "@/lib/googleDrive";
-import { parseMatrizRawRowsOnly } from "@/lib/parseMatrizWorkbook";
-import { detectarColumnaMunicipio } from "@/lib/municipioDetect";
-import { calcularGruposEdadDesdeExcel } from "@/lib/gruposEdadExcel";
-import { calcularIndicadoresDesdeExcel } from "@/lib/indicadoresExcel";
-import { contarControlesPorMes } from "@/lib/contadorControles";
-import { MUNICIPIOS } from "@/components/pi/sampleData";
-
-// Siempre buscar el archivo más reciente en Drive, nunca servir una respuesta cacheada.
-export const dynamic = "force-dynamic";
-// La matriz pesa ~35MB y tiene ~44,000 filas: descargarla y calcular los
-// indicadores toma más que el límite por defecto de las funciones serverless.
-export const maxDuration = 60;
-
-const START_ROW = 4;
+import fs from "fs/promises";
+import path from "path";
 
 /**
- * Sincroniza automáticamente con la carpeta de Drive: descarga la matriz
- * CONSOLIDADO más reciente y calcula los indicadores agregados en el
- * servidor. Nunca devuelve filas crudas (nombres, documentos, direcciones o
- * teléfonos de los menores/madres) — solo los conteos e indicadores ya
- * agregados que el dashboard necesita, igual que al restaurar desde
- * localStorage tras una carga manual.
+ * Sirve los indicadores ya calculados por el job periódico de GitHub Actions
+ * (scripts/sync-drive-data.ts), que descarga la matriz más reciente de Drive
+ * y los deja en src/data/drive-sync-latest.json.
+ *
+ * A propósito NO se hace el fetch a Drive ni el parseo aquí: ese trabajo
+ * (~35MB + ~44,000 filas) supera el límite de 60s de las funciones
+ * serverless del plan Hobby de Vercel. Leer un JSON ya calculado es
+ * instantáneo y no tiene ese riesgo.
  */
 export async function GET() {
-  if (!isDriveConfigured()) {
-    return NextResponse.json({ configured: false });
-  }
-
   try {
-    const matriz = await getLatestMatrizFromDrive();
-    if (!matriz) {
-      return NextResponse.json({ configured: true, found: false });
-    }
-
-    const { rawRows } = parseMatrizRawRowsOnly(matriz.buffer);
-    const colMunicipio = detectarColumnaMunicipio(rawRows, START_ROW, MUNICIPIOS);
-
-    const grupos = calcularGruposEdadDesdeExcel(rawRows, START_ROW);
-    const indicadores = calcularIndicadoresDesdeExcel(rawRows, START_ROW, undefined, colMunicipio);
-
-    // Nota: a propósito NO se recalculan los indicadores por cada uno de los 22
-    // municipios aquí (23 pasadas completas sobre ~44,000 filas excede el
-    // tiempo límite de la función serverless). El filtro por municipio queda
-    // disponible igual en cuanto se hace una carga manual del Excel, que sí
-    // corre en el navegador sin límite de tiempo.
-    const conteosMes = contarControlesPorMes(rawRows, START_ROW, new Date().getFullYear());
-    const mejorMes = conteosMes.reduce((a, b) => (b.conteo > a.conteo ? b : a), conteosMes[0]);
-    const mesPrincipal = mejorMes && mejorMes.conteo > 0
-      ? mejorMes.mes.charAt(0) + mejorMes.mes.slice(1).toLowerCase()
-      : null;
-
-    return NextResponse.json({
-      configured: true,
-      found: true,
-      filename: matriz.file.name,
-      modifiedTime: matriz.file.modifiedTime,
-      rowsCount: rawRows.length - START_ROW,
-      colMunicipio,
-      grupos,
-      indicadores,
-      mesPrincipal,
-    });
+    const filePath = path.join(process.cwd(), "src", "data", "drive-sync-latest.json");
+    const raw = await fs.readFile(filePath, "utf-8");
+    return NextResponse.json(JSON.parse(raw));
   } catch (error: any) {
-    console.error("[drive-sync] Error:", error);
-    return NextResponse.json(
-      {
-        configured: true,
-        found: false,
-        error: error?.message ?? "Error desconocido",
-        // Diagnóstico temporal, sin exponer la clave real: solo forma/longitud.
-        keyDebug: diagnosticoClavePrivada(),
-      },
-      { status: 500 },
-    );
+    console.error("[drive-sync] Error leyendo el cache local:", error);
+    return NextResponse.json({ configured: false }, { status: 200 });
   }
-}
-
-/** Diagnóstico no sensible de GOOGLE_DRIVE_PRIVATE_KEY para depurar el formato guardado en Vercel. */
-function diagnosticoClavePrivada() {
-  const raw = process.env.GOOGLE_DRIVE_PRIVATE_KEY || "";
-  return {
-    length: raw.length,
-    startsWith: raw.slice(0, 15),
-    endsWith: raw.slice(-15),
-    tieneBackslashN: raw.includes("\\n"),
-    tieneNewlineReal: raw.includes("\n"),
-    cantidadBackslashN: (raw.match(/\\n/g) || []).length,
-    cantidadNewlineReal: (raw.match(/\n/g) || []).length,
-  };
 }
