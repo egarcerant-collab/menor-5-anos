@@ -19,14 +19,35 @@ export function isDriveConfigured(): boolean {
   return Boolean(process.env.GOOGLE_DRIVE_CLIENT_EMAIL && process.env.GOOGLE_DRIVE_PRIVATE_KEY);
 }
 
+const stripQuotes = (s: string) => s.trim().replace(/^["']|["']$/g, "");
+
+/**
+ * Si en la variable de entorno quedó pegado el archivo .json completo de la
+ * cuenta de servicio (en vez de solo el campo que corresponde), lo detecta y
+ * extrae el campo pedido. Así no depende de que el copy-paste manual sea exacto.
+ */
+function extraerCampo(raw: string, campo: "private_key" | "client_email"): string {
+  const value = stripQuotes(raw);
+  if (value.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(value);
+      if (typeof parsed[campo] === "string") return parsed[campo];
+    } catch {
+      // No era JSON válido, se sigue tratando como el valor directo.
+    }
+  }
+  return value;
+}
+
 function getClient(): JWT {
-  const email = (process.env.GOOGLE_DRIVE_CLIENT_EMAIL || "").trim().replace(/^["']|["']$/g, "");
+  const emailRaw = process.env.GOOGLE_DRIVE_CLIENT_EMAIL || "";
+  const keyRaw = process.env.GOOGLE_DRIVE_PRIVATE_KEY || "";
+
+  const email = extraerCampo(emailRaw, "client_email") || extraerCampo(keyRaw, "client_email");
   // Vercel/Next no preservan saltos de línea reales en variables de entorno;
-  // se guardan como "\n" literal y hay que convertirlos de vuelta. También se
-  // toleran comillas envolventes, comunes al copiar el valor directo del JSON
-  // de la cuenta de servicio.
-  const rawKey = (process.env.GOOGLE_DRIVE_PRIVATE_KEY || "").trim().replace(/^["']|["']$/g, "");
-  const key = rawKey.replace(/\\n/g, "\n");
+  // se guardan como "\n" literal y hay que convertirlos de vuelta.
+  const key = extraerCampo(keyRaw, "private_key").replace(/\\n/g, "\n");
+
   if (!email || !key) {
     throw new Error("Credenciales de Google Drive no configuradas (GOOGLE_DRIVE_CLIENT_EMAIL / GOOGLE_DRIVE_PRIVATE_KEY).");
   }
