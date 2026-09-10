@@ -9,6 +9,9 @@ import { MUNICIPIOS } from "@/components/pi/sampleData";
 
 // Siempre buscar el archivo más reciente en Drive, nunca servir una respuesta cacheada.
 export const dynamic = "force-dynamic";
+// La matriz pesa ~35MB y tiene ~44,000 filas: descargarla y calcular los
+// indicadores toma más que el límite por defecto de las funciones serverless.
+export const maxDuration = 60;
 
 const START_ROW = 4;
 
