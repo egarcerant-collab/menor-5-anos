@@ -9,14 +9,13 @@ import {
 import {
   Baby, Stethoscope, Apple,
   TrendingUp, TrendingDown, MapPin, Calendar, Star,
-  Activity, BarChart2, Filter, Upload,
+  Activity, BarChart2, Filter, Download,
   AlertCircle, Syringe, Scale, FileSpreadsheet
 } from "lucide-react";
 import { MunicipioFilter } from "@/components/pi/MunicipioFilter";
 import { AgeRangeSelector } from "@/components/pi/AgeRangeSelector";
 import { GeneradorInformesIPSI } from "@/components/pi/GeneradorInformesIPSI";
 import { RIASSection } from "@/components/pi/RIASSection";
-import { ExcelLoader } from "@/components/pi/ExcelLoader";
 import { ContadorControles } from "@/components/pi/ContadorControles";
 import { MUNICIPIOS, GRUPO_COLORS } from "@/components/pi/sampleData";
 import type { GrupoEdadFiltro } from "@/components/pi/types";
@@ -158,52 +157,6 @@ export default function PrimeraInfanciaDashboard() {
   const [indPorMunicipio, setIndPorMunicipio] = useState<Record<string, IndPorGrupo> | null>(null);
   const [mesPrincipal, setMesPrincipal] = useState<string | null>(null);
   const [colMunicipio, setColMunicipio] = useState<string>('B');
-
-  // ── Detecta la columna del Excel que contiene el municipio ───────────────
-  function detectarColumnaMunicipio(rawRows: Record<string, unknown>[], startIdx: number): string {
-    // Revisamos más columnas (hasta la S) para cubrir diferentes estructuras de Excel
-    const cols = ['B','C','D','E','F','G','H','A','I','J','K','L','M','N','O','P','Q','R','S'];
-    const nombresNorm = MUNICIPIOS.map(m =>
-      m.nombre.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-    );
-    let bestCol = 'B';
-    let bestScore = 0;
-    const sampleSize = Math.min(500, rawRows.length - startIdx);
-    for (const col of cols) {
-      // Contar cuántos valores únicos distintos matchean municipios conocidos
-      const valoresUnicos = new Set<string>();
-      let score = 0;
-      for (let r = startIdx; r < startIdx + sampleSize; r++) {
-        const val = String(rawRows[r]?.[col] ?? '').trim().toUpperCase()
-          .normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-        if (!val || val.length < 3) continue;
-        // Solo match directo: el valor de la celda CONTIENE el nombre del municipio (no al revés)
-        // Esto evita falsos positivos con strings cortos
-        const matched = nombresNorm.some(n => n.length >= 4 && (val === n || val.includes(n)));
-        if (matched) {
-          score++;
-          valoresUnicos.add(val);
-        }
-      }
-      // Bonus si hay múltiples municipios distintos en la misma columna
-      const diversidad = valoresUnicos.size;
-      const scoreAjustado = score * (diversidad > 1 ? diversidad : 0.1);
-      if (scoreAjustado > bestScore) { bestScore = scoreAjustado; bestCol = col; }
-    }
-    console.log(`[ColMunicipio] Detectada: ${bestCol} (score=${bestScore.toFixed(1)})`);
-    return bestCol;
-  }
-
-  // ── Computa y guarda indicadores pre-segmentados por municipio ───────────
-  function computarYGuardarPorMunicipio(rawRows: Record<string, unknown>[], colMun: string) {
-    const result: Record<string, IndPorGrupo> = {};
-    for (const mun of MUNICIPIOS) {
-      const nombreNorm = mun.nombre.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-      result[mun.id] = calcularIndicadoresDesdeExcel(rawRows, 4, [nombreNorm], colMun);
-    }
-    setIndPorMunicipio(result);
-    guardarIndPorMunicipio(result, colMun);
-  }
 
   // Restaurar desde localStorage al montar
   useEffect(() => {
@@ -525,13 +478,6 @@ export default function PrimeraInfanciaDashboard() {
                 <span className="text-emerald-200 font-medium">{fmtN(excelCargado.rows)} filas · {excelCargado.filename}</span>
               </div>
             )}
-            <button
-              onClick={() => setPestana("datos")}
-              className="flex items-center gap-1.5 glass rounded-xl px-3 py-2 text-sm text-white/90 hover:bg-white/20 transition-colors"
-            >
-              <Upload className="w-3.5 h-3.5" />
-              {excelCargado ? "Actualizar Base" : "Cargar Excel"}
-            </button>
           </div>
         </div>
 
@@ -551,12 +497,11 @@ export default function PrimeraInfanciaDashboard() {
               { id:"rias",       label:"RIAS Nutrición", icon:Apple },
               { id:"vacunacion", label:"Vacunación",     icon:Syringe },
               { id:"desarrollo", label:"C&D",            icon:Stethoscope },
-              { id:"datos",      label:"Cargar Datos",   icon:Upload },
+              { id:"datos",      label:"Exportar",       icon:Download },
             ] as const).map(({ id, label, icon:Icon }) => (
               <button key={id} onClick={() => setPestana(id)} className={tabStyle(id)}>
                 <Icon className="w-3.5 h-3.5" />
                 {label}
-                {id==="datos" && excelCargado && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 ml-0.5" />}
               </button>
             ))}
           </div>
@@ -591,15 +536,9 @@ export default function PrimeraInfanciaDashboard() {
           <div className="flex items-center gap-3 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700 text-sm text-amber-900 dark:text-amber-200">
             <span className="text-2xl flex-shrink-0">⚠️</span>
             <div>
-              <p className="font-bold">Recargue el Excel para filtrar por municipio</p>
-              <p className="text-xs mt-0.5 opacity-80">Los datos guardados muestran el total. Cargue el Excel nuevamente para ver solo los municipios seleccionados.</p>
+              <p className="font-bold">Filtro por municipio no disponible con los datos sincronizados</p>
+              <p className="text-xs mt-0.5 opacity-80">Los datos que trae Drive automáticamente muestran el total general. El filtro por municipio se activará en la próxima actualización.</p>
             </div>
-            <button
-              onClick={() => setPestana("datos")}
-              className="ml-auto flex-shrink-0 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-colors"
-            >
-              Ir a Cargar Excel →
-            </button>
           </div>
         )}
 
@@ -614,7 +553,7 @@ export default function PrimeraInfanciaDashboard() {
         {pestana !== "datos" && !tieneExcel && (
           <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl text-sm text-amber-800 dark:text-amber-300">
             <FileSpreadsheet className="w-5 h-5 flex-shrink-0" />
-            <span>Los indicadores se calculan desde el archivo Excel. <button onClick={() => setPestana("datos")} className="underline font-semibold">Cargue la base de datos</button> para ver los datos reales.</span>
+            <span>Los indicadores se calculan desde la matriz de Drive. Todavía no hay datos sincronizados — se cargarán automáticamente en la próxima actualización.</span>
           </div>
         )}
 
@@ -881,52 +820,6 @@ export default function PrimeraInfanciaDashboard() {
         {/* ─── CARGAR DATOS ─────────────────────────────────────────────────── */}
         {pestana==="datos" && (
           <div className="space-y-5 fade-in-up max-w-4xl mx-auto">
-
-            {/* Cargar Excel */}
-            <div className="bg-card rounded-2xl p-5 border border-border shadow-sm">
-              <SectionTitle icon={FileSpreadsheet}>Cargar Base de Datos Mensual</SectionTitle>
-
-              {datosRestaurados && excelCargado && !rawExcelRows && (
-                <div className="mb-4 flex items-start gap-2.5 p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-700 rounded-xl text-xs text-emerald-800 dark:text-emerald-300">
-                  <span className="text-base">💾</span>
-                  <div>
-                    <span className="font-semibold">Datos guardados restaurados automáticamente</span>
-                    <br />
-                    <span className="opacity-80">{excelCargado.filename} · {fmtN(excelCargado.rows)} registros</span>
-                    <br />
-                    <span className="opacity-70">Cargue un nuevo archivo para actualizar, o use los botones de exportación.</span>
-                  </div>
-                </div>
-              )}
-
-              <ExcelLoader
-                onDataLoaded={(rows, filename, fecha, rawRows) => {
-                  setExcelCargado({ filename, rows: rows.length, fecha });
-                  setRawExcelRows(rawRows);
-                  setGruposEdadExcel(calcularGruposEdadDesdeExcel(rawRows, 4));
-                  setIndicadoresExcel(calcularIndicadoresDesdeExcel(rawRows, 4));
-                  setDatosRestaurados(false);
-                  // Detectar columna municipio y pre-computar por municipio
-                  const colMun = detectarColumnaMunicipio(rawRows, 4);
-                  setColMunicipio(colMun);
-                  computarYGuardarPorMunicipio(rawRows, colMun);
-                  // Detectar y guardar mes principal
-                  const conteosMes = contarControlesPorMes(rawRows, 4, parseInt(periodo));
-                  const mejorMes = conteosMes.reduce((a, b) => b.conteo > a.conteo ? b : a, conteosMes[0]);
-                  if (mejorMes && mejorMes.conteo > 0) {
-                    const mesNom = mejorMes.mes.charAt(0) + mejorMes.mes.slice(1).toLowerCase();
-                    setMesPrincipal(mesNom);
-                    guardarMesPrincipal(mesNom);
-                  }
-                }}
-                onGuardar={() => {
-                  if (excelCargado && gruposEdadExcel && indicadoresExcel) {
-                    guardarDatos(excelCargado, gruposEdadExcel, indicadoresExcel);
-                    setHistorial(recuperarHistorial());
-                  }
-                }}
-              />
-            </div>
 
             {/* Exportar / Base de datos */}
             {indicadoresExcel && gruposEdadExcel && excelCargado && (
