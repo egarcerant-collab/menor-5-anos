@@ -11,6 +11,14 @@ on:
 permissions:
   contents: write
 
+# Nunca dos corridas en paralelo: si el cron y un "Actualizar ahora" manual
+# coinciden, la segunda espera a que termine la primera en vez de chocar al
+# escribir el mismo archivo (rebase no alcanza a resolver un conflicto real
+# de contenido, solo el caso de "main avanzó pero no hay overlap").
+concurrency:
+  group: sync-drive
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -39,15 +47,24 @@ jobs:
             exit 0
           fi
           git commit -m "chore: actualizar datos desde Drive [skip ci]"
-          # main puede haber avanzado mientras corria este job (push manual,
-          # otra corrida en paralelo): reintenta con rebase antes de fallar.
+          # Respaldo del resultado ya calculado, por si un rebase con conflicto
+          # real obliga a resetear el árbol de trabajo (no debería pasar con
+          # el "concurrency" del workflow, pero por si acaso).
+          cp src/data/drive-sync-latest.json /tmp/drive-sync-latest.json
           for i in 1 2 3 4 5; do
             if git push; then
               exit 0
             fi
-            echo "Push rechazado, reintentando con rebase ($i/5)..."
+            echo "Push rechazado, reintentando ($i/5)..."
             git fetch origin main
-            git rebase origin/main
+            if ! git rebase origin/main; then
+              echo "Conflicto real en el rebase, se descarta y se reaplica el resultado calculado."
+              git rebase --abort
+              git reset --hard origin/main
+              cp /tmp/drive-sync-latest.json src/data/drive-sync-latest.json
+              git add src/data/drive-sync-latest.json
+              git commit -m "chore: actualizar datos desde Drive [skip ci]"
+            fi
             sleep 3
           done
           echo "No se pudo subir el commit tras varios intentos."
