@@ -15,199 +15,199 @@
     "Julio": {
       "filename": "MATRIZ SEGUIMIENTO SALUD INFANTIL__AJUSTADA - JULIO 2026 - CONSOLIDADO.xlsx",
       "modifiedTime": "2026-09-03T16:44:28.000Z",
-      "generadoEn": "2026-09-18T14:46:35.195Z",
+      "generadoEn": "2026-09-18T15:05:57.626Z",
       "rowsCount": 44469,
       "colMunicipio": "M",
       "grupos": {
-        "0-6m": 300,
-        "7-12m": 1984,
-        "13-24m": 6030,
-        "25-59m": 21510,
-        "60m+": 14642,
+        "0-6m": 359,
+        "7-12m": 2148,
+        "13-24m": 6114,
+        "25-59m": 21605,
+        "60m+": 14240,
         "sinFecha": 3,
         "total": 44466
       },
       "indicadores": {
         "0-6m": {
-          "total": 300,
+          "total": 359,
           "controles": [
             {
               "nombre": "1 mes",
               "col": "AM",
-              "realizados": 200,
-              "con_peso_talla": 196
+              "realizados": 230,
+              "con_peso_talla": 225
             },
             {
               "nombre": "2-3 meses",
               "col": "AX",
-              "realizados": 151,
-              "con_peso_talla": 151
+              "realizados": 177,
+              "con_peso_talla": 177
             }
           ],
-          "total_controles": 351,
+          "total_controles": 407,
           "clasif": {
-            "adecuado": 162,
-            "riesgo": 52,
+            "adecuado": 191,
+            "riesgo": 58,
             "dnt_moderada": 12,
             "dnt_severa": 0,
-            "sobrepeso": 36,
-            "sin_dato": 38
+            "sobrepeso": 38,
+            "sin_dato": 60
           },
-          "vacunacion_completa": 209,
-          "tamizaje_hemoglobina": 30,
-          "hierro": 74,
-          "desparasitacion": 41,
-          "consejeria_lactancia": 153,
-          "lactancia_exclusiva_6m": 56,
-          "bajo_peso_nacer": 2,
-          "ninos_wayuu": 119,
-          "zona_rural_dispersa": 147
+          "vacunacion_completa": 249,
+          "tamizaje_hemoglobina": 37,
+          "hierro": 105,
+          "desparasitacion": 55,
+          "consejeria_lactancia": 171,
+          "lactancia_exclusiva_6m": 66,
+          "bajo_peso_nacer": 3,
+          "ninos_wayuu": 137,
+          "zona_rural_dispersa": 175
         },
         "7-12m": {
-          "total": 1984,
+          "total": 2148,
           "controles": [
             {
               "nombre": "6-8 meses",
               "col": "BP",
-              "realizados": 427,
-              "con_peso_talla": 426
+              "realizados": 478,
+              "con_peso_talla": 477
             },
             {
               "nombre": "9-11 meses",
               "col": "CA",
-              "realizados": 176,
-              "con_peso_talla": 173
+              "realizados": 227,
+              "con_peso_talla": 224
             }
           ],
-          "total_controles": 603,
+          "total_controles": 705,
           "clasif": {
-            "adecuado": 339,
-            "riesgo": 107,
-            "dnt_moderada": 20,
-            "dnt_severa": 6,
-            "sobrepeso": 43,
-            "sin_dato": 1469
+            "adecuado": 404,
+            "riesgo": 111,
+            "dnt_moderada": 26,
+            "dnt_severa": 7,
+            "sobrepeso": 48,
+            "sin_dato": 1552
           },
-          "vacunacion_completa": 329,
-          "tamizaje_hemoglobina": 241,
-          "hierro": 413,
-          "desparasitacion": 196,
-          "consejeria_lactancia": 198,
-          "lactancia_exclusiva_6m": 106,
-          "bajo_peso_nacer": 3,
-          "ninos_wayuu": 441,
-          "zona_rural_dispersa": 1308
+          "vacunacion_completa": 307,
+          "tamizaje_hemoglobina": 258,
+          "hierro": 417,
+          "desparasitacion": 202,
+          "consejeria_lactancia": 191,
+          "lactancia_exclusiva_6m": 104,
+          "bajo_peso_nacer": 2,
+          "ninos_wayuu": 476,
+          "zona_rural_dispersa": 1444
         },
         "13-24m": {
-          "total": 6030,
+          "total": 6114,
           "controles": [
             {
               "nombre": "12-18 meses",
               "col": "CL",
-              "realizados": 1080,
-              "con_peso_talla": 927
+              "realizados": 1107,
+              "con_peso_talla": 953
             },
             {
               "nombre": "19-23 meses",
               "col": "CW",
-              "realizados": 300,
-              "con_peso_talla": 290
+              "realizados": 345,
+              "con_peso_talla": 335
             }
           ],
-          "total_controles": 1380,
+          "total_controles": 1452,
           "clasif": {
-            "adecuado": 852,
-            "riesgo": 139,
-            "dnt_moderada": 102,
-            "dnt_severa": 19,
-            "sobrepeso": 45,
-            "sin_dato": 4873
+            "adecuado": 890,
+            "riesgo": 147,
+            "dnt_moderada": 108,
+            "dnt_severa": 21,
+            "sobrepeso": 47,
+            "sin_dato": 4901
           },
-          "vacunacion_completa": 588,
-          "tamizaje_hemoglobina": 506,
-          "hierro": 550,
-          "desparasitacion": 235,
-          "consejeria_lactancia": 180,
+          "vacunacion_completa": 601,
+          "tamizaje_hemoglobina": 509,
+          "hierro": 542,
+          "desparasitacion": 224,
+          "consejeria_lactancia": 175,
           "lactancia_exclusiva_6m": 167,
           "bajo_peso_nacer": 3,
-          "ninos_wayuu": 1161,
-          "zona_rural_dispersa": 3999
+          "ninos_wayuu": 1169,
+          "zona_rural_dispersa": 4036
         },
         "25-59m": {
-          "total": 21510,
+          "total": 21605,
           "controles": [
             {
               "nombre": "24-29 meses",
               "col": "DH",
-              "realizados": 1345,
-              "con_peso_talla": 1269
+              "realizados": 1339,
+              "con_peso_talla": 1270
             },
             {
               "nombre": "30-35 meses",
               "col": "DS",
-              "realizados": 1180,
-              "con_peso_talla": 1167
+              "realizados": 1184,
+              "con_peso_talla": 1171
             },
             {
               "nombre": "3 años",
               "col": "ED",
-              "realizados": 1564,
-              "con_peso_talla": 1534
+              "realizados": 1570,
+              "con_peso_talla": 1540
             },
             {
               "nombre": "4 años",
               "col": "EO",
-              "realizados": 1090,
-              "con_peso_talla": 1007
+              "realizados": 1129,
+              "con_peso_talla": 1043
             }
           ],
-          "total_controles": 5179,
+          "total_controles": 5222,
           "clasif": {
-            "adecuado": 2915,
-            "riesgo": 292,
-            "dnt_moderada": 273,
+            "adecuado": 2930,
+            "riesgo": 297,
+            "dnt_moderada": 278,
             "dnt_severa": 3,
-            "sobrepeso": 86,
-            "sin_dato": 17941
+            "sobrepeso": 87,
+            "sin_dato": 18010
           },
-          "vacunacion_completa": 2530,
-          "tamizaje_hemoglobina": 1138,
-          "hierro": 1483,
-          "desparasitacion": 663,
-          "consejeria_lactancia": 252,
-          "lactancia_exclusiva_6m": 330,
+          "vacunacion_completa": 2554,
+          "tamizaje_hemoglobina": 1116,
+          "hierro": 1469,
+          "desparasitacion": 661,
+          "consejeria_lactancia": 246,
+          "lactancia_exclusiva_6m": 327,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 6341,
-          "zona_rural_dispersa": 14375
+          "ninos_wayuu": 6421,
+          "zona_rural_dispersa": 14448
         },
         "60m+": {
-          "total": 14642,
+          "total": 14240,
           "controles": [
             {
               "nombre": "5 años",
               "col": "EZ",
-              "realizados": 1326,
-              "con_peso_talla": 1300
+              "realizados": 1323,
+              "con_peso_talla": 1297
             }
           ],
-          "total_controles": 1326,
+          "total_controles": 1323,
           "clasif": {
             "adecuado": 587,
             "riesgo": 13,
-            "dnt_moderada": 36,
+            "dnt_moderada": 34,
             "dnt_severa": 0,
             "sobrepeso": 23,
-            "sin_dato": 13983
+            "sin_dato": 13583
           },
-          "vacunacion_completa": 1452,
-          "tamizaje_hemoglobina": 276,
-          "hierro": 609,
-          "desparasitacion": 230,
+          "vacunacion_completa": 1397,
+          "tamizaje_hemoglobina": 271,
+          "hierro": 596,
+          "desparasitacion": 223,
           "consejeria_lactancia": 29,
-          "lactancia_exclusiva_6m": 104,
+          "lactancia_exclusiva_6m": 99,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 5115,
-          "zona_rural_dispersa": 10523
+          "ninos_wayuu": 4974,
+          "zona_rural_dispersa": 10249
         },
         "todos": {
           "total": 44466,
@@ -215,78 +215,78 @@
             {
               "nombre": "1 mes",
               "col": "AM",
-              "realizados": 200,
-              "con_peso_talla": 196
+              "realizados": 230,
+              "con_peso_talla": 225
             },
             {
               "nombre": "2-3 meses",
               "col": "AX",
-              "realizados": 151,
-              "con_peso_talla": 151
+              "realizados": 177,
+              "con_peso_talla": 177
             },
             {
               "nombre": "6-8 meses",
               "col": "BP",
-              "realizados": 427,
-              "con_peso_talla": 426
+              "realizados": 478,
+              "con_peso_talla": 477
             },
             {
               "nombre": "9-11 meses",
               "col": "CA",
-              "realizados": 176,
-              "con_peso_talla": 173
+              "realizados": 227,
+              "con_peso_talla": 224
             },
             {
               "nombre": "12-18 meses",
               "col": "CL",
-              "realizados": 1080,
-              "con_peso_talla": 927
+              "realizados": 1107,
+              "con_peso_talla": 953
             },
             {
               "nombre": "19-23 meses",
               "col": "CW",
-              "realizados": 300,
-              "con_peso_talla": 290
+              "realizados": 345,
+              "con_peso_talla": 335
             },
             {
               "nombre": "24-29 meses",
               "col": "DH",
-              "realizados": 1345,
-              "con_peso_talla": 1269
+              "realizados": 1339,
+              "con_peso_talla": 1270
             },
             {
               "nombre": "30-35 meses",
               "col": "DS",
-              "realizados": 1180,
-              "con_peso_talla": 1167
+              "realizados": 1184,
+              "con_peso_talla": 1171
             },
             {
               "nombre": "3 años",
               "col": "ED",
-              "realizados": 1564,
-              "con_peso_talla": 1534
+              "realizados": 1570,
+              "con_peso_talla": 1540
             },
             {
               "nombre": "4 años",
               "col": "EO",
-              "realizados": 1090,
-              "con_peso_talla": 1007
+              "realizados": 1129,
+              "con_peso_talla": 1043
             },
             {
               "nombre": "5 años",
               "col": "EZ",
-              "realizados": 1326,
-              "con_peso_talla": 1300
+              "realizados": 1323,
+              "con_peso_talla": 1297
             }
           ],
-          "total_controles": 8839,
+          "total_controles": 9109,
           "clasif": {
-            "adecuado": 4855,
-            "riesgo": 603,
-            "dnt_moderada": 443,
-            "dnt_severa": 28,
-            "sobrepeso": 233,
-            "sin_dato": 38304
+            "adecuado": 5002,
+            "riesgo": 626,
+            "dnt_moderada": 458,
+            "dnt_severa": 31,
+            "sobrepeso": 243,
+            "sin_dato": 38106
           },
           "vacunacion_completa": 5108,
           "tamizaje_hemoglobina": 2191,
@@ -304,199 +304,199 @@
     "Junio": {
       "filename": "MATRIZ SEGUIMIENTO SALUD INFANTIL__AJUSTADA - JUNIO 2026 - CONSOLIDADO.xlsx",
       "modifiedTime": "2026-09-08T22:15:49.983Z",
-      "generadoEn": "2026-09-18T14:47:23.293Z",
+      "generadoEn": "2026-09-18T15:06:44.925Z",
       "rowsCount": 44250,
       "colMunicipio": "M",
       "grupos": {
-        "0-6m": 164,
-        "7-12m": 1941,
-        "13-24m": 6017,
-        "25-59m": 21493,
-        "60m+": 14632,
+        "0-6m": 190,
+        "7-12m": 2066,
+        "13-24m": 6066,
+        "25-59m": 21567,
+        "60m+": 14358,
         "sinFecha": 3,
         "total": 44247
       },
       "indicadores": {
         "0-6m": {
-          "total": 164,
+          "total": 190,
           "controles": [
             {
               "nombre": "1 mes",
               "col": "AM",
-              "realizados": 122,
-              "con_peso_talla": 121
+              "realizados": 135,
+              "con_peso_talla": 134
             },
             {
               "nombre": "2-3 meses",
               "col": "AX",
-              "realizados": 78,
-              "con_peso_talla": 78
+              "realizados": 89,
+              "con_peso_talla": 89
             }
           ],
-          "total_controles": 200,
+          "total_controles": 224,
           "clasif": {
-            "adecuado": 103,
-            "riesgo": 24,
+            "adecuado": 118,
+            "riesgo": 27,
             "dnt_moderada": 9,
             "dnt_severa": 0,
             "sobrepeso": 17,
-            "sin_dato": 11
+            "sin_dato": 19
           },
-          "vacunacion_completa": 106,
-          "tamizaje_hemoglobina": 25,
-          "hierro": 67,
-          "desparasitacion": 31,
-          "consejeria_lactancia": 84,
-          "lactancia_exclusiva_6m": 44,
-          "bajo_peso_nacer": 1,
-          "ninos_wayuu": 79,
-          "zona_rural_dispersa": 76
+          "vacunacion_completa": 123,
+          "tamizaje_hemoglobina": 30,
+          "hierro": 85,
+          "desparasitacion": 39,
+          "consejeria_lactancia": 91,
+          "lactancia_exclusiva_6m": 50,
+          "bajo_peso_nacer": 2,
+          "ninos_wayuu": 89,
+          "zona_rural_dispersa": 88
         },
         "7-12m": {
-          "total": 1941,
+          "total": 2066,
           "controles": [
             {
               "nombre": "6-8 meses",
               "col": "BP",
-              "realizados": 290,
-              "con_peso_talla": 290
+              "realizados": 325,
+              "con_peso_talla": 325
             },
             {
               "nombre": "9-11 meses",
               "col": "CA",
-              "realizados": 60,
-              "con_peso_talla": 60
+              "realizados": 85,
+              "con_peso_talla": 85
             }
           ],
-          "total_controles": 350,
+          "total_controles": 410,
           "clasif": {
-            "adecuado": 218,
-            "riesgo": 79,
-            "dnt_moderada": 15,
+            "adecuado": 258,
+            "riesgo": 81,
+            "dnt_moderada": 19,
             "dnt_severa": 8,
-            "sobrepeso": 31,
-            "sin_dato": 1590
+            "sobrepeso": 35,
+            "sin_dato": 1665
           },
-          "vacunacion_completa": 283,
-          "tamizaje_hemoglobina": 183,
-          "hierro": 402,
-          "desparasitacion": 159,
-          "consejeria_lactancia": 146,
-          "lactancia_exclusiva_6m": 94,
-          "bajo_peso_nacer": 3,
-          "ninos_wayuu": 449,
-          "zona_rural_dispersa": 1281
+          "vacunacion_completa": 277,
+          "tamizaje_hemoglobina": 193,
+          "hierro": 408,
+          "desparasitacion": 164,
+          "consejeria_lactancia": 144,
+          "lactancia_exclusiva_6m": 92,
+          "bajo_peso_nacer": 2,
+          "ninos_wayuu": 476,
+          "zona_rural_dispersa": 1379
         },
         "13-24m": {
-          "total": 6017,
+          "total": 6066,
           "controles": [
             {
               "nombre": "12-18 meses",
               "col": "CL",
-              "realizados": 843,
-              "con_peso_talla": 724
+              "realizados": 862,
+              "con_peso_talla": 742
             },
             {
               "nombre": "19-23 meses",
               "col": "CW",
-              "realizados": 198,
-              "con_peso_talla": 197
+              "realizados": 227,
+              "con_peso_talla": 226
             }
           ],
-          "total_controles": 1041,
+          "total_controles": 1089,
           "clasif": {
-            "adecuado": 646,
-            "riesgo": 107,
-            "dnt_moderada": 82,
-            "dnt_severa": 19,
+            "adecuado": 672,
+            "riesgo": 114,
+            "dnt_moderada": 84,
+            "dnt_severa": 21,
             "sobrepeso": 31,
-            "sin_dato": 5132
+            "sin_dato": 5144
           },
-          "vacunacion_completa": 573,
-          "tamizaje_hemoglobina": 418,
-          "hierro": 529,
-          "desparasitacion": 206,
+          "vacunacion_completa": 586,
+          "tamizaje_hemoglobina": 423,
+          "hierro": 525,
+          "desparasitacion": 200,
           "consejeria_lactancia": 122,
-          "lactancia_exclusiva_6m": 146,
+          "lactancia_exclusiva_6m": 150,
           "bajo_peso_nacer": 3,
-          "ninos_wayuu": 1162,
-          "zona_rural_dispersa": 3992
+          "ninos_wayuu": 1174,
+          "zona_rural_dispersa": 4019
         },
         "25-59m": {
-          "total": 21493,
+          "total": 21567,
           "controles": [
             {
               "nombre": "24-29 meses",
               "col": "DH",
-              "realizados": 1062,
-              "con_peso_talla": 1019
+              "realizados": 1057,
+              "con_peso_talla": 1020
             },
             {
               "nombre": "30-35 meses",
               "col": "DS",
-              "realizados": 973,
-              "con_peso_talla": 967
+              "realizados": 976,
+              "con_peso_talla": 970
             },
             {
               "nombre": "3 años",
               "col": "ED",
-              "realizados": 1225,
-              "con_peso_talla": 1217
+              "realizados": 1228,
+              "con_peso_talla": 1220
             },
             {
               "nombre": "4 años",
               "col": "EO",
-              "realizados": 860,
-              "con_peso_talla": 846
+              "realizados": 885,
+              "con_peso_talla": 871
             }
           ],
-          "total_controles": 4120,
+          "total_controles": 4146,
           "clasif": {
-            "adecuado": 2385,
-            "riesgo": 243,
-            "dnt_moderada": 233,
+            "adecuado": 2396,
+            "riesgo": 244,
+            "dnt_moderada": 237,
             "dnt_severa": 2,
             "sobrepeso": 58,
-            "sin_dato": 18572
+            "sin_dato": 18630
           },
-          "vacunacion_completa": 2518,
-          "tamizaje_hemoglobina": 1004,
-          "hierro": 1348,
-          "desparasitacion": 582,
-          "consejeria_lactancia": 197,
-          "lactancia_exclusiva_6m": 206,
+          "vacunacion_completa": 2535,
+          "tamizaje_hemoglobina": 985,
+          "hierro": 1338,
+          "desparasitacion": 578,
+          "consejeria_lactancia": 192,
+          "lactancia_exclusiva_6m": 200,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 6338,
-          "zona_rural_dispersa": 14369
+          "ninos_wayuu": 6387,
+          "zona_rural_dispersa": 14415
         },
         "60m+": {
-          "total": 14632,
+          "total": 14358,
           "controles": [
             {
               "nombre": "5 años",
               "col": "EZ",
-              "realizados": 1051,
-              "con_peso_talla": 1044
+              "realizados": 1049,
+              "con_peso_talla": 1042
             }
           ],
-          "total_controles": 1051,
+          "total_controles": 1049,
           "clasif": {
             "adecuado": 418,
             "riesgo": 10,
-            "dnt_moderada": 34,
+            "dnt_moderada": 33,
             "dnt_severa": 0,
             "sobrepeso": 16,
-            "sin_dato": 14154
+            "sin_dato": 13881
           },
-          "vacunacion_completa": 1445,
-          "tamizaje_hemoglobina": 229,
-          "hierro": 569,
-          "desparasitacion": 191,
+          "vacunacion_completa": 1404,
+          "tamizaje_hemoglobina": 228,
+          "hierro": 559,
+          "desparasitacion": 188,
           "consejeria_lactancia": 21,
-          "lactancia_exclusiva_6m": 61,
+          "lactancia_exclusiva_6m": 59,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 5113,
-          "zona_rural_dispersa": 10518
+          "ninos_wayuu": 5015,
+          "zona_rural_dispersa": 10335
         },
         "todos": {
           "total": 44247,
@@ -504,78 +504,78 @@
             {
               "nombre": "1 mes",
               "col": "AM",
-              "realizados": 122,
-              "con_peso_talla": 121
+              "realizados": 135,
+              "con_peso_talla": 134
             },
             {
               "nombre": "2-3 meses",
               "col": "AX",
-              "realizados": 78,
-              "con_peso_talla": 78
+              "realizados": 89,
+              "con_peso_talla": 89
             },
             {
               "nombre": "6-8 meses",
               "col": "BP",
-              "realizados": 290,
-              "con_peso_talla": 290
+              "realizados": 325,
+              "con_peso_talla": 325
             },
             {
               "nombre": "9-11 meses",
               "col": "CA",
-              "realizados": 60,
-              "con_peso_talla": 60
+              "realizados": 85,
+              "con_peso_talla": 85
             },
             {
               "nombre": "12-18 meses",
               "col": "CL",
-              "realizados": 843,
-              "con_peso_talla": 724
+              "realizados": 862,
+              "con_peso_talla": 742
             },
             {
               "nombre": "19-23 meses",
               "col": "CW",
-              "realizados": 198,
-              "con_peso_talla": 197
+              "realizados": 227,
+              "con_peso_talla": 226
             },
             {
               "nombre": "24-29 meses",
               "col": "DH",
-              "realizados": 1062,
-              "con_peso_talla": 1019
+              "realizados": 1057,
+              "con_peso_talla": 1020
             },
             {
               "nombre": "30-35 meses",
               "col": "DS",
-              "realizados": 973,
-              "con_peso_talla": 967
+              "realizados": 976,
+              "con_peso_talla": 970
             },
             {
               "nombre": "3 años",
               "col": "ED",
-              "realizados": 1225,
-              "con_peso_talla": 1217
+              "realizados": 1228,
+              "con_peso_talla": 1220
             },
             {
               "nombre": "4 años",
               "col": "EO",
-              "realizados": 860,
-              "con_peso_talla": 846
+              "realizados": 885,
+              "con_peso_talla": 871
             },
             {
               "nombre": "5 años",
               "col": "EZ",
-              "realizados": 1051,
-              "con_peso_talla": 1044
+              "realizados": 1049,
+              "con_peso_talla": 1042
             }
           ],
-          "total_controles": 6762,
+          "total_controles": 6918,
           "clasif": {
-            "adecuado": 3770,
-            "riesgo": 463,
-            "dnt_moderada": 373,
-            "dnt_severa": 29,
-            "sobrepeso": 153,
-            "sin_dato": 39459
+            "adecuado": 3862,
+            "riesgo": 476,
+            "dnt_moderada": 382,
+            "dnt_severa": 31,
+            "sobrepeso": 157,
+            "sin_dato": 39339
           },
           "vacunacion_completa": 4925,
           "tamizaje_hemoglobina": 1859,
@@ -593,199 +593,199 @@
     "Mayo": {
       "filename": "MATRIZ SEGUIMIENTO SALUD INFANTIL__AJUSTADA - MAYO 2026 - CONSOLIDADO.xlsx",
       "modifiedTime": "2026-09-08T22:14:33.879Z",
-      "generadoEn": "2026-09-18T14:48:09.149Z",
+      "generadoEn": "2026-09-18T15:07:33.049Z",
       "rowsCount": 44158,
       "colMunicipio": "M",
       "grupos": {
-        "0-6m": 113,
-        "7-12m": 1910,
-        "13-24m": 6013,
-        "25-59m": 21487,
-        "60m+": 14632,
+        "0-6m": 132,
+        "7-12m": 2041,
+        "13-24m": 6063,
+        "25-59m": 21561,
+        "60m+": 14358,
         "sinFecha": 3,
         "total": 44155
       },
       "indicadores": {
         "0-6m": {
-          "total": 113,
+          "total": 132,
           "controles": [
             {
               "nombre": "1 mes",
               "col": "AM",
-              "realizados": 95,
-              "con_peso_talla": 94
+              "realizados": 108,
+              "con_peso_talla": 107
             },
             {
               "nombre": "2-3 meses",
               "col": "AX",
-              "realizados": 26,
-              "con_peso_talla": 26
+              "realizados": 36,
+              "con_peso_talla": 36
             }
           ],
-          "total_controles": 121,
+          "total_controles": 144,
           "clasif": {
-            "adecuado": 69,
-            "riesgo": 18,
+            "adecuado": 84,
+            "riesgo": 21,
             "dnt_moderada": 6,
             "dnt_severa": 0,
             "sobrepeso": 9,
-            "sin_dato": 11
+            "sin_dato": 12
           },
-          "vacunacion_completa": 79,
-          "tamizaje_hemoglobina": 19,
-          "hierro": 58,
-          "desparasitacion": 23,
-          "consejeria_lactancia": 70,
-          "lactancia_exclusiva_6m": 41,
-          "bajo_peso_nacer": 1,
-          "ninos_wayuu": 59,
-          "zona_rural_dispersa": 37
+          "vacunacion_completa": 92,
+          "tamizaje_hemoglobina": 24,
+          "hierro": 76,
+          "desparasitacion": 31,
+          "consejeria_lactancia": 77,
+          "lactancia_exclusiva_6m": 47,
+          "bajo_peso_nacer": 2,
+          "ninos_wayuu": 67,
+          "zona_rural_dispersa": 42
         },
         "7-12m": {
-          "total": 1910,
+          "total": 2041,
           "controles": [
             {
               "nombre": "6-8 meses",
               "col": "BP",
-              "realizados": 194,
-              "con_peso_talla": 194
+              "realizados": 228,
+              "con_peso_talla": 228
             },
             {
               "nombre": "9-11 meses",
               "col": "CA",
-              "realizados": 8,
-              "con_peso_talla": 8
+              "realizados": 21,
+              "con_peso_talla": 21
             }
           ],
-          "total_controles": 202,
+          "total_controles": 249,
           "clasif": {
-            "adecuado": 141,
-            "riesgo": 54,
-            "dnt_moderada": 11,
-            "dnt_severa": 5,
-            "sobrepeso": 24,
-            "sin_dato": 1675
+            "adecuado": 175,
+            "riesgo": 55,
+            "dnt_moderada": 13,
+            "dnt_severa": 6,
+            "sobrepeso": 28,
+            "sin_dato": 1764
           },
-          "vacunacion_completa": 268,
-          "tamizaje_hemoglobina": 157,
-          "hierro": 400,
-          "desparasitacion": 158,
-          "consejeria_lactancia": 132,
-          "lactancia_exclusiva_6m": 93,
-          "bajo_peso_nacer": 3,
-          "ninos_wayuu": 439,
-          "zona_rural_dispersa": 1231
+          "vacunacion_completa": 265,
+          "tamizaje_hemoglobina": 165,
+          "hierro": 406,
+          "desparasitacion": 163,
+          "consejeria_lactancia": 129,
+          "lactancia_exclusiva_6m": 91,
+          "bajo_peso_nacer": 2,
+          "ninos_wayuu": 468,
+          "zona_rural_dispersa": 1333
         },
         "13-24m": {
-          "total": 6013,
+          "total": 6063,
           "controles": [
             {
               "nombre": "12-18 meses",
               "col": "CL",
-              "realizados": 667,
-              "con_peso_talla": 533
+              "realizados": 685,
+              "con_peso_talla": 550
             },
             {
               "nombre": "19-23 meses",
               "col": "CW",
-              "realizados": 113,
-              "con_peso_talla": 112
+              "realizados": 133,
+              "con_peso_talla": 132
             }
           ],
-          "total_controles": 780,
+          "total_controles": 818,
           "clasif": {
-            "adecuado": 470,
-            "riesgo": 82,
-            "dnt_moderada": 56,
-            "dnt_severa": 14,
+            "adecuado": 489,
+            "riesgo": 89,
+            "dnt_moderada": 57,
+            "dnt_severa": 16,
             "sobrepeso": 25,
-            "sin_dato": 5366
+            "sin_dato": 5387
           },
-          "vacunacion_completa": 571,
-          "tamizaje_hemoglobina": 365,
-          "hierro": 525,
-          "desparasitacion": 162,
-          "consejeria_lactancia": 107,
-          "lactancia_exclusiva_6m": 143,
+          "vacunacion_completa": 585,
+          "tamizaje_hemoglobina": 370,
+          "hierro": 521,
+          "desparasitacion": 154,
+          "consejeria_lactancia": 108,
+          "lactancia_exclusiva_6m": 147,
           "bajo_peso_nacer": 3,
-          "ninos_wayuu": 1161,
-          "zona_rural_dispersa": 3975
+          "ninos_wayuu": 1173,
+          "zona_rural_dispersa": 4005
         },
         "25-59m": {
-          "total": 21487,
+          "total": 21561,
           "controles": [
             {
               "nombre": "24-29 meses",
               "col": "DH",
-              "realizados": 800,
-              "con_peso_talla": 757
+              "realizados": 795,
+              "con_peso_talla": 758
             },
             {
               "nombre": "30-35 meses",
               "col": "DS",
-              "realizados": 769,
-              "con_peso_talla": 765
+              "realizados": 771,
+              "con_peso_talla": 767
             },
             {
               "nombre": "3 años",
               "col": "ED",
-              "realizados": 920,
-              "con_peso_talla": 913
+              "realizados": 922,
+              "con_peso_talla": 915
             },
             {
               "nombre": "4 años",
               "col": "EO",
-              "realizados": 642,
-              "con_peso_talla": 629
+              "realizados": 663,
+              "con_peso_talla": 650
             }
           ],
-          "total_controles": 3131,
+          "total_controles": 3151,
           "clasif": {
-            "adecuado": 1761,
-            "riesgo": 208,
-            "dnt_moderada": 181,
+            "adecuado": 1771,
+            "riesgo": 209,
+            "dnt_moderada": 185,
             "dnt_severa": 0,
             "sobrepeso": 46,
-            "sin_dato": 19291
+            "sin_dato": 19350
           },
-          "vacunacion_completa": 2514,
-          "tamizaje_hemoglobina": 835,
-          "hierro": 1304,
-          "desparasitacion": 449,
-          "consejeria_lactancia": 157,
-          "lactancia_exclusiva_6m": 198,
+          "vacunacion_completa": 2531,
+          "tamizaje_hemoglobina": 817,
+          "hierro": 1294,
+          "desparasitacion": 447,
+          "consejeria_lactancia": 152,
+          "lactancia_exclusiva_6m": 192,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 6338,
-          "zona_rural_dispersa": 14357
+          "ninos_wayuu": 6387,
+          "zona_rural_dispersa": 14403
         },
         "60m+": {
-          "total": 14632,
+          "total": 14358,
           "controles": [
             {
               "nombre": "5 años",
               "col": "EZ",
-              "realizados": 796,
-              "con_peso_talla": 792
+              "realizados": 794,
+              "con_peso_talla": 790
             }
           ],
-          "total_controles": 796,
+          "total_controles": 794,
           "clasif": {
             "adecuado": 374,
             "riesgo": 10,
-            "dnt_moderada": 34,
+            "dnt_moderada": 33,
             "dnt_severa": 0,
             "sobrepeso": 12,
-            "sin_dato": 14202
+            "sin_dato": 13929
           },
-          "vacunacion_completa": 1445,
+          "vacunacion_completa": 1404,
           "tamizaje_hemoglobina": 199,
-          "hierro": 564,
-          "desparasitacion": 161,
+          "hierro": 554,
+          "desparasitacion": 158,
           "consejeria_lactancia": 17,
-          "lactancia_exclusiva_6m": 58,
+          "lactancia_exclusiva_6m": 56,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 5113,
-          "zona_rural_dispersa": 10517
+          "ninos_wayuu": 5015,
+          "zona_rural_dispersa": 10334
         },
         "todos": {
           "total": 44155,
@@ -793,78 +793,78 @@
             {
               "nombre": "1 mes",
               "col": "AM",
-              "realizados": 95,
-              "con_peso_talla": 94
+              "realizados": 108,
+              "con_peso_talla": 107
             },
             {
               "nombre": "2-3 meses",
               "col": "AX",
-              "realizados": 26,
-              "con_peso_talla": 26
+              "realizados": 36,
+              "con_peso_talla": 36
             },
             {
               "nombre": "6-8 meses",
               "col": "BP",
-              "realizados": 194,
-              "con_peso_talla": 194
+              "realizados": 228,
+              "con_peso_talla": 228
             },
             {
               "nombre": "9-11 meses",
               "col": "CA",
-              "realizados": 8,
-              "con_peso_talla": 8
+              "realizados": 21,
+              "con_peso_talla": 21
             },
             {
               "nombre": "12-18 meses",
               "col": "CL",
-              "realizados": 667,
-              "con_peso_talla": 533
+              "realizados": 685,
+              "con_peso_talla": 550
             },
             {
               "nombre": "19-23 meses",
               "col": "CW",
-              "realizados": 113,
-              "con_peso_talla": 112
+              "realizados": 133,
+              "con_peso_talla": 132
             },
             {
               "nombre": "24-29 meses",
               "col": "DH",
-              "realizados": 800,
-              "con_peso_talla": 757
+              "realizados": 795,
+              "con_peso_talla": 758
             },
             {
               "nombre": "30-35 meses",
               "col": "DS",
-              "realizados": 769,
-              "con_peso_talla": 765
+              "realizados": 771,
+              "con_peso_talla": 767
             },
             {
               "nombre": "3 años",
               "col": "ED",
-              "realizados": 920,
-              "con_peso_talla": 913
+              "realizados": 922,
+              "con_peso_talla": 915
             },
             {
               "nombre": "4 años",
               "col": "EO",
-              "realizados": 642,
-              "con_peso_talla": 629
+              "realizados": 663,
+              "con_peso_talla": 650
             },
             {
               "nombre": "5 años",
               "col": "EZ",
-              "realizados": 796,
-              "con_peso_talla": 792
+              "realizados": 794,
+              "con_peso_talla": 790
             }
           ],
-          "total_controles": 5030,
+          "total_controles": 5156,
           "clasif": {
-            "adecuado": 2815,
-            "riesgo": 372,
-            "dnt_moderada": 288,
-            "dnt_severa": 19,
-            "sobrepeso": 116,
-            "sin_dato": 40545
+            "adecuado": 2893,
+            "riesgo": 384,
+            "dnt_moderada": 294,
+            "dnt_severa": 22,
+            "sobrepeso": 120,
+            "sin_dato": 40442
           },
           "vacunacion_completa": 4877,
           "tamizaje_hemoglobina": 1575,
@@ -882,199 +882,199 @@
     "Abril": {
       "filename": "MATRIZ SEGUIMIENTO SALUD INFANTIL__AJUSTADA - ABRIL 2026 - CONSOLIDADO.xlsx",
       "modifiedTime": "2026-06-24T15:02:40.000Z",
-      "generadoEn": "2026-09-18T14:48:57.250Z",
+      "generadoEn": "2026-09-18T15:08:19.416Z",
       "rowsCount": 44034,
       "colMunicipio": "M",
       "grupos": {
-        "0-6m": 56,
-        "7-12m": 1868,
-        "13-24m": 6002,
-        "25-59m": 21474,
-        "60m+": 14631,
+        "0-6m": 486,
+        "7-12m": 2635,
+        "13-24m": 6285,
+        "25-59m": 22097,
+        "60m+": 12528,
         "sinFecha": 3,
         "total": 44031
       },
       "indicadores": {
         "0-6m": {
-          "total": 56,
+          "total": 486,
           "controles": [
             {
               "nombre": "1 mes",
               "col": "AM",
-              "realizados": 52,
-              "con_peso_talla": 52
+              "realizados": 169,
+              "con_peso_talla": 159
             },
             {
               "nombre": "2-3 meses",
               "col": "AX",
-              "realizados": 2,
-              "con_peso_talla": 2
+              "realizados": 140,
+              "con_peso_talla": 140
             }
           ],
-          "total_controles": 54,
+          "total_controles": 309,
           "clasif": {
-            "adecuado": 33,
-            "riesgo": 8,
-            "dnt_moderada": 2,
+            "adecuado": 147,
+            "riesgo": 50,
+            "dnt_moderada": 7,
             "dnt_severa": 0,
-            "sobrepeso": 4,
-            "sin_dato": 9
+            "sobrepeso": 30,
+            "sin_dato": 252
           },
-          "vacunacion_completa": 45,
-          "tamizaje_hemoglobina": 11,
-          "hierro": 48,
-          "desparasitacion": 16,
-          "consejeria_lactancia": 36,
-          "lactancia_exclusiva_6m": 22,
-          "bajo_peso_nacer": 0,
-          "ninos_wayuu": 18,
-          "zona_rural_dispersa": 11
+          "vacunacion_completa": 162,
+          "tamizaje_hemoglobina": 51,
+          "hierro": 222,
+          "desparasitacion": 84,
+          "consejeria_lactancia": 99,
+          "lactancia_exclusiva_6m": 65,
+          "bajo_peso_nacer": 3,
+          "ninos_wayuu": 126,
+          "zona_rural_dispersa": 231
         },
         "7-12m": {
-          "total": 1868,
+          "total": 2635,
           "controles": [
             {
               "nombre": "6-8 meses",
               "col": "BP",
-              "realizados": 102,
-              "con_peso_talla": 102
+              "realizados": 298,
+              "con_peso_talla": 297
             },
             {
               "nombre": "9-11 meses",
               "col": "CA",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 83,
+              "con_peso_talla": 83
             }
           ],
-          "total_controles": 102,
+          "total_controles": 381,
           "clasif": {
-            "adecuado": 86,
-            "riesgo": 34,
-            "dnt_moderada": 6,
+            "adecuado": 270,
+            "riesgo": 67,
+            "dnt_moderada": 13,
             "dnt_severa": 0,
-            "sobrepeso": 16,
-            "sin_dato": 1726
+            "sobrepeso": 34,
+            "sin_dato": 2251
           },
-          "vacunacion_completa": 244,
-          "tamizaje_hemoglobina": 135,
-          "hierro": 394,
-          "desparasitacion": 143,
-          "consejeria_lactancia": 102,
-          "lactancia_exclusiva_6m": 79,
-          "bajo_peso_nacer": 3,
-          "ninos_wayuu": 411,
-          "zona_rural_dispersa": 1210
+          "vacunacion_completa": 242,
+          "tamizaje_hemoglobina": 167,
+          "hierro": 358,
+          "desparasitacion": 120,
+          "consejeria_lactancia": 60,
+          "lactancia_exclusiva_6m": 73,
+          "bajo_peso_nacer": 0,
+          "ninos_wayuu": 545,
+          "zona_rural_dispersa": 1872
         },
         "13-24m": {
-          "total": 6002,
+          "total": 6285,
           "controles": [
             {
               "nombre": "12-18 meses",
               "col": "CL",
-              "realizados": 532,
-              "con_peso_talla": 530
+              "realizados": 647,
+              "con_peso_talla": 646
             },
             {
               "nombre": "19-23 meses",
               "col": "CW",
-              "realizados": 65,
-              "con_peso_talla": 64
+              "realizados": 149,
+              "con_peso_talla": 148
             }
           ],
-          "total_controles": 597,
+          "total_controles": 796,
           "clasif": {
-            "adecuado": 363,
-            "riesgo": 62,
-            "dnt_moderada": 35,
+            "adecuado": 478,
+            "riesgo": 78,
+            "dnt_moderada": 46,
             "dnt_severa": 0,
-            "sobrepeso": 21,
-            "sin_dato": 5521
+            "sobrepeso": 29,
+            "sin_dato": 5654
           },
-          "vacunacion_completa": 570,
-          "tamizaje_hemoglobina": 309,
-          "hierro": 500,
-          "desparasitacion": 156,
-          "consejeria_lactancia": 81,
-          "lactancia_exclusiva_6m": 119,
+          "vacunacion_completa": 578,
+          "tamizaje_hemoglobina": 306,
+          "hierro": 442,
+          "desparasitacion": 139,
+          "consejeria_lactancia": 68,
+          "lactancia_exclusiva_6m": 98,
           "bajo_peso_nacer": 3,
-          "ninos_wayuu": 1154,
-          "zona_rural_dispersa": 3970
+          "ninos_wayuu": 1168,
+          "zona_rural_dispersa": 4040
         },
         "25-59m": {
-          "total": 21474,
+          "total": 22097,
           "controles": [
             {
               "nombre": "24-29 meses",
               "col": "DH",
-              "realizados": 726,
-              "con_peso_talla": 724
+              "realizados": 733,
+              "con_peso_talla": 731
             },
             {
               "nombre": "30-35 meses",
               "col": "DS",
-              "realizados": 583,
-              "con_peso_talla": 580
+              "realizados": 591,
+              "con_peso_talla": 588
             },
             {
               "nombre": "3 años",
               "col": "ED",
-              "realizados": 723,
-              "con_peso_talla": 715
+              "realizados": 737,
+              "con_peso_talla": 729
             },
             {
               "nombre": "4 años",
               "col": "EO",
-              "realizados": 525,
-              "con_peso_talla": 513
+              "realizados": 609,
+              "con_peso_talla": 597
             }
           ],
-          "total_controles": 2557,
+          "total_controles": 2670,
           "clasif": {
-            "adecuado": 1377,
-            "riesgo": 173,
-            "dnt_moderada": 165,
+            "adecuado": 1439,
+            "riesgo": 182,
+            "dnt_moderada": 180,
             "dnt_severa": 0,
             "sobrepeso": 39,
-            "sin_dato": 19720
+            "sin_dato": 20257
           },
-          "vacunacion_completa": 2507,
-          "tamizaje_hemoglobina": 694,
-          "hierro": 1208,
-          "desparasitacion": 435,
-          "consejeria_lactancia": 109,
-          "lactancia_exclusiva_6m": 175,
+          "vacunacion_completa": 2646,
+          "tamizaje_hemoglobina": 642,
+          "hierro": 1189,
+          "desparasitacion": 424,
+          "consejeria_lactancia": 102,
+          "lactancia_exclusiva_6m": 167,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 6333,
-          "zona_rural_dispersa": 14354
+          "ninos_wayuu": 6942,
+          "zona_rural_dispersa": 14851
         },
         "60m+": {
-          "total": 14631,
+          "total": 12528,
           "controles": [
             {
               "nombre": "5 años",
               "col": "EZ",
-              "realizados": 628,
-              "con_peso_talla": 627
+              "realizados": 613,
+              "con_peso_talla": 612
             }
           ],
-          "total_controles": 628,
+          "total_controles": 613,
           "clasif": {
-            "adecuado": 343,
-            "riesgo": 7,
-            "dnt_moderada": 33,
+            "adecuado": 338,
+            "riesgo": 6,
+            "dnt_moderada": 27,
             "dnt_severa": 0,
             "sobrepeso": 11,
-            "sin_dato": 14237
+            "sin_dato": 12146
           },
-          "vacunacion_completa": 1444,
-          "tamizaje_hemoglobina": 160,
-          "hierro": 524,
-          "desparasitacion": 149,
-          "consejeria_lactancia": 14,
-          "lactancia_exclusiva_6m": 55,
+          "vacunacion_completa": 1182,
+          "tamizaje_hemoglobina": 143,
+          "hierro": 463,
+          "desparasitacion": 132,
+          "consejeria_lactancia": 13,
+          "lactancia_exclusiva_6m": 47,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 5113,
-          "zona_rural_dispersa": 10516
+          "ninos_wayuu": 4248,
+          "zona_rural_dispersa": 9067
         },
         "todos": {
           "total": 44031,
@@ -1082,78 +1082,78 @@
             {
               "nombre": "1 mes",
               "col": "AM",
-              "realizados": 52,
-              "con_peso_talla": 52
+              "realizados": 169,
+              "con_peso_talla": 159
             },
             {
               "nombre": "2-3 meses",
               "col": "AX",
-              "realizados": 2,
-              "con_peso_talla": 2
+              "realizados": 140,
+              "con_peso_talla": 140
             },
             {
               "nombre": "6-8 meses",
               "col": "BP",
-              "realizados": 102,
-              "con_peso_talla": 102
+              "realizados": 298,
+              "con_peso_talla": 297
             },
             {
               "nombre": "9-11 meses",
               "col": "CA",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 83,
+              "con_peso_talla": 83
             },
             {
               "nombre": "12-18 meses",
               "col": "CL",
-              "realizados": 532,
-              "con_peso_talla": 530
+              "realizados": 647,
+              "con_peso_talla": 646
             },
             {
               "nombre": "19-23 meses",
               "col": "CW",
-              "realizados": 65,
-              "con_peso_talla": 64
+              "realizados": 149,
+              "con_peso_talla": 148
             },
             {
               "nombre": "24-29 meses",
               "col": "DH",
-              "realizados": 726,
-              "con_peso_talla": 724
+              "realizados": 733,
+              "con_peso_talla": 731
             },
             {
               "nombre": "30-35 meses",
               "col": "DS",
-              "realizados": 583,
-              "con_peso_talla": 580
+              "realizados": 591,
+              "con_peso_talla": 588
             },
             {
               "nombre": "3 años",
               "col": "ED",
-              "realizados": 723,
-              "con_peso_talla": 715
+              "realizados": 737,
+              "con_peso_talla": 729
             },
             {
               "nombre": "4 años",
               "col": "EO",
-              "realizados": 525,
-              "con_peso_talla": 513
+              "realizados": 609,
+              "con_peso_talla": 597
             },
             {
               "nombre": "5 años",
               "col": "EZ",
-              "realizados": 628,
-              "con_peso_talla": 627
+              "realizados": 613,
+              "con_peso_talla": 612
             }
           ],
-          "total_controles": 3938,
+          "total_controles": 4769,
           "clasif": {
-            "adecuado": 2202,
-            "riesgo": 284,
-            "dnt_moderada": 241,
+            "adecuado": 2672,
+            "riesgo": 383,
+            "dnt_moderada": 273,
             "dnt_severa": 0,
-            "sobrepeso": 91,
-            "sin_dato": 41213
+            "sobrepeso": 143,
+            "sin_dato": 40560
           },
           "vacunacion_completa": 4810,
           "tamizaje_hemoglobina": 1309,
@@ -1171,199 +1171,199 @@
     "Marzo": {
       "filename": "MATRIZ SEGUIMIENTO SALUD INFANTIL__AJUSTADA - MARZO 2026 - CONSOLIDADO.xlsx",
       "modifiedTime": "2026-05-28T19:48:30.000Z",
-      "generadoEn": "2026-09-18T14:49:43.977Z",
+      "generadoEn": "2026-09-18T15:09:04.023Z",
       "rowsCount": 43864,
       "colMunicipio": "M",
       "grupos": {
-        "0-6m": 22,
-        "7-12m": 1770,
-        "13-24m": 5985,
-        "25-59m": 21455,
-        "60m+": 14629,
+        "0-6m": 719,
+        "7-12m": 2627,
+        "13-24m": 6333,
+        "25-59m": 22272,
+        "60m+": 11910,
         "sinFecha": 3,
         "total": 43861
       },
       "indicadores": {
         "0-6m": {
-          "total": 22,
+          "total": 719,
           "controles": [
             {
               "nombre": "1 mes",
               "col": "AM",
-              "realizados": 16,
-              "con_peso_talla": 16
+              "realizados": 106,
+              "con_peso_talla": 96
             },
             {
               "nombre": "2-3 meses",
               "col": "AX",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 126,
+              "con_peso_talla": 126
             }
           ],
-          "total_controles": 16,
+          "total_controles": 232,
           "clasif": {
-            "adecuado": 11,
-            "riesgo": 0,
-            "dnt_moderada": 1,
+            "adecuado": 110,
+            "riesgo": 34,
+            "dnt_moderada": 4,
             "dnt_severa": 0,
-            "sobrepeso": 0,
-            "sin_dato": 10
+            "sobrepeso": 19,
+            "sin_dato": 552
           },
-          "vacunacion_completa": 13,
-          "tamizaje_hemoglobina": 5,
-          "hierro": 14,
-          "desparasitacion": 14,
-          "consejeria_lactancia": 7,
-          "lactancia_exclusiva_6m": 12,
-          "bajo_peso_nacer": 0,
-          "ninos_wayuu": 11,
-          "zona_rural_dispersa": 11
+          "vacunacion_completa": 88,
+          "tamizaje_hemoglobina": 32,
+          "hierro": 100,
+          "desparasitacion": 100,
+          "consejeria_lactancia": 33,
+          "lactancia_exclusiva_6m": 43,
+          "bajo_peso_nacer": 3,
+          "ninos_wayuu": 181,
+          "zona_rural_dispersa": 488
         },
         "7-12m": {
-          "total": 1770,
+          "total": 2627,
           "controles": [
             {
               "nombre": "6-8 meses",
               "col": "BP",
-              "realizados": 9,
-              "con_peso_talla": 9
+              "realizados": 127,
+              "con_peso_talla": 127
             },
             {
               "nombre": "9-11 meses",
               "col": "CA",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 24,
+              "con_peso_talla": 24
             }
           ],
-          "total_controles": 9,
+          "total_controles": 151,
           "clasif": {
-            "adecuado": 36,
-            "riesgo": 9,
-            "dnt_moderada": 2,
+            "adecuado": 161,
+            "riesgo": 32,
+            "dnt_moderada": 6,
             "dnt_severa": 0,
-            "sobrepeso": 7,
-            "sin_dato": 1716
+            "sobrepeso": 17,
+            "sin_dato": 2411
           },
-          "vacunacion_completa": 127,
-          "tamizaje_hemoglobina": 77,
-          "hierro": 141,
-          "desparasitacion": 141,
-          "consejeria_lactancia": 34,
-          "lactancia_exclusiva_6m": 33,
-          "bajo_peso_nacer": 3,
-          "ninos_wayuu": 381,
-          "zona_rural_dispersa": 1210
+          "vacunacion_completa": 137,
+          "tamizaje_hemoglobina": 111,
+          "hierro": 78,
+          "desparasitacion": 78,
+          "consejeria_lactancia": 12,
+          "lactancia_exclusiva_6m": 4,
+          "bajo_peso_nacer": 0,
+          "ninos_wayuu": 512,
+          "zona_rural_dispersa": 1881
         },
         "13-24m": {
-          "total": 5985,
+          "total": 6333,
           "controles": [
             {
               "nombre": "12-18 meses",
               "col": "CL",
-              "realizados": 264,
-              "con_peso_talla": 262
+              "realizados": 341,
+              "con_peso_talla": 341
             },
             {
               "nombre": "19-23 meses",
               "col": "CW",
-              "realizados": 7,
-              "con_peso_talla": 7
+              "realizados": 79,
+              "con_peso_talla": 79
             }
           ],
-          "total_controles": 271,
+          "total_controles": 420,
           "clasif": {
-            "adecuado": 180,
-            "riesgo": 31,
-            "dnt_moderada": 21,
+            "adecuado": 282,
+            "riesgo": 39,
+            "dnt_moderada": 29,
             "dnt_severa": 0,
-            "sobrepeso": 10,
-            "sin_dato": 5743
+            "sobrepeso": 18,
+            "sin_dato": 5965
           },
-          "vacunacion_completa": 398,
-          "tamizaje_hemoglobina": 169,
-          "hierro": 90,
-          "desparasitacion": 43,
-          "consejeria_lactancia": 22,
-          "lactancia_exclusiva_6m": 7,
+          "vacunacion_completa": 446,
+          "tamizaje_hemoglobina": 158,
+          "hierro": 81,
+          "desparasitacion": 25,
+          "consejeria_lactancia": 23,
+          "lactancia_exclusiva_6m": 6,
           "bajo_peso_nacer": 1,
-          "ninos_wayuu": 1146,
-          "zona_rural_dispersa": 3970
+          "ninos_wayuu": 1193,
+          "zona_rural_dispersa": 4071
         },
         "25-59m": {
-          "total": 21455,
+          "total": 22272,
           "controles": [
             {
               "nombre": "24-29 meses",
               "col": "DH",
-              "realizados": 355,
-              "con_peso_talla": 355
+              "realizados": 359,
+              "con_peso_talla": 359
             },
             {
               "nombre": "30-35 meses",
               "col": "DS",
-              "realizados": 274,
-              "con_peso_talla": 274
+              "realizados": 278,
+              "con_peso_talla": 278
             },
             {
               "nombre": "3 años",
               "col": "ED",
-              "realizados": 386,
-              "con_peso_talla": 384
+              "realizados": 398,
+              "con_peso_talla": 396
             },
             {
               "nombre": "4 años",
               "col": "EO",
-              "realizados": 273,
-              "con_peso_talla": 273
+              "realizados": 338,
+              "con_peso_talla": 338
             }
           ],
-          "total_controles": 1288,
+          "total_controles": 1373,
           "clasif": {
-            "adecuado": 853,
-            "riesgo": 84,
-            "dnt_moderada": 130,
+            "adecuado": 907,
+            "riesgo": 90,
+            "dnt_moderada": 147,
             "dnt_severa": 0,
             "sobrepeso": 23,
-            "sin_dato": 20365
+            "sin_dato": 21105
           },
-          "vacunacion_completa": 2097,
-          "tamizaje_hemoglobina": 371,
-          "hierro": 373,
-          "desparasitacion": 121,
-          "consejeria_lactancia": 37,
+          "vacunacion_completa": 2256,
+          "tamizaje_hemoglobina": 332,
+          "hierro": 408,
+          "desparasitacion": 138,
+          "consejeria_lactancia": 33,
           "lactancia_exclusiva_6m": 13,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 6331,
-          "zona_rural_dispersa": 14354
+          "ninos_wayuu": 7130,
+          "zona_rural_dispersa": 14978
         },
         "60m+": {
-          "total": 14629,
+          "total": 11910,
           "controles": [
             {
               "nombre": "5 años",
               "col": "EZ",
-              "realizados": 392,
-              "con_peso_talla": 392
+              "realizados": 374,
+              "con_peso_talla": 374
             }
           ],
-          "total_controles": 392,
+          "total_controles": 374,
           "clasif": {
-            "adecuado": 221,
-            "riesgo": 2,
-            "dnt_moderada": 30,
+            "adecuado": 214,
+            "riesgo": 1,
+            "dnt_moderada": 23,
             "dnt_severa": 0,
             "sobrepeso": 8,
-            "sin_dato": 14368
+            "sin_dato": 11664
           },
-          "vacunacion_completa": 1300,
-          "tamizaje_hemoglobina": 83,
-          "hierro": 281,
-          "desparasitacion": 135,
-          "consejeria_lactancia": 3,
-          "lactancia_exclusiva_6m": 2,
+          "vacunacion_completa": 1008,
+          "tamizaje_hemoglobina": 72,
+          "hierro": 232,
+          "desparasitacion": 113,
+          "consejeria_lactancia": 2,
+          "lactancia_exclusiva_6m": 1,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 5113,
-          "zona_rural_dispersa": 10516
+          "ninos_wayuu": 3966,
+          "zona_rural_dispersa": 8643
         },
         "todos": {
           "total": 43861,
@@ -1371,78 +1371,78 @@
             {
               "nombre": "1 mes",
               "col": "AM",
-              "realizados": 16,
-              "con_peso_talla": 16
+              "realizados": 106,
+              "con_peso_talla": 96
             },
             {
               "nombre": "2-3 meses",
               "col": "AX",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 126,
+              "con_peso_talla": 126
             },
             {
               "nombre": "6-8 meses",
               "col": "BP",
-              "realizados": 9,
-              "con_peso_talla": 9
+              "realizados": 127,
+              "con_peso_talla": 127
             },
             {
               "nombre": "9-11 meses",
               "col": "CA",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 24,
+              "con_peso_talla": 24
             },
             {
               "nombre": "12-18 meses",
               "col": "CL",
-              "realizados": 264,
-              "con_peso_talla": 262
+              "realizados": 341,
+              "con_peso_talla": 341
             },
             {
               "nombre": "19-23 meses",
               "col": "CW",
-              "realizados": 7,
-              "con_peso_talla": 7
+              "realizados": 79,
+              "con_peso_talla": 79
             },
             {
               "nombre": "24-29 meses",
               "col": "DH",
-              "realizados": 355,
-              "con_peso_talla": 355
+              "realizados": 359,
+              "con_peso_talla": 359
             },
             {
               "nombre": "30-35 meses",
               "col": "DS",
-              "realizados": 274,
-              "con_peso_talla": 274
+              "realizados": 278,
+              "con_peso_talla": 278
             },
             {
               "nombre": "3 años",
               "col": "ED",
-              "realizados": 386,
-              "con_peso_talla": 384
+              "realizados": 398,
+              "con_peso_talla": 396
             },
             {
               "nombre": "4 años",
               "col": "EO",
-              "realizados": 273,
-              "con_peso_talla": 273
+              "realizados": 338,
+              "con_peso_talla": 338
             },
             {
               "nombre": "5 años",
               "col": "EZ",
-              "realizados": 392,
-              "con_peso_talla": 392
+              "realizados": 374,
+              "con_peso_talla": 374
             }
           ],
-          "total_controles": 1976,
+          "total_controles": 2550,
           "clasif": {
-            "adecuado": 1301,
-            "riesgo": 126,
-            "dnt_moderada": 184,
+            "adecuado": 1674,
+            "riesgo": 196,
+            "dnt_moderada": 209,
             "dnt_severa": 0,
-            "sobrepeso": 48,
-            "sin_dato": 42202
+            "sobrepeso": 85,
+            "sin_dato": 41697
           },
           "vacunacion_completa": 3935,
           "tamizaje_hemoglobina": 705,
@@ -1460,132 +1460,132 @@
     "Febrero": {
       "filename": "MATRIZ SEGUIMIENTO SALUD INFANTIL__AJUSTADA 2026 - FEBRERO 2026 - CONSOLIDADO.xlsx",
       "modifiedTime": "2026-04-16T20:22:40.000Z",
-      "generadoEn": "2026-09-18T14:50:22.275Z",
+      "generadoEn": "2026-09-18T15:09:40.843Z",
       "rowsCount": 43784,
       "colMunicipio": "M",
       "grupos": {
-        "0-6m": 1,
-        "7-12m": 1743,
-        "13-24m": 5989,
-        "25-59m": 21441,
-        "60m+": 14610,
+        "0-6m": 1311,
+        "7-12m": 2599,
+        "13-24m": 6363,
+        "25-59m": 22487,
+        "60m+": 11024,
         "sinFecha": 0,
         "total": 43784
       },
       "indicadores": {
         "0-6m": {
-          "total": 1,
+          "total": 1311,
           "controles": [
             {
               "nombre": "1 mes",
               "col": "AM",
-              "realizados": 1,
-              "con_peso_talla": 1
+              "realizados": 110,
+              "con_peso_talla": 95
             },
             {
               "nombre": "2-3 meses",
               "col": "AX",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 209,
+              "con_peso_talla": 209
             }
           ],
-          "total_controles": 1,
+          "total_controles": 319,
           "clasif": {
-            "adecuado": 0,
-            "riesgo": 0,
-            "dnt_moderada": 0,
+            "adecuado": 171,
+            "riesgo": 35,
+            "dnt_moderada": 4,
             "dnt_severa": 0,
-            "sobrepeso": 0,
-            "sin_dato": 1
+            "sobrepeso": 16,
+            "sin_dato": 1085
           },
-          "vacunacion_completa": 0,
-          "tamizaje_hemoglobina": 0,
-          "hierro": 1,
-          "desparasitacion": 1,
-          "consejeria_lactancia": 0,
+          "vacunacion_completa": 118,
+          "tamizaje_hemoglobina": 38,
+          "hierro": 159,
+          "desparasitacion": 167,
+          "consejeria_lactancia": 19,
           "lactancia_exclusiva_6m": 0,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 1,
-          "zona_rural_dispersa": 1
+          "ninos_wayuu": 257,
+          "zona_rural_dispersa": 885
         },
         "7-12m": {
-          "total": 1743,
+          "total": 2599,
           "controles": [
             {
               "nombre": "6-8 meses",
               "col": "BP",
-              "realizados": 10,
-              "con_peso_talla": 10
+              "realizados": 231,
+              "con_peso_talla": 231
             },
             {
               "nombre": "9-11 meses",
               "col": "CA",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 127,
+              "con_peso_talla": 127
             }
           ],
-          "total_controles": 10,
+          "total_controles": 358,
           "clasif": {
-            "adecuado": 6,
-            "riesgo": 0,
-            "dnt_moderada": 0,
+            "adecuado": 221,
+            "riesgo": 21,
+            "dnt_moderada": 9,
             "dnt_severa": 0,
-            "sobrepeso": 0,
-            "sin_dato": 1737
+            "sobrepeso": 11,
+            "sin_dato": 2337
           },
-          "vacunacion_completa": 139,
-          "tamizaje_hemoglobina": 53,
-          "hierro": 181,
-          "desparasitacion": 190,
-          "consejeria_lactancia": 19,
+          "vacunacion_completa": 157,
+          "tamizaje_hemoglobina": 95,
+          "hierro": 159,
+          "desparasitacion": 171,
+          "consejeria_lactancia": 1,
           "lactancia_exclusiva_6m": 0,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 334,
-          "zona_rural_dispersa": 1175
+          "ninos_wayuu": 484,
+          "zona_rural_dispersa": 1849
         },
         "13-24m": {
-          "total": 5989,
+          "total": 6363,
           "controles": [
             {
               "nombre": "12-18 meses",
               "col": "CL",
-              "realizados": 296,
-              "con_peso_talla": 296
+              "realizados": 388,
+              "con_peso_talla": 387
             },
             {
               "nombre": "19-23 meses",
               "col": "CW",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 123,
+              "con_peso_talla": 123
             }
           ],
-          "total_controles": 296,
+          "total_controles": 511,
           "clasif": {
-            "adecuado": 140,
-            "riesgo": 19,
-            "dnt_moderada": 12,
+            "adecuado": 189,
+            "riesgo": 22,
+            "dnt_moderada": 17,
             "dnt_severa": 0,
-            "sobrepeso": 4,
-            "sin_dato": 5814
+            "sobrepeso": 6,
+            "sin_dato": 6129
           },
-          "vacunacion_completa": 403,
-          "tamizaje_hemoglobina": 166,
-          "hierro": 267,
-          "desparasitacion": 293,
-          "consejeria_lactancia": 1,
+          "vacunacion_completa": 462,
+          "tamizaje_hemoglobina": 133,
+          "hierro": 221,
+          "desparasitacion": 241,
+          "consejeria_lactancia": 0,
           "lactancia_exclusiva_6m": 0,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 1133,
-          "zona_rural_dispersa": 3968
+          "ninos_wayuu": 1197,
+          "zona_rural_dispersa": 4112
         },
         "25-59m": {
-          "total": 21441,
+          "total": 22487,
           "controles": [
             {
               "nombre": "24-29 meses",
               "col": "DH",
-              "realizados": 293,
-              "con_peso_talla": 293
+              "realizados": 294,
+              "con_peso_talla": 294
             },
             {
               "nombre": "30-35 meses",
@@ -1596,37 +1596,37 @@
             {
               "nombre": "3 años",
               "col": "ED",
-              "realizados": 363,
-              "con_peso_talla": 363
+              "realizados": 365,
+              "con_peso_talla": 365
             },
             {
               "nombre": "4 años",
               "col": "EO",
-              "realizados": 263,
-              "con_peso_talla": 263
+              "realizados": 339,
+              "con_peso_talla": 339
             }
           ],
-          "total_controles": 1157,
+          "total_controles": 1236,
           "clasif": {
-            "adecuado": 455,
+            "adecuado": 492,
             "riesgo": 27,
-            "dnt_moderada": 27,
+            "dnt_moderada": 32,
             "dnt_severa": 0,
-            "sobrepeso": 12,
-            "sin_dato": 20920
+            "sobrepeso": 16,
+            "sin_dato": 21920
           },
-          "vacunacion_completa": 2125,
-          "tamizaje_hemoglobina": 259,
-          "hierro": 530,
-          "desparasitacion": 591,
+          "vacunacion_completa": 2331,
+          "tamizaje_hemoglobina": 224,
+          "hierro": 467,
+          "desparasitacion": 531,
           "consejeria_lactancia": 2,
           "lactancia_exclusiva_6m": 0,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 6308,
-          "zona_rural_dispersa": 14343
+          "ninos_wayuu": 7338,
+          "zona_rural_dispersa": 15110
         },
         "60m+": {
-          "total": 14610,
+          "total": 11024,
           "controles": [
             {
               "nombre": "5 años",
@@ -1642,17 +1642,17 @@
             "dnt_moderada": 16,
             "dnt_severa": 0,
             "sobrepeso": 5,
-            "sin_dato": 14438
+            "sin_dato": 10852
           },
-          "vacunacion_completa": 1358,
-          "tamizaje_hemoglobina": 41,
-          "hierro": 136,
-          "desparasitacion": 158,
+          "vacunacion_completa": 957,
+          "tamizaje_hemoglobina": 29,
+          "hierro": 109,
+          "desparasitacion": 123,
           "consejeria_lactancia": 0,
           "lactancia_exclusiva_6m": 0,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 5107,
-          "zona_rural_dispersa": 10501
+          "ninos_wayuu": 3607,
+          "zona_rural_dispersa": 8032
         },
         "todos": {
           "total": 43784,
@@ -1660,44 +1660,44 @@
             {
               "nombre": "1 mes",
               "col": "AM",
-              "realizados": 1,
-              "con_peso_talla": 1
+              "realizados": 110,
+              "con_peso_talla": 95
             },
             {
               "nombre": "2-3 meses",
               "col": "AX",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 209,
+              "con_peso_talla": 209
             },
             {
               "nombre": "6-8 meses",
               "col": "BP",
-              "realizados": 10,
-              "con_peso_talla": 10
+              "realizados": 231,
+              "con_peso_talla": 231
             },
             {
               "nombre": "9-11 meses",
               "col": "CA",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 127,
+              "con_peso_talla": 127
             },
             {
               "nombre": "12-18 meses",
               "col": "CL",
-              "realizados": 296,
-              "con_peso_talla": 296
+              "realizados": 388,
+              "con_peso_talla": 387
             },
             {
               "nombre": "19-23 meses",
               "col": "CW",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 123,
+              "con_peso_talla": 123
             },
             {
               "nombre": "24-29 meses",
               "col": "DH",
-              "realizados": 293,
-              "con_peso_talla": 293
+              "realizados": 294,
+              "con_peso_talla": 294
             },
             {
               "nombre": "30-35 meses",
@@ -1708,14 +1708,14 @@
             {
               "nombre": "3 años",
               "col": "ED",
-              "realizados": 363,
-              "con_peso_talla": 363
+              "realizados": 365,
+              "con_peso_talla": 365
             },
             {
               "nombre": "4 años",
               "col": "EO",
-              "realizados": 263,
-              "con_peso_talla": 263
+              "realizados": 339,
+              "con_peso_talla": 339
             },
             {
               "nombre": "5 años",
@@ -1724,14 +1724,14 @@
               "con_peso_talla": 331
             }
           ],
-          "total_controles": 1795,
+          "total_controles": 2755,
           "clasif": {
-            "adecuado": 752,
-            "riesgo": 46,
-            "dnt_moderada": 55,
+            "adecuado": 1224,
+            "riesgo": 105,
+            "dnt_moderada": 78,
             "dnt_severa": 0,
-            "sobrepeso": 21,
-            "sin_dato": 42910
+            "sobrepeso": 54,
+            "sin_dato": 42323
           },
           "vacunacion_completa": 4025,
           "tamizaje_hemoglobina": 519,
@@ -1749,132 +1749,132 @@
     "Enero": {
       "filename": "MATRIZ SEGUIMIENTO SALUD INFANTIL__AJUSTADA 2026 - ENERO 2026 - CONSOLIDADO.xlsx",
       "modifiedTime": "2026-02-27T18:58:48.000Z",
-      "generadoEn": "2026-09-18T14:50:51.668Z",
+      "generadoEn": "2026-09-18T15:10:16.263Z",
       "rowsCount": 43681,
       "colMunicipio": "M",
       "grupos": {
-        "0-6m": 0,
-        "7-12m": 1662,
-        "13-24m": 5978,
-        "25-59m": 21432,
-        "60m+": 14609,
+        "0-6m": 1983,
+        "7-12m": 2538,
+        "13-24m": 6418,
+        "25-59m": 22805,
+        "60m+": 9937,
         "sinFecha": 0,
         "total": 43681
       },
       "indicadores": {
         "0-6m": {
-          "total": 0,
+          "total": 1983,
           "controles": [
             {
               "nombre": "1 mes",
               "col": "AM",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 32,
+              "con_peso_talla": 32
             },
             {
               "nombre": "2-3 meses",
               "col": "AX",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 130,
+              "con_peso_talla": 130
             }
           ],
-          "total_controles": 0,
+          "total_controles": 162,
           "clasif": {
-            "adecuado": 0,
-            "riesgo": 0,
-            "dnt_moderada": 0,
+            "adecuado": 104,
+            "riesgo": 33,
+            "dnt_moderada": 3,
             "dnt_severa": 0,
-            "sobrepeso": 0,
-            "sin_dato": 0
+            "sobrepeso": 11,
+            "sin_dato": 1832
           },
-          "vacunacion_completa": 0,
-          "tamizaje_hemoglobina": 0,
+          "vacunacion_completa": 102,
+          "tamizaje_hemoglobina": 39,
           "hierro": 0,
           "desparasitacion": 0,
           "consejeria_lactancia": 0,
           "lactancia_exclusiva_6m": 0,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 0,
-          "zona_rural_dispersa": 0
+          "ninos_wayuu": 367,
+          "zona_rural_dispersa": 1388
         },
         "7-12m": {
-          "total": 1662,
+          "total": 2538,
           "controles": [
             {
               "nombre": "6-8 meses",
               "col": "BP",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 116,
+              "con_peso_talla": 116
             },
             {
               "nombre": "9-11 meses",
               "col": "CA",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 96,
+              "con_peso_talla": 96
             }
           ],
-          "total_controles": 0,
+          "total_controles": 212,
           "clasif": {
-            "adecuado": 0,
-            "riesgo": 0,
-            "dnt_moderada": 0,
+            "adecuado": 150,
+            "riesgo": 28,
+            "dnt_moderada": 9,
             "dnt_severa": 0,
-            "sobrepeso": 0,
-            "sin_dato": 1662
+            "sobrepeso": 13,
+            "sin_dato": 2338
           },
-          "vacunacion_completa": 88,
-          "tamizaje_hemoglobina": 32,
+          "vacunacion_completa": 173,
+          "tamizaje_hemoglobina": 60,
           "hierro": 0,
           "desparasitacion": 0,
           "consejeria_lactancia": 0,
           "lactancia_exclusiva_6m": 0,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 298,
-          "zona_rural_dispersa": 1153
+          "ninos_wayuu": 448,
+          "zona_rural_dispersa": 1777
         },
         "13-24m": {
-          "total": 5978,
+          "total": 6418,
           "controles": [
             {
               "nombre": "12-18 meses",
               "col": "CL",
-              "realizados": 149,
-              "con_peso_talla": 149
+              "realizados": 208,
+              "con_peso_talla": 208
             },
             {
               "nombre": "19-23 meses",
               "col": "CW",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 77,
+              "con_peso_talla": 77
             }
           ],
-          "total_controles": 149,
+          "total_controles": 285,
           "clasif": {
-            "adecuado": 106,
-            "riesgo": 15,
-            "dnt_moderada": 12,
+            "adecuado": 209,
+            "riesgo": 20,
+            "dnt_moderada": 20,
             "dnt_severa": 0,
-            "sobrepeso": 4,
-            "sin_dato": 5841
+            "sobrepeso": 10,
+            "sin_dato": 6159
           },
-          "vacunacion_completa": 395,
-          "tamizaje_hemoglobina": 108,
+          "vacunacion_completa": 487,
+          "tamizaje_hemoglobina": 81,
           "hierro": 2,
           "desparasitacion": 3,
           "consejeria_lactancia": 0,
           "lactancia_exclusiva_6m": 0,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 1125,
-          "zona_rural_dispersa": 3966
+          "ninos_wayuu": 1258,
+          "zona_rural_dispersa": 4195
         },
         "25-59m": {
-          "total": 21432,
+          "total": 22805,
           "controles": [
             {
               "nombre": "24-29 meses",
               "col": "DH",
-              "realizados": 171,
-              "con_peso_talla": 171
+              "realizados": 170,
+              "con_peso_talla": 170
             },
             {
               "nombre": "30-35 meses",
@@ -1891,31 +1891,31 @@
             {
               "nombre": "4 años",
               "col": "EO",
-              "realizados": 145,
-              "con_peso_talla": 145
+              "realizados": 196,
+              "con_peso_talla": 196
             }
           ],
-          "total_controles": 652,
+          "total_controles": 702,
           "clasif": {
-            "adecuado": 496,
-            "riesgo": 48,
-            "dnt_moderada": 48,
+            "adecuado": 534,
+            "riesgo": 49,
+            "dnt_moderada": 58,
             "dnt_severa": 0,
             "sobrepeso": 10,
-            "sin_dato": 20830
+            "sin_dato": 22154
           },
-          "vacunacion_completa": 2094,
-          "tamizaje_hemoglobina": 179,
+          "vacunacion_completa": 2328,
+          "tamizaje_hemoglobina": 148,
           "hierro": 2,
           "desparasitacion": 9,
           "consejeria_lactancia": 0,
           "lactancia_exclusiva_6m": 0,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 6304,
-          "zona_rural_dispersa": 14338
+          "ninos_wayuu": 7558,
+          "zona_rural_dispersa": 15335
         },
         "60m+": {
-          "total": 14609,
+          "total": 9937,
           "controles": [
             {
               "nombre": "5 años",
@@ -1931,17 +1931,17 @@
             "dnt_moderada": 16,
             "dnt_severa": 0,
             "sobrepeso": 4,
-            "sin_dato": 14454
+            "sin_dato": 9782
           },
-          "vacunacion_completa": 1297,
-          "tamizaje_hemoglobina": 30,
+          "vacunacion_completa": 784,
+          "tamizaje_hemoglobina": 21,
           "hierro": 1,
           "desparasitacion": 2,
           "consejeria_lactancia": 0,
           "lactancia_exclusiva_6m": 0,
           "bajo_peso_nacer": 0,
-          "ninos_wayuu": 5106,
-          "zona_rural_dispersa": 10501
+          "ninos_wayuu": 3202,
+          "zona_rural_dispersa": 7263
         },
         "todos": {
           "total": 43681,
@@ -1949,44 +1949,44 @@
             {
               "nombre": "1 mes",
               "col": "AM",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 32,
+              "con_peso_talla": 32
             },
             {
               "nombre": "2-3 meses",
               "col": "AX",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 130,
+              "con_peso_talla": 130
             },
             {
               "nombre": "6-8 meses",
               "col": "BP",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 116,
+              "con_peso_talla": 116
             },
             {
               "nombre": "9-11 meses",
               "col": "CA",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 96,
+              "con_peso_talla": 96
             },
             {
               "nombre": "12-18 meses",
               "col": "CL",
-              "realizados": 149,
-              "con_peso_talla": 149
+              "realizados": 208,
+              "con_peso_talla": 208
             },
             {
               "nombre": "19-23 meses",
               "col": "CW",
-              "realizados": 0,
-              "con_peso_talla": 0
+              "realizados": 77,
+              "con_peso_talla": 77
             },
             {
               "nombre": "24-29 meses",
               "col": "DH",
-              "realizados": 171,
-              "con_peso_talla": 171
+              "realizados": 170,
+              "con_peso_talla": 170
             },
             {
               "nombre": "30-35 meses",
@@ -2003,8 +2003,8 @@
             {
               "nombre": "4 años",
               "col": "EO",
-              "realizados": 145,
-              "con_peso_talla": 145
+              "realizados": 196,
+              "con_peso_talla": 196
             },
             {
               "nombre": "5 años",
@@ -2013,14 +2013,14 @@
               "con_peso_talla": 200
             }
           ],
-          "total_controles": 1001,
+          "total_controles": 1561,
           "clasif": {
-            "adecuado": 737,
-            "riesgo": 63,
-            "dnt_moderada": 76,
+            "adecuado": 1132,
+            "riesgo": 130,
+            "dnt_moderada": 106,
             "dnt_severa": 0,
-            "sobrepeso": 18,
-            "sin_dato": 42787
+            "sobrepeso": 48,
+            "sin_dato": 42265
           },
           "vacunacion_completa": 3874,
           "tamizaje_hemoglobina": 349,
