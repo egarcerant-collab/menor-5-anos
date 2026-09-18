@@ -33,6 +33,18 @@ import {
 // ─── UTILIDADES ───────────────────────────────────────────────────────────────
 const meses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
+/**
+ * Recorta la lista de meses hasta el mes que indica el nombre del archivo
+ * cargado (ej: "...JULIO 2026..." -> Enero..Julio), para no ofrecer meses
+ * futuros que todavía no tienen datos en la matriz vigente.
+ */
+function mesesDisponiblesDesdeArchivo(filename?: string | null): string[] {
+  if (!filename) return meses;
+  const upper = filename.toUpperCase();
+  const idx = meses.findIndex(m => upper.includes(m.toUpperCase()));
+  return idx === -1 ? meses : meses.slice(0, idx + 1);
+}
+
 function pct(n: number, total: number) {
   return total > 0 ? parseFloat((n / total * 100).toFixed(1)) : 0;
 }
@@ -469,7 +481,7 @@ export default function PrimeraInfanciaDashboard() {
             <div className="flex items-center gap-1.5 glass rounded-xl px-3 py-2 text-sm">
               <Calendar className="w-3.5 h-3.5 text-white/70" />
               <select value={mesSel} onChange={e=>setMesSel(e.target.value)} className="bg-transparent text-white text-sm outline-none cursor-pointer">
-                {["Todos",...meses].map(m=><option key={m} value={m} className="text-gray-900">{m}</option>)}
+                {["Todos",...mesesDisponiblesDesdeArchivo(excelCargado?.filename)].map(m=><option key={m} value={m} className="text-gray-900">{m}</option>)}
               </select>
             </div>
             {excelCargado && (
