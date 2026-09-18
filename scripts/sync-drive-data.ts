@@ -28,11 +28,11 @@ const START_ROW = 4;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_PATH = path.join(__dirname, "..", "src", "data", "drive-sync-latest.json");
 
-function procesarArchivo(buffer: ArrayBuffer) {
+function procesarArchivo(buffer: ArrayBuffer, fechaReferencia: Date) {
   const { rawRows } = parseMatrizRawRowsOnly(buffer);
   const colMunicipio = detectarColumnaMunicipio(rawRows, START_ROW, MUNICIPIOS);
-  const grupos = calcularGruposEdadDesdeExcel(rawRows, START_ROW);
-  const indicadores = calcularIndicadoresDesdeExcel(rawRows, START_ROW, undefined, colMunicipio);
+  const grupos = calcularGruposEdadDesdeExcel(rawRows, START_ROW, fechaReferencia);
+  const indicadores = calcularIndicadoresDesdeExcel(rawRows, START_ROW, undefined, colMunicipio, fechaReferencia);
 
   const conteosMes = contarControlesPorMes(rawRows, START_ROW, new Date().getFullYear());
   const mejorMes = conteosMes.reduce((a, b) => (b.conteo > a.conteo ? b : a), conteosMes[0]);
@@ -58,7 +58,10 @@ async function main() {
     console.log(`Procesando ${info.file.name} (${mesNombre})...`);
     const t0 = Date.now();
     try {
-      const datos = procesarArchivo(buffer);
+      // La edad de cada niño se calcula a la fecha de este archivo, no a
+      // hoy: si no, un niño de "0-6 meses" en enero apareceria mas grande
+      // al ver ese snapshot meses despues.
+      const datos = procesarArchivo(buffer, new Date(info.file.modifiedTime));
       meses[mesNombre] = {
         filename: info.file.name,
         modifiedTime: info.file.modifiedTime,

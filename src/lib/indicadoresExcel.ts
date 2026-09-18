@@ -362,9 +362,10 @@ export function calcularIndicadoresDesdeExcel(
   startRowIndex = 4,
   municipiosFiltro?: string[],   // nombres en mayúsculas normalizados
   colMun: string = COLUMNA_MUNICIPIO,
+  fechaReferencia: Date = new Date(),
 ): IndPorGrupo {
   const filtrarMunicipio = municipiosFiltro && municipiosFiltro.length > 0;
-  const hoy = new Date();
+  const hoy = fechaReferencia;
 
   // Inicializar acumuladores
   const acc: Record<string, IndicadoresGrupoExcel> = {

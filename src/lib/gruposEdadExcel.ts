@@ -75,11 +75,17 @@ function clasificarGrupo(meses: number): keyof Omit<GrupoConteoExcel, "sinFecha"
 /**
  * Lee las filas del Excel (con header:'A') desde startRowIndex,
  * toma la columna H como fecha de nacimiento, calcula la edad en meses
- * al día de hoy y cuenta cuántos niños hay en cada grupo de edad.
+ * a la fecha de referencia (por defecto hoy) y cuenta cuántos niños hay en
+ * cada grupo de edad.
+ * @param fechaReferencia  Fecha contra la que se calcula la edad. Al ver un
+ *   snapshot mensual histórico, debe ser la fecha de ese archivo, no hoy —
+ *   si no, un niño registrado como "0-6 meses" en enero aparecería con más
+ *   edad al calcularla con la fecha actual.
  */
 export function calcularGruposEdadDesdeExcel(
   rawRows: Record<string, unknown>[],
   startRowIndex = 4,
+  fechaReferencia: Date = new Date(),
 ): GrupoConteoExcel {
   const conteo: GrupoConteoExcel = {
     "0-6m": 0,
@@ -91,7 +97,7 @@ export function calcularGruposEdadDesdeExcel(
     total: 0,
   };
 
-  const hoy = new Date();
+  const hoy = fechaReferencia;
 
   for (let r = startRowIndex; r < rawRows.length; r++) {
     const row = rawRows[r];

@@ -568,6 +568,16 @@ export default function PrimeraInfanciaDashboard() {
       {/* ═══ CONTENIDO ════════════════════════════════════════════════════════ */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 space-y-5">
 
+        {/* Aviso: qué mes/archivo se está mostrando ahora mismo */}
+        {excelCargado && (
+          <div className="flex items-center gap-2.5 p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 text-sm text-indigo-900 dark:text-indigo-200 fade-in-up">
+            <Calendar className="w-4 h-4 flex-shrink-0 text-indigo-500" />
+            <span>
+              Mostrando datos de <strong>{mesSel === "Todos" ? "el mes más reciente" : mesSel} {periodo}</strong> · {fmtN(excelCargado.rows)} niños · archivo: {excelCargado.filename}
+            </span>
+          </div>
+        )}
+
         {/* FILTROS PERSISTENTES */}
         {pestana !== "datos" && (
           <div className="space-y-4 fade-in-up">
