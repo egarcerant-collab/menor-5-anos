@@ -189,6 +189,7 @@ export default function PrimeraInfanciaDashboard() {
   const [indPorMunicipio, setIndPorMunicipio] = useState<Record<string, IndPorGrupo> | null>(null);
   const [mesPrincipal, setMesPrincipal] = useState<string | null>(null);
   const [colMunicipio, setColMunicipio] = useState<string>('B');
+  const [syncPorMes, setSyncPorMes] = useState<{ meses: Record<string, any>; ordenMeses: string[]; ultimoMes: string } | null>(null);
 
   // Restaurar desde localStorage al montar
   useEffect(() => {
@@ -208,10 +209,11 @@ export default function PrimeraInfanciaDashboard() {
     setMounted(true);
   }, []);
 
-  // ── Sincronización automática con Drive: al entrar, trae la matriz más
-  // reciente de la carpeta compartida y actualiza los indicadores. No
-  // reemplaza una sesión con rawRows ya cargados manualmente (para no perder
-  // el detalle interactivo por mes/municipio de esa carga en curso).
+  // ── Sincronización automática con Drive: al entrar, trae TODAS las
+  // matrices mensuales de la carpeta compartida (una por mes, ya calculadas
+  // por el job de GitHub Actions). No reemplaza una sesión con rawRows ya
+  // cargados manualmente (para no perder el detalle interactivo de esa
+  // carga en curso).
   useEffect(() => {
     if (rawExcelRows) return;
     let cancelado = false;
@@ -220,25 +222,37 @@ export default function PrimeraInfanciaDashboard() {
       .then(r => r.json())
       .then(data => {
         if (cancelado || !data?.configured || !data?.found) return;
-
-        const meta = { filename: data.filename, rows: data.rowsCount, fecha: new Date(data.modifiedTime) };
-        setExcelCargado(meta);
-        setGruposEdadExcel(data.grupos);
-        setIndicadoresExcel(data.indicadores);
-        setColMunicipio(data.colMunicipio);
-        setDatosRestaurados(false);
-        guardarDatos(meta, data.grupos, data.indicadores);
-        if (data.mesPrincipal) {
-          setMesPrincipal(data.mesPrincipal);
-          guardarMesPrincipal(data.mesPrincipal);
-        }
-        setHistorial(recuperarHistorial());
+        setSyncPorMes({ meses: data.meses, ordenMeses: data.ordenMeses, ultimoMes: data.ultimoMes });
       })
       .catch(err => console.error("[DriveSync] Error:", err));
 
     return () => { cancelado = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ── Aplica el mes seleccionado: cuando cambia mesSel o llegan datos
+  // nuevos de Drive, muestra el snapshot real de ese mes ("Todos" = el mes
+  // vigente más reciente). Cada archivo mensual de Drive es acumulativo, así
+  // que esto no pierde historial: julio ya incluye enero-julio corregido.
+  useEffect(() => {
+    if (!syncPorMes || rawExcelRows) return;
+    const key = mesSel === "Todos" ? syncPorMes.ultimoMes : mesSel;
+    const datos = syncPorMes.meses?.[key];
+    if (!datos) return;
+
+    const meta = { filename: datos.filename, rows: datos.rowsCount, fecha: new Date(datos.modifiedTime) };
+    setExcelCargado(meta);
+    setGruposEdadExcel(datos.grupos);
+    setIndicadoresExcel(datos.indicadores);
+    setColMunicipio(datos.colMunicipio);
+    setDatosRestaurados(false);
+    guardarDatos(meta, datos.grupos, datos.indicadores);
+    if (datos.mesPrincipal) {
+      setMesPrincipal(datos.mesPrincipal);
+      guardarMesPrincipal(datos.mesPrincipal);
+    }
+    setHistorial(recuperarHistorial());
+  }, [mesSel, syncPorMes, rawExcelRows]);
 
   // Guardar automáticamente cuando cambian los datos
   useEffect(() => {
@@ -501,7 +515,7 @@ export default function PrimeraInfanciaDashboard() {
             <div className="flex items-center gap-1.5 glass rounded-xl px-3 py-2 text-sm">
               <Calendar className="w-3.5 h-3.5 text-white/70" />
               <select value={mesSel} onChange={e=>setMesSel(e.target.value)} className="bg-transparent text-white text-sm outline-none cursor-pointer">
-                {["Todos",...mesesDisponiblesDesdeArchivo(excelCargado?.filename)].map(m=><option key={m} value={m} className="text-gray-900">{m}</option>)}
+                {["Todos",...[...(syncPorMes?.ordenMeses ?? mesesDisponiblesDesdeArchivo(excelCargado?.filename))].reverse()].map(m=><option key={m} value={m} className="text-gray-900">{m}</option>)}
               </select>
             </div>
             {excelCargado && (

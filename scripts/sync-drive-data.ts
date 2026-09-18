@@ -1,13 +1,13 @@
 /**
- * Job periódico (GitHub Actions) que descarga la matriz CONSOLIDADO más
- * reciente de Drive, calcula los indicadores agregados y escribe el
- * resultado en src/data/drive-sync-latest.json.
+ * Job periódico (GitHub Actions) que descarga TODAS las matrices CONSOLIDADO
+ * de Drive (una por mes), calcula los indicadores agregados de cada una y
+ * escribe el resultado en src/data/drive-sync-latest.json, organizado por
+ * mes.
  *
- * Se ejecuta FUERA de Vercel a propósito: descargar el archivo (~35MB) y
- * parsear ~44,000 filas supera el límite de 60s de las funciones
- * serverless del plan Hobby. Aquí no hay ese límite. El endpoint
- * /api/drive-sync en la app solo lee este JSON ya calculado (rápido, sin
- * riesgo de timeout).
+ * Se ejecuta FUERA de Vercel a propósito: descargar cada archivo (~35MB) y
+ * parsear ~44,000 filas supera el límite de 60s de las funciones serverless
+ * del plan Hobby. Aquí no hay ese límite. El endpoint /api/drive-sync en la
+ * app solo lee este JSON ya calculado (rápido, sin riesgo de timeout).
  *
  * Nunca escribe filas crudas (nombres, documentos, direcciones, teléfonos):
  * solo los conteos e indicadores ya agregados que el dashboard necesita.
@@ -16,7 +16,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { getLatestMatrizFromDrive, isDriveConfigured } from "../src/lib/googleDrive";
+import { procesarTodasLasMatrices, isDriveConfigured, type DriveFileConFecha } from "../src/lib/googleDrive";
 import { parseMatrizRawRowsOnly } from "../src/lib/parseMatrizWorkbook";
 import { detectarColumnaMunicipio } from "../src/lib/municipioDetect";
 import { calcularGruposEdadDesdeExcel } from "../src/lib/gruposEdadExcel";
@@ -28,22 +28,8 @@ const START_ROW = 4;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_PATH = path.join(__dirname, "..", "src", "data", "drive-sync-latest.json");
 
-async function main() {
-  if (!isDriveConfigured()) {
-    console.error("GOOGLE_DRIVE_CLIENT_EMAIL / GOOGLE_DRIVE_PRIVATE_KEY no configuradas. Abortando.");
-    process.exit(1);
-  }
-
-  const matriz = await getLatestMatrizFromDrive();
-  if (!matriz) {
-    console.log("No se encontró ningún archivo en la carpeta de Drive.");
-    fs.writeFileSync(OUT_PATH, JSON.stringify({ configured: true, found: false }, null, 2));
-    return;
-  }
-
-  console.log(`Procesando ${matriz.file.name} (modificado ${matriz.file.modifiedTime})...`);
-  const t0 = Date.now();
-  const { rawRows } = parseMatrizRawRowsOnly(matriz.buffer);
+function procesarArchivo(buffer: ArrayBuffer) {
+  const { rawRows } = parseMatrizRawRowsOnly(buffer);
   const colMunicipio = detectarColumnaMunicipio(rawRows, START_ROW, MUNICIPIOS);
   const grupos = calcularGruposEdadDesdeExcel(rawRows, START_ROW);
   const indicadores = calcularIndicadoresDesdeExcel(rawRows, START_ROW, undefined, colMunicipio);
@@ -54,22 +40,59 @@ async function main() {
     ? mejorMes.mes.charAt(0) + mejorMes.mes.slice(1).toLowerCase()
     : null;
 
+  return { rowsCount: rawRows.length - START_ROW, colMunicipio, grupos, indicadores, mesPrincipal };
+}
+
+async function main() {
+  if (!isDriveConfigured()) {
+    console.error("GOOGLE_DRIVE_CLIENT_EMAIL / GOOGLE_DRIVE_PRIVATE_KEY no configuradas. Abortando.");
+    process.exit(1);
+  }
+
+  const meses: Record<string, any> = {};
+  const orden: string[] = [];
+  let huboError = false;
+
+  await procesarTodasLasMatrices(async (info: DriveFileConFecha, buffer: ArrayBuffer) => {
+    const mesNombre = info.mesNombre!;
+    console.log(`Procesando ${info.file.name} (${mesNombre})...`);
+    const t0 = Date.now();
+    try {
+      const datos = procesarArchivo(buffer);
+      meses[mesNombre] = {
+        filename: info.file.name,
+        modifiedTime: info.file.modifiedTime,
+        generadoEn: new Date().toISOString(),
+        ...datos,
+      };
+      orden.push(mesNombre);
+      console.log(`  -> ${datos.rowsCount} filas en ${Date.now() - t0}ms`);
+    } catch (err) {
+      huboError = true;
+      console.error(`  -> Error procesando ${info.file.name}:`, err);
+    }
+  });
+
+  if (orden.length === 0) {
+    console.log("No se encontró ninguna matriz reconocible en Drive.");
+    fs.writeFileSync(OUT_PATH, JSON.stringify({ configured: true, found: false }, null, 2));
+    if (huboError) process.exit(1);
+    return;
+  }
+
   const resultado = {
     configured: true,
     found: true,
-    filename: matriz.file.name,
-    modifiedTime: matriz.file.modifiedTime,
-    rowsCount: rawRows.length - START_ROW,
-    colMunicipio,
-    grupos,
-    indicadores,
-    mesPrincipal,
-    generadoEn: new Date().toISOString(),
+    // orden ya viene del mas reciente al mas antiguo (ver listMatricesEnDrive)
+    ordenMeses: orden,
+    ultimoMes: orden[0],
+    meses,
   };
 
   fs.mkdirSync(path.dirname(OUT_PATH), { recursive: true });
   fs.writeFileSync(OUT_PATH, JSON.stringify(resultado, null, 2));
-  console.log(`Listo en ${Date.now() - t0}ms. ${resultado.rowsCount} filas -> ${OUT_PATH}`);
+  console.log(`Listo: ${orden.length} meses -> ${OUT_PATH}`);
+  if (huboError) process.exit(1);
 }
 
 main().catch(err => {
