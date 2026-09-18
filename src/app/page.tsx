@@ -688,13 +688,6 @@ export default function PrimeraInfanciaDashboard() {
               {/* Clasificación nutricional */}
               <div className="bg-card rounded-2xl p-5 border border-border shadow-sm card-hover fade-in-up fade-delay-1">
                 <SectionTitle icon={Scale}>Clasificación Nutricional</SectionTitle>
-                {/* Aviso cuando el filtro no puede aplicarse sin rawRows */}
-                {!rawExcelRows && municipiosSel.length < MUNICIPIOS.length && (
-                  <div className="mb-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700 text-xs text-amber-800 dark:text-amber-300 flex items-center gap-2">
-                    <span>⚠️</span>
-                    <span>Para filtrar por municipio, <strong>recargue el archivo Excel</strong> — los datos guardados no tienen el desglose por municipio.</span>
-                  </div>
-                )}
                 {nutPieData ? (
                   <>
                     <ResponsiveContainer width="100%" height={220}>
