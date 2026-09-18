@@ -28,11 +28,34 @@ const START_ROW = 4;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_PATH = path.join(__dirname, "..", "src", "data", "drive-sync-latest.json");
 
+const normalizar = (s: string) => s.toUpperCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+
 function procesarArchivo(buffer: ArrayBuffer, fechaReferencia: Date) {
   const { rawRows } = parseMatrizRawRowsOnly(buffer);
   const colMunicipio = detectarColumnaMunicipio(rawRows, START_ROW, MUNICIPIOS);
   const grupos = calcularGruposEdadDesdeExcel(rawRows, START_ROW, fechaReferencia);
   const indicadores = calcularIndicadoresDesdeExcel(rawRows, START_ROW, undefined, colMunicipio, fechaReferencia);
+
+  // Indicadores y grupos de edad por municipio: ahora que esto corre en
+  // GitHub Actions (sin el limite de 60s de las funciones serverless de
+  // Vercel), se puede calcular para los 22 municipios sin riesgo de timeout.
+  const indPorMunicipio: Record<string, ReturnType<typeof calcularIndicadoresDesdeExcel>> = {};
+  const gruposPorMunicipio: Record<string, ReturnType<typeof calcularGruposEdadDesdeExcel>> = {};
+  for (const mun of MUNICIPIOS) {
+    const nombreNorm = normalizar(mun.nombre);
+    indPorMunicipio[mun.id] = calcularIndicadoresDesdeExcel(rawRows, START_ROW, [nombreNorm], colMunicipio, fechaReferencia);
+
+    const filas = rawRows.filter((row, i) => {
+      if (i < START_ROW) return false;
+      const val = normalizar(String(row[colMunicipio] ?? "").trim());
+      return !!val && val.length >= 3 && (val === nombreNorm || val.includes(nombreNorm));
+    });
+    gruposPorMunicipio[mun.id] = calcularGruposEdadDesdeExcel(
+      [...rawRows.slice(0, START_ROW), ...filas],
+      START_ROW,
+      fechaReferencia,
+    );
+  }
 
   const conteosMes = contarControlesPorMes(rawRows, START_ROW, new Date().getFullYear());
   const mejorMes = conteosMes.reduce((a, b) => (b.conteo > a.conteo ? b : a), conteosMes[0]);
@@ -40,7 +63,15 @@ function procesarArchivo(buffer: ArrayBuffer, fechaReferencia: Date) {
     ? mejorMes.mes.charAt(0) + mejorMes.mes.slice(1).toLowerCase()
     : null;
 
-  return { rowsCount: rawRows.length - START_ROW, colMunicipio, grupos, indicadores, mesPrincipal };
+  return {
+    rowsCount: rawRows.length - START_ROW,
+    colMunicipio,
+    grupos,
+    indicadores,
+    indPorMunicipio,
+    gruposPorMunicipio,
+    mesPrincipal,
+  };
 }
 
 async function main() {

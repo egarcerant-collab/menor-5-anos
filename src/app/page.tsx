@@ -187,6 +187,7 @@ export default function PrimeraInfanciaDashboard() {
   const [datosRestaurados, setDatosRestaurados] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [indPorMunicipio, setIndPorMunicipio] = useState<Record<string, IndPorGrupo> | null>(null);
+  const [gruposPorMunicipio, setGruposPorMunicipio] = useState<Record<string, GrupoConteoExcel> | null>(null);
   const [mesPrincipal, setMesPrincipal] = useState<string | null>(null);
   const [colMunicipio, setColMunicipio] = useState<string>('B');
   const [syncPorMes, setSyncPorMes] = useState<{ meses: Record<string, any>; ordenMeses: string[]; ultimoMes: string } | null>(null);
@@ -245,8 +246,11 @@ export default function PrimeraInfanciaDashboard() {
     setGruposEdadExcel(datos.grupos);
     setIndicadoresExcel(datos.indicadores);
     setColMunicipio(datos.colMunicipio);
+    setIndPorMunicipio(datos.indPorMunicipio ?? null);
+    setGruposPorMunicipio(datos.gruposPorMunicipio ?? null);
     setDatosRestaurados(false);
     guardarDatos(meta, datos.grupos, datos.indicadores);
+    if (datos.indPorMunicipio) guardarIndPorMunicipio(datos.indPorMunicipio, datos.colMunicipio);
     if (datos.mesPrincipal) {
       setMesPrincipal(datos.mesPrincipal);
       guardarMesPrincipal(datos.mesPrincipal);
@@ -342,17 +346,38 @@ export default function PrimeraInfanciaDashboard() {
 
   // ── Grupos de edad filtrados por municipio ───────────────────────────────
   const gruposEdadFiltrados = useMemo(() => {
-    if (!rawExcelRows) return gruposEdadExcel;
     const todosSeleccionados = municipiosSel.length === MUNICIPIOS.length;
-    if (todosSeleccionados) return calcularGruposEdadDesdeExcel(rawExcelRows, 4);
-    // Filtrar rawRows por municipio y recalcular
-    const filtradas = rawExcelRows.filter((row, i) => {
-      if (i < 4) return false;
-      const munVal = String(row[colMunicipio] ?? '').trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      return !!munVal && municipiosNombresNorm.some(m => m.length >= 3 && (munVal === m || munVal.includes(m)));
-    });
-    return calcularGruposEdadDesdeExcel([...rawExcelRows.slice(0, 4), ...filtradas.slice()], 4);
-  }, [rawExcelRows, municipiosSel, municipiosNombresNorm, gruposEdadExcel]);
+
+    if (rawExcelRows) {
+      if (todosSeleccionados) return calcularGruposEdadDesdeExcel(rawExcelRows, 4);
+      const filtradas = rawExcelRows.filter((row, i) => {
+        if (i < 4) return false;
+        const munVal = String(row[colMunicipio] ?? '').trim().toUpperCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+        return !!munVal && municipiosNombresNorm.some(m => m.length >= 3 && (munVal === m || munVal.includes(m)));
+      });
+      return calcularGruposEdadDesdeExcel([...rawExcelRows.slice(0, 4), ...filtradas.slice()], 4);
+    }
+
+    // Sin rawRows: sumar los pre-computados por municipio (del auto-sync)
+    if (gruposPorMunicipio) {
+      if (todosSeleccionados) return gruposEdadExcel;
+      const partes = municipiosSel.map(id => gruposPorMunicipio[id]).filter(Boolean);
+      if (partes.length === 0) return gruposEdadExcel;
+      const suma: GrupoConteoExcel = { "0-6m":0, "7-12m":0, "13-24m":0, "25-59m":0, "60m+":0, sinFecha:0, total:0 };
+      for (const p of partes) {
+        suma["0-6m"] += p["0-6m"];
+        suma["7-12m"] += p["7-12m"];
+        suma["13-24m"] += p["13-24m"];
+        suma["25-59m"] += p["25-59m"];
+        suma["60m+"] += p["60m+"];
+        suma.sinFecha += p.sinFecha;
+        suma.total += p.total;
+      }
+      return suma;
+    }
+
+    return gruposEdadExcel;
+  }, [rawExcelRows, municipiosSel, municipiosNombresNorm, gruposEdadExcel, gruposPorMunicipio, colMunicipio]);
 
   // ── Indicadores del grupo seleccionado (desde Excel) ─────────────────────
   const indExcel: IndicadoresGrupoExcel | null = indicadoresFiltrados
@@ -605,13 +630,13 @@ export default function PrimeraInfanciaDashboard() {
           </div>
         )}
 
-        {/* Aviso filtro sin rawRows */}
-        {pestana !== "datos" && !rawExcelRows && municipiosSel.length < MUNICIPIOS.length && indicadoresExcel && (
+        {/* Aviso filtro sin datos por municipio disponibles (ni rawRows ni pre-computados) */}
+        {pestana !== "datos" && !rawExcelRows && !indPorMunicipio && municipiosSel.length < MUNICIPIOS.length && indicadoresExcel && (
           <div className="flex items-center gap-3 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700 text-sm text-amber-900 dark:text-amber-200">
             <span className="text-2xl flex-shrink-0">⚠️</span>
             <div>
-              <p className="font-bold">Filtro por municipio no disponible con los datos sincronizados</p>
-              <p className="text-xs mt-0.5 opacity-80">Los datos que trae Drive automáticamente muestran el total general. El filtro por municipio se activará en la próxima actualización.</p>
+              <p className="font-bold">Filtro por municipio no disponible todavía</p>
+              <p className="text-xs mt-0.5 opacity-80">Muestra el total general. Se activará en la próxima sincronización.</p>
             </div>
           </div>
         )}
