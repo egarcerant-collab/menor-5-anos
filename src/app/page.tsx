@@ -578,6 +578,13 @@ export default function PrimeraInfanciaDashboard() {
           </div>
         )}
 
+        {/* KPIs — arriba de los filtros, se mueven solos según el mes seleccionado */}
+        {pestana !== "datos" && (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {kpis.map((k,i) => <KPICard key={k.titulo} kpi={k} delay={i} />)}
+          </div>
+        )}
+
         {/* FILTROS PERSISTENTES */}
         {pestana !== "datos" && (
           <div className="space-y-4 fade-in-up">
@@ -606,13 +613,6 @@ export default function PrimeraInfanciaDashboard() {
               <p className="font-bold">Filtro por municipio no disponible con los datos sincronizados</p>
               <p className="text-xs mt-0.5 opacity-80">Los datos que trae Drive automáticamente muestran el total general. El filtro por municipio se activará en la próxima actualización.</p>
             </div>
-          </div>
-        )}
-
-        {/* KPIs */}
-        {pestana !== "datos" && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            {kpis.map((k,i) => <KPICard key={k.titulo} kpi={k} delay={i} />)}
           </div>
         )}
 
