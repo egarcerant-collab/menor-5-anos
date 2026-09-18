@@ -9,7 +9,7 @@ import {
 import {
   Baby, Stethoscope, Apple,
   TrendingUp, TrendingDown, MapPin, Calendar, Star,
-  Activity, BarChart2, Filter, Download,
+  Activity, BarChart2, Filter, Download, RefreshCw,
   AlertCircle, Syringe, Scale, FileSpreadsheet
 } from "lucide-react";
 import { MunicipioFilter } from "@/components/pi/MunicipioFilter";
@@ -156,6 +156,26 @@ export default function PrimeraInfanciaDashboard() {
   const [periodo, setPeriodo] = useState("2026");
   const [mesSel, setMesSel] = useState("Todos");
   const [pestana, setPestana] = useState<Pestana>("resumen");
+  const [sincronizando, setSincronizando] = useState(false);
+  const [sincMensaje, setSincMensaje] = useState<string | null>(null);
+
+  // ── Dispara manualmente el job de GitHub Actions que trae los datos de Drive ──
+  async function dispararSincronizacion() {
+    setSincronizando(true);
+    setSincMensaje(null);
+    try {
+      const resp = await fetch("/api/trigger-sync", { method: "POST" });
+      const data = await resp.json();
+      setSincMensaje(data.ok
+        ? "✓ Sincronización iniciada. Los datos se actualizan en 1-2 minutos."
+        : `✗ ${data.error ?? "No se pudo iniciar la sincronización."}`);
+    } catch {
+      setSincMensaje("✗ No se pudo contactar al servidor.");
+    } finally {
+      setSincronizando(false);
+      setTimeout(() => setSincMensaje(null), 8000);
+    }
+  }
   const [municipiosSel, setMunicipiosSel] = useState<string[]>(MUNICIPIOS.map(m => m.id));
   const [ipsSel, setIpsSel] = useState<string[]>([]);
   const [grupoEdad, setGrupoEdad] = useState<GrupoEdadFiltro>("todos");
@@ -489,6 +509,17 @@ export default function PrimeraInfanciaDashboard() {
                 <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-300" />
                 <span className="text-emerald-200 font-medium">{fmtN(excelCargado.rows)} filas · {excelCargado.filename}</span>
               </div>
+            )}
+            <button
+              onClick={dispararSincronizacion}
+              disabled={sincronizando}
+              className="flex items-center gap-1.5 glass rounded-xl px-3 py-2 text-sm text-white/90 hover:bg-white/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${sincronizando ? "animate-spin" : ""}`} />
+              {sincronizando ? "Sincronizando..." : "Actualizar ahora"}
+            </button>
+            {sincMensaje && (
+              <span className="text-xs text-white/90 glass rounded-xl px-3 py-1.5">{sincMensaje}</span>
             )}
           </div>
         </div>
