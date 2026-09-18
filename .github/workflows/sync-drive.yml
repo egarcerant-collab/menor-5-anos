@@ -34,5 +34,21 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add src/data/drive-sync-latest.json
-          git diff --cached --quiet && echo "Sin cambios." || git commit -m "chore: actualizar datos desde Drive [skip ci]"
-          git push
+          if git diff --cached --quiet; then
+            echo "Sin cambios."
+            exit 0
+          fi
+          git commit -m "chore: actualizar datos desde Drive [skip ci]"
+          # main puede haber avanzado mientras corria este job (push manual,
+          # otra corrida en paralelo): reintenta con rebase antes de fallar.
+          for i in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push rechazado, reintentando con rebase ($i/5)..."
+            git fetch origin main
+            git rebase origin/main
+            sleep 3
+          done
+          echo "No se pudo subir el commit tras varios intentos."
+          exit 1
