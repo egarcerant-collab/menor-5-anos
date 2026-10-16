@@ -15,7 +15,7 @@
     "Julio": {
       "filename": "MATRIZ SEGUIMIENTO SALUD INFANTIL__AJUSTADA - JULIO 2026 - CONSOLIDADO.xlsx",
       "modifiedTime": "2026-09-03T16:44:28.000Z",
-      "generadoEn": "2026-10-16T19:58:41.696Z",
+      "generadoEn": "2026-10-16T20:04:54.843Z",
       "rowsCount": 44469,
       "colMunicipio": "M",
       "grupos": {
@@ -6485,12 +6485,160 @@
           "total": 667
         }
       },
+      "controlesPorMes": [
+        {
+          "mes": "ENERO",
+          "numero": 1,
+          "conteo": 1884
+        },
+        {
+          "mes": "FEBRERO",
+          "numero": 2,
+          "conteo": 1173
+        },
+        {
+          "mes": "MARZO",
+          "numero": 3,
+          "conteo": 1529
+        },
+        {
+          "mes": "ABRIL",
+          "numero": 4,
+          "conteo": 1742
+        },
+        {
+          "mes": "MAYO",
+          "numero": 5,
+          "conteo": 1189
+        },
+        {
+          "mes": "JUNIO",
+          "numero": 6,
+          "conteo": 2060
+        },
+        {
+          "mes": "JULIO",
+          "numero": 7,
+          "conteo": 1565
+        },
+        {
+          "mes": "AGOSTO",
+          "numero": 8,
+          "conteo": 0
+        },
+        {
+          "mes": "SEPTIEMBRE",
+          "numero": 9,
+          "conteo": 0
+        },
+        {
+          "mes": "OCTUBRE",
+          "numero": 10,
+          "conteo": 0
+        },
+        {
+          "mes": "NOVIEMBRE",
+          "numero": 11,
+          "conteo": 0
+        },
+        {
+          "mes": "DICIEMBRE",
+          "numero": 12,
+          "conteo": 0
+        }
+      ],
+      "controlesPorVisita": [
+        {
+          "col": "AM",
+          "numero": 1,
+          "rango": "1 mes",
+          "profesional": "Enfermería",
+          "conteo": 1221
+        },
+        {
+          "col": "AX",
+          "numero": 2,
+          "rango": "2 a 3 meses",
+          "profesional": "Enfermería",
+          "conteo": 1439
+        },
+        {
+          "col": "BG",
+          "numero": 3,
+          "rango": "4 a 5 meses",
+          "profesional": "Medicina",
+          "conteo": 1448
+        },
+        {
+          "col": "BP",
+          "numero": 4,
+          "rango": "6 a 8 meses",
+          "profesional": "Enfermería",
+          "conteo": 1528
+        },
+        {
+          "col": "CA",
+          "numero": 5,
+          "rango": "9 a 11 meses",
+          "profesional": "Enfermería",
+          "conteo": 1428
+        },
+        {
+          "col": "CL",
+          "numero": 6,
+          "rango": "12 a 18 meses",
+          "profesional": "Medicina",
+          "conteo": 2098
+        },
+        {
+          "col": "CW",
+          "numero": 7,
+          "rango": "19 a 23 meses",
+          "profesional": "Enfermería",
+          "conteo": 1099
+        },
+        {
+          "col": "DH",
+          "numero": 8,
+          "rango": "24 a 29 meses",
+          "profesional": "Medicina",
+          "conteo": 1542
+        },
+        {
+          "col": "DS",
+          "numero": 9,
+          "rango": "30 a 35 meses",
+          "profesional": "Enfermería",
+          "conteo": 1384
+        },
+        {
+          "col": "ED",
+          "numero": 10,
+          "rango": "3 años",
+          "profesional": "Medicina",
+          "conteo": 1848
+        },
+        {
+          "col": "EO",
+          "numero": 11,
+          "rango": "4 años",
+          "profesional": "Enfermería",
+          "conteo": 1623
+        },
+        {
+          "col": "EZ",
+          "numero": 12,
+          "rango": "5 años",
+          "profesional": "Medicina",
+          "conteo": 1680
+        }
+      ],
       "mesPrincipal": "Junio"
     },
     "Junio": {
       "filename": "MATRIZ SEGUIMIENTO SALUD INFANTIL__AJUSTADA - JUNIO 2026 - CONSOLIDADO.xlsx",
       "modifiedTime": "2026-09-08T22:15:49.983Z",
-      "generadoEn": "2026-10-16T19:59:19.904Z",
+      "generadoEn": "2026-10-16T20:05:15.949Z",
       "rowsCount": 44250,
       "colMunicipio": "M",
       "grupos": {
@@ -12960,12 +13108,160 @@
           "total": 667
         }
       },
+      "controlesPorMes": [
+        {
+          "mes": "ENERO",
+          "numero": 1,
+          "conteo": 1840
+        },
+        {
+          "mes": "FEBRERO",
+          "numero": 2,
+          "conteo": 1149
+        },
+        {
+          "mes": "MARZO",
+          "numero": 3,
+          "conteo": 1503
+        },
+        {
+          "mes": "ABRIL",
+          "numero": 4,
+          "conteo": 1693
+        },
+        {
+          "mes": "MAYO",
+          "numero": 5,
+          "conteo": 1005
+        },
+        {
+          "mes": "JUNIO",
+          "numero": 6,
+          "conteo": 1689
+        },
+        {
+          "mes": "JULIO",
+          "numero": 7,
+          "conteo": 1
+        },
+        {
+          "mes": "AGOSTO",
+          "numero": 8,
+          "conteo": 0
+        },
+        {
+          "mes": "SEPTIEMBRE",
+          "numero": 9,
+          "conteo": 0
+        },
+        {
+          "mes": "OCTUBRE",
+          "numero": 10,
+          "conteo": 0
+        },
+        {
+          "mes": "NOVIEMBRE",
+          "numero": 11,
+          "conteo": 0
+        },
+        {
+          "mes": "DICIEMBRE",
+          "numero": 12,
+          "conteo": 0
+        }
+      ],
+      "controlesPorVisita": [
+        {
+          "col": "AM",
+          "numero": 1,
+          "rango": "1 mes",
+          "profesional": "Enfermería",
+          "conteo": 872
+        },
+        {
+          "col": "AX",
+          "numero": 2,
+          "rango": "2 a 3 meses",
+          "profesional": "Enfermería",
+          "conteo": 1176
+        },
+        {
+          "col": "BG",
+          "numero": 3,
+          "rango": "4 a 5 meses",
+          "profesional": "Medicina",
+          "conteo": 1209
+        },
+        {
+          "col": "BP",
+          "numero": 4,
+          "rango": "6 a 8 meses",
+          "profesional": "Enfermería",
+          "conteo": 1218
+        },
+        {
+          "col": "CA",
+          "numero": 5,
+          "rango": "9 a 11 meses",
+          "profesional": "Enfermería",
+          "conteo": 1107
+        },
+        {
+          "col": "CL",
+          "numero": 6,
+          "rango": "12 a 18 meses",
+          "profesional": "Medicina",
+          "conteo": 1665
+        },
+        {
+          "col": "CW",
+          "numero": 7,
+          "rango": "19 a 23 meses",
+          "profesional": "Enfermería",
+          "conteo": 873
+        },
+        {
+          "col": "DH",
+          "numero": 8,
+          "rango": "24 a 29 meses",
+          "profesional": "Medicina",
+          "conteo": 1211
+        },
+        {
+          "col": "DS",
+          "numero": 9,
+          "rango": "30 a 35 meses",
+          "profesional": "Enfermería",
+          "conteo": 1139
+        },
+        {
+          "col": "ED",
+          "numero": 10,
+          "rango": "3 años",
+          "profesional": "Medicina",
+          "conteo": 1440
+        },
+        {
+          "col": "EO",
+          "numero": 11,
+          "rango": "4 años",
+          "profesional": "Enfermería",
+          "conteo": 1297
+        },
+        {
+          "col": "EZ",
+          "numero": 12,
+          "rango": "5 años",
+          "profesional": "Medicina",
+          "conteo": 1406
+        }
+      ],
       "mesPrincipal": "Enero"
     },
     "Mayo": {
       "filename": "MATRIZ SEGUIMIENTO SALUD INFANTIL__AJUSTADA - MAYO 2026 - CONSOLIDADO.xlsx",
       "modifiedTime": "2026-09-08T22:14:33.879Z",
-      "generadoEn": "2026-10-16T20:00:01.834Z",
+      "generadoEn": "2026-10-16T20:05:56.313Z",
       "rowsCount": 44158,
       "colMunicipio": "M",
       "grupos": {
@@ -19435,12 +19731,160 @@
           "total": 667
         }
       },
+      "controlesPorMes": [
+        {
+          "mes": "ENERO",
+          "numero": 1,
+          "conteo": 1822
+        },
+        {
+          "mes": "FEBRERO",
+          "numero": 2,
+          "conteo": 1132
+        },
+        {
+          "mes": "MARZO",
+          "numero": 3,
+          "conteo": 1433
+        },
+        {
+          "mes": "ABRIL",
+          "numero": 4,
+          "conteo": 1669
+        },
+        {
+          "mes": "MAYO",
+          "numero": 5,
+          "conteo": 986
+        },
+        {
+          "mes": "JUNIO",
+          "numero": 6,
+          "conteo": 0
+        },
+        {
+          "mes": "JULIO",
+          "numero": 7,
+          "conteo": 0
+        },
+        {
+          "mes": "AGOSTO",
+          "numero": 8,
+          "conteo": 0
+        },
+        {
+          "mes": "SEPTIEMBRE",
+          "numero": 9,
+          "conteo": 0
+        },
+        {
+          "mes": "OCTUBRE",
+          "numero": 10,
+          "conteo": 0
+        },
+        {
+          "mes": "NOVIEMBRE",
+          "numero": 11,
+          "conteo": 0
+        },
+        {
+          "mes": "DICIEMBRE",
+          "numero": 12,
+          "conteo": 0
+        }
+      ],
+      "controlesPorVisita": [
+        {
+          "col": "AM",
+          "numero": 1,
+          "rango": "1 mes",
+          "profesional": "Enfermería",
+          "conteo": 769
+        },
+        {
+          "col": "AX",
+          "numero": 2,
+          "rango": "2 a 3 meses",
+          "profesional": "Enfermería",
+          "conteo": 966
+        },
+        {
+          "col": "BG",
+          "numero": 3,
+          "rango": "4 a 5 meses",
+          "profesional": "Medicina",
+          "conteo": 1003
+        },
+        {
+          "col": "BP",
+          "numero": 4,
+          "rango": "6 a 8 meses",
+          "profesional": "Enfermería",
+          "conteo": 967
+        },
+        {
+          "col": "CA",
+          "numero": 5,
+          "rango": "9 a 11 meses",
+          "profesional": "Enfermería",
+          "conteo": 835
+        },
+        {
+          "col": "CL",
+          "numero": 6,
+          "rango": "12 a 18 meses",
+          "profesional": "Medicina",
+          "conteo": 1325
+        },
+        {
+          "col": "CW",
+          "numero": 7,
+          "rango": "19 a 23 meses",
+          "profesional": "Enfermería",
+          "conteo": 685
+        },
+        {
+          "col": "DH",
+          "numero": 8,
+          "rango": "24 a 29 meses",
+          "profesional": "Medicina",
+          "conteo": 917
+        },
+        {
+          "col": "DS",
+          "numero": 9,
+          "rango": "30 a 35 meses",
+          "profesional": "Enfermería",
+          "conteo": 903
+        },
+        {
+          "col": "ED",
+          "numero": 10,
+          "rango": "3 años",
+          "profesional": "Medicina",
+          "conteo": 1095
+        },
+        {
+          "col": "EO",
+          "numero": 11,
+          "rango": "4 años",
+          "profesional": "Enfermería",
+          "conteo": 1007
+        },
+        {
+          "col": "EZ",
+          "numero": 12,
+          "rango": "5 años",
+          "profesional": "Medicina",
+          "conteo": 1145
+        }
+      ],
       "mesPrincipal": "Enero"
     },
     "Abril": {
       "filename": "MATRIZ SEGUIMIENTO SALUD INFANTIL__AJUSTADA - ABRIL 2026 - CONSOLIDADO.xlsx",
       "modifiedTime": "2026-06-24T15:02:40.000Z",
-      "generadoEn": "2026-10-16T20:00:43.780Z",
+      "generadoEn": "2026-10-16T20:06:44.379Z",
       "rowsCount": 44034,
       "colMunicipio": "M",
       "grupos": {
@@ -25910,12 +26354,160 @@
           "total": 667
         }
       },
+      "controlesPorMes": [
+        {
+          "mes": "ENERO",
+          "numero": 1,
+          "conteo": 1799
+        },
+        {
+          "mes": "FEBRERO",
+          "numero": 2,
+          "conteo": 1079
+        },
+        {
+          "mes": "MARZO",
+          "numero": 3,
+          "conteo": 1384
+        },
+        {
+          "mes": "ABRIL",
+          "numero": 4,
+          "conteo": 1483
+        },
+        {
+          "mes": "MAYO",
+          "numero": 5,
+          "conteo": 0
+        },
+        {
+          "mes": "JUNIO",
+          "numero": 6,
+          "conteo": 0
+        },
+        {
+          "mes": "JULIO",
+          "numero": 7,
+          "conteo": 0
+        },
+        {
+          "mes": "AGOSTO",
+          "numero": 8,
+          "conteo": 0
+        },
+        {
+          "mes": "SEPTIEMBRE",
+          "numero": 9,
+          "conteo": 0
+        },
+        {
+          "mes": "OCTUBRE",
+          "numero": 10,
+          "conteo": 0
+        },
+        {
+          "mes": "NOVIEMBRE",
+          "numero": 11,
+          "conteo": 0
+        },
+        {
+          "mes": "DICIEMBRE",
+          "numero": 12,
+          "conteo": 0
+        }
+      ],
+      "controlesPorVisita": [
+        {
+          "col": "AM",
+          "numero": 1,
+          "rango": "1 mes",
+          "profesional": "Enfermería",
+          "conteo": 614
+        },
+        {
+          "col": "AX",
+          "numero": 2,
+          "rango": "2 a 3 meses",
+          "profesional": "Enfermería",
+          "conteo": 674
+        },
+        {
+          "col": "BG",
+          "numero": 3,
+          "rango": "4 a 5 meses",
+          "profesional": "Medicina",
+          "conteo": 726
+        },
+        {
+          "col": "BP",
+          "numero": 4,
+          "rango": "6 a 8 meses",
+          "profesional": "Enfermería",
+          "conteo": 647
+        },
+        {
+          "col": "CA",
+          "numero": 5,
+          "rango": "9 a 11 meses",
+          "profesional": "Enfermería",
+          "conteo": 582
+        },
+        {
+          "col": "CL",
+          "numero": 6,
+          "rango": "12 a 18 meses",
+          "profesional": "Medicina",
+          "conteo": 989
+        },
+        {
+          "col": "CW",
+          "numero": 7,
+          "rango": "19 a 23 meses",
+          "profesional": "Enfermería",
+          "conteo": 492
+        },
+        {
+          "col": "DH",
+          "numero": 8,
+          "rango": "24 a 29 meses",
+          "profesional": "Medicina",
+          "conteo": 810
+        },
+        {
+          "col": "DS",
+          "numero": 9,
+          "rango": "30 a 35 meses",
+          "profesional": "Enfermería",
+          "conteo": 683
+        },
+        {
+          "col": "ED",
+          "numero": 10,
+          "rango": "3 años",
+          "profesional": "Medicina",
+          "conteo": 854
+        },
+        {
+          "col": "EO",
+          "numero": 11,
+          "rango": "4 años",
+          "profesional": "Enfermería",
+          "conteo": 812
+        },
+        {
+          "col": "EZ",
+          "numero": 12,
+          "rango": "5 años",
+          "profesional": "Medicina",
+          "conteo": 975
+        }
+      ],
       "mesPrincipal": "Enero"
     },
     "Marzo": {
       "filename": "MATRIZ SEGUIMIENTO SALUD INFANTIL__AJUSTADA - MARZO 2026 - CONSOLIDADO.xlsx",
       "modifiedTime": "2026-05-28T19:48:30.000Z",
-      "generadoEn": "2026-10-16T20:01:26.141Z",
+      "generadoEn": "2026-10-16T20:07:32.221Z",
       "rowsCount": 43864,
       "colMunicipio": "M",
       "grupos": {
@@ -32385,12 +32977,160 @@
           "total": 667
         }
       },
+      "controlesPorMes": [
+        {
+          "mes": "ENERO",
+          "numero": 1,
+          "conteo": 1749
+        },
+        {
+          "mes": "FEBRERO",
+          "numero": 2,
+          "conteo": 309
+        },
+        {
+          "mes": "MARZO",
+          "numero": 3,
+          "conteo": 1366
+        },
+        {
+          "mes": "ABRIL",
+          "numero": 4,
+          "conteo": 0
+        },
+        {
+          "mes": "MAYO",
+          "numero": 5,
+          "conteo": 0
+        },
+        {
+          "mes": "JUNIO",
+          "numero": 6,
+          "conteo": 0
+        },
+        {
+          "mes": "JULIO",
+          "numero": 7,
+          "conteo": 0
+        },
+        {
+          "mes": "AGOSTO",
+          "numero": 8,
+          "conteo": 0
+        },
+        {
+          "mes": "SEPTIEMBRE",
+          "numero": 9,
+          "conteo": 0
+        },
+        {
+          "mes": "OCTUBRE",
+          "numero": 10,
+          "conteo": 0
+        },
+        {
+          "mes": "NOVIEMBRE",
+          "numero": 11,
+          "conteo": 0
+        },
+        {
+          "mes": "DICIEMBRE",
+          "numero": 12,
+          "conteo": 0
+        }
+      ],
+      "controlesPorVisita": [
+        {
+          "col": "AM",
+          "numero": 1,
+          "rango": "1 mes",
+          "profesional": "Enfermería",
+          "conteo": 162
+        },
+        {
+          "col": "AX",
+          "numero": 2,
+          "rango": "2 a 3 meses",
+          "profesional": "Enfermería",
+          "conteo": 304
+        },
+        {
+          "col": "BG",
+          "numero": 3,
+          "rango": "4 a 5 meses",
+          "profesional": "Medicina",
+          "conteo": 319
+        },
+        {
+          "col": "BP",
+          "numero": 4,
+          "rango": "6 a 8 meses",
+          "profesional": "Enfermería",
+          "conteo": 172
+        },
+        {
+          "col": "CA",
+          "numero": 5,
+          "rango": "9 a 11 meses",
+          "profesional": "Enfermería",
+          "conteo": 223
+        },
+        {
+          "col": "CL",
+          "numero": 6,
+          "rango": "12 a 18 meses",
+          "profesional": "Medicina",
+          "conteo": 426
+        },
+        {
+          "col": "CW",
+          "numero": 7,
+          "rango": "19 a 23 meses",
+          "profesional": "Enfermería",
+          "conteo": 207
+        },
+        {
+          "col": "DH",
+          "numero": 8,
+          "rango": "24 a 29 meses",
+          "profesional": "Medicina",
+          "conteo": 383
+        },
+        {
+          "col": "DS",
+          "numero": 9,
+          "rango": "30 a 35 meses",
+          "profesional": "Enfermería",
+          "conteo": 320
+        },
+        {
+          "col": "ED",
+          "numero": 10,
+          "rango": "3 años",
+          "profesional": "Medicina",
+          "conteo": 445
+        },
+        {
+          "col": "EO",
+          "numero": 11,
+          "rango": "4 años",
+          "profesional": "Enfermería",
+          "conteo": 433
+        },
+        {
+          "col": "EZ",
+          "numero": 12,
+          "rango": "5 años",
+          "profesional": "Medicina",
+          "conteo": 737
+        }
+      ],
       "mesPrincipal": "Enero"
     },
     "Febrero": {
       "filename": "MATRIZ SEGUIMIENTO SALUD INFANTIL__AJUSTADA 2026 - FEBRERO 2026 - CONSOLIDADO.xlsx",
       "modifiedTime": "2026-04-16T20:22:40.000Z",
-      "generadoEn": "2026-10-16T20:01:58.920Z",
+      "generadoEn": "2026-10-16T20:08:11.744Z",
       "rowsCount": 43784,
       "colMunicipio": "M",
       "grupos": {
@@ -38860,12 +39600,160 @@
           "total": 667
         }
       },
+      "controlesPorMes": [
+        {
+          "mes": "ENERO",
+          "numero": 1,
+          "conteo": 1726
+        },
+        {
+          "mes": "FEBRERO",
+          "numero": 2,
+          "conteo": 1388
+        },
+        {
+          "mes": "MARZO",
+          "numero": 3,
+          "conteo": 0
+        },
+        {
+          "mes": "ABRIL",
+          "numero": 4,
+          "conteo": 0
+        },
+        {
+          "mes": "MAYO",
+          "numero": 5,
+          "conteo": 0
+        },
+        {
+          "mes": "JUNIO",
+          "numero": 6,
+          "conteo": 0
+        },
+        {
+          "mes": "JULIO",
+          "numero": 7,
+          "conteo": 0
+        },
+        {
+          "mes": "AGOSTO",
+          "numero": 8,
+          "conteo": 0
+        },
+        {
+          "mes": "SEPTIEMBRE",
+          "numero": 9,
+          "conteo": 0
+        },
+        {
+          "mes": "OCTUBRE",
+          "numero": 10,
+          "conteo": 0
+        },
+        {
+          "mes": "NOVIEMBRE",
+          "numero": 11,
+          "conteo": 0
+        },
+        {
+          "mes": "DICIEMBRE",
+          "numero": 12,
+          "conteo": 0
+        }
+      ],
+      "controlesPorVisita": [
+        {
+          "col": "AM",
+          "numero": 1,
+          "rango": "1 mes",
+          "profesional": "Enfermería",
+          "conteo": 307
+        },
+        {
+          "col": "AX",
+          "numero": 2,
+          "rango": "2 a 3 meses",
+          "profesional": "Enfermería",
+          "conteo": 211
+        },
+        {
+          "col": "BG",
+          "numero": 3,
+          "rango": "4 a 5 meses",
+          "profesional": "Medicina",
+          "conteo": 233
+        },
+        {
+          "col": "BP",
+          "numero": 4,
+          "rango": "6 a 8 meses",
+          "profesional": "Enfermería",
+          "conteo": 233
+        },
+        {
+          "col": "CA",
+          "numero": 5,
+          "rango": "9 a 11 meses",
+          "profesional": "Enfermería",
+          "conteo": 173
+        },
+        {
+          "col": "CL",
+          "numero": 6,
+          "rango": "12 a 18 meses",
+          "profesional": "Medicina",
+          "conteo": 407
+        },
+        {
+          "col": "CW",
+          "numero": 7,
+          "rango": "19 a 23 meses",
+          "profesional": "Enfermería",
+          "conteo": 166
+        },
+        {
+          "col": "DH",
+          "numero": 8,
+          "rango": "24 a 29 meses",
+          "profesional": "Medicina",
+          "conteo": 294
+        },
+        {
+          "col": "DS",
+          "numero": 9,
+          "rango": "30 a 35 meses",
+          "profesional": "Enfermería",
+          "conteo": 238
+        },
+        {
+          "col": "ED",
+          "numero": 10,
+          "rango": "3 años",
+          "profesional": "Medicina",
+          "conteo": 368
+        },
+        {
+          "col": "EO",
+          "numero": 11,
+          "rango": "4 años",
+          "profesional": "Enfermería",
+          "conteo": 362
+        },
+        {
+          "col": "EZ",
+          "numero": 12,
+          "rango": "5 años",
+          "profesional": "Medicina",
+          "conteo": 332
+        }
+      ],
       "mesPrincipal": "Enero"
     },
     "Enero": {
       "filename": "MATRIZ SEGUIMIENTO SALUD INFANTIL__AJUSTADA 2026 - ENERO 2026 - CONSOLIDADO.xlsx",
       "modifiedTime": "2026-02-27T18:58:48.000Z",
-      "generadoEn": "2026-10-16T20:02:35.416Z",
+      "generadoEn": "2026-10-16T20:08:50.497Z",
       "rowsCount": 43681,
       "colMunicipio": "M",
       "grupos": {
@@ -45335,6 +46223,154 @@
           "total": 667
         }
       },
+      "controlesPorMes": [
+        {
+          "mes": "ENERO",
+          "numero": 1,
+          "conteo": 1726
+        },
+        {
+          "mes": "FEBRERO",
+          "numero": 2,
+          "conteo": 0
+        },
+        {
+          "mes": "MARZO",
+          "numero": 3,
+          "conteo": 0
+        },
+        {
+          "mes": "ABRIL",
+          "numero": 4,
+          "conteo": 0
+        },
+        {
+          "mes": "MAYO",
+          "numero": 5,
+          "conteo": 0
+        },
+        {
+          "mes": "JUNIO",
+          "numero": 6,
+          "conteo": 0
+        },
+        {
+          "mes": "JULIO",
+          "numero": 7,
+          "conteo": 0
+        },
+        {
+          "mes": "AGOSTO",
+          "numero": 8,
+          "conteo": 0
+        },
+        {
+          "mes": "SEPTIEMBRE",
+          "numero": 9,
+          "conteo": 0
+        },
+        {
+          "mes": "OCTUBRE",
+          "numero": 10,
+          "conteo": 0
+        },
+        {
+          "mes": "NOVIEMBRE",
+          "numero": 11,
+          "conteo": 0
+        },
+        {
+          "mes": "DICIEMBRE",
+          "numero": 12,
+          "conteo": 0
+        }
+      ],
+      "controlesPorVisita": [
+        {
+          "col": "AM",
+          "numero": 1,
+          "rango": "1 mes",
+          "profesional": "Enfermería",
+          "conteo": 32
+        },
+        {
+          "col": "AX",
+          "numero": 2,
+          "rango": "2 a 3 meses",
+          "profesional": "Enfermería",
+          "conteo": 130
+        },
+        {
+          "col": "BG",
+          "numero": 3,
+          "rango": "4 a 5 meses",
+          "profesional": "Medicina",
+          "conteo": 144
+        },
+        {
+          "col": "BP",
+          "numero": 4,
+          "rango": "6 a 8 meses",
+          "profesional": "Enfermería",
+          "conteo": 118
+        },
+        {
+          "col": "CA",
+          "numero": 5,
+          "rango": "9 a 11 meses",
+          "profesional": "Enfermería",
+          "conteo": 98
+        },
+        {
+          "col": "CL",
+          "numero": 6,
+          "rango": "12 a 18 meses",
+          "profesional": "Medicina",
+          "conteo": 212
+        },
+        {
+          "col": "CW",
+          "numero": 7,
+          "rango": "19 a 23 meses",
+          "profesional": "Enfermería",
+          "conteo": 81
+        },
+        {
+          "col": "DH",
+          "numero": 8,
+          "rango": "24 a 29 meses",
+          "profesional": "Medicina",
+          "conteo": 171
+        },
+        {
+          "col": "DS",
+          "numero": 9,
+          "rango": "30 a 35 meses",
+          "profesional": "Enfermería",
+          "conteo": 128
+        },
+        {
+          "col": "ED",
+          "numero": 10,
+          "rango": "3 años",
+          "profesional": "Medicina",
+          "conteo": 208
+        },
+        {
+          "col": "EO",
+          "numero": 11,
+          "rango": "4 años",
+          "profesional": "Enfermería",
+          "conteo": 204
+        },
+        {
+          "col": "EZ",
+          "numero": 12,
+          "rango": "5 años",
+          "profesional": "Medicina",
+          "conteo": 200
+        }
+      ],
       "mesPrincipal": "Enero"
     }
   }
