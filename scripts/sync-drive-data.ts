@@ -21,7 +21,7 @@ import { parseMatrizRawRowsOnly } from "../src/lib/parseMatrizWorkbook";
 import { detectarColumnaMunicipio } from "../src/lib/municipioDetect";
 import { calcularGruposEdadDesdeExcel } from "../src/lib/gruposEdadExcel";
 import { calcularIndicadoresDesdeExcel } from "../src/lib/indicadoresExcel";
-import { contarControlesPorMes } from "../src/lib/contadorControles";
+import { contarControlesPorMes, contarControlesPorVisita } from "../src/lib/contadorControles";
 import { MUNICIPIOS } from "../src/components/pi/sampleData";
 
 const START_ROW = 4;
@@ -57,7 +57,11 @@ function procesarArchivo(buffer: ArrayBuffer, fechaReferencia: Date) {
     );
   }
 
-  const conteosMes = contarControlesPorMes(rawRows, START_ROW, new Date().getFullYear());
+  // Controles (visitas RIAS) con fecha en cada mes calendario, y por tipo de
+  // visita. Es lo que muestra el componente "Controles por mes" sin necesitar
+  // las filas crudas en el navegador.
+  const conteosMes = contarControlesPorMes(rawRows, START_ROW, fechaReferencia.getFullYear());
+  const conteosVisita = contarControlesPorVisita(rawRows, START_ROW);
   const mejorMes = conteosMes.reduce((a, b) => (b.conteo > a.conteo ? b : a), conteosMes[0]);
   const mesPrincipal = mejorMes && mejorMes.conteo > 0
     ? mejorMes.mes.charAt(0) + mejorMes.mes.slice(1).toLowerCase()
@@ -70,6 +74,8 @@ function procesarArchivo(buffer: ArrayBuffer, fechaReferencia: Date) {
     indicadores,
     indPorMunicipio,
     gruposPorMunicipio,
+    controlesPorMes: conteosMes,
+    controlesPorVisita: conteosVisita,
     mesPrincipal,
   };
 }

@@ -21,7 +21,7 @@ import { MUNICIPIOS, GRUPO_COLORS } from "@/components/pi/sampleData";
 import type { GrupoEdadFiltro } from "@/components/pi/types";
 import { calcularGruposEdadDesdeExcel, type GrupoConteoExcel } from "@/lib/gruposEdadExcel";
 import { calcularIndicadoresDesdeExcel, type IndPorGrupo, type IndicadoresGrupoExcel, COLUMNA_MUNICIPIO } from "@/lib/indicadoresExcel";
-import { contarControlesPorMes } from "@/lib/contadorControles";
+import { contarControlesPorMes, type ConteoMes, type ConteoVisita } from "@/lib/contadorControles";
 import {
   guardarDatos, recuperarDatos, limpiarDatos,
   recuperarHistorial, exportarCSVIndicadores, exportarCSVFilasCrudas, exportarJSON,
@@ -188,6 +188,7 @@ export default function PrimeraInfanciaDashboard() {
   const [mounted, setMounted] = useState(false);
   const [indPorMunicipio, setIndPorMunicipio] = useState<Record<string, IndPorGrupo> | null>(null);
   const [gruposPorMunicipio, setGruposPorMunicipio] = useState<Record<string, GrupoConteoExcel> | null>(null);
+  const [controlesSync, setControlesSync] = useState<{ mes: ConteoMes[]; visita: ConteoVisita[] } | null>(null);
   const [mesPrincipal, setMesPrincipal] = useState<string | null>(null);
   const [colMunicipio, setColMunicipio] = useState<string>('B');
   const [syncPorMes, setSyncPorMes] = useState<{ meses: Record<string, any>; ordenMeses: string[]; ultimoMes: string } | null>(null);
@@ -248,6 +249,7 @@ export default function PrimeraInfanciaDashboard() {
     setColMunicipio(datos.colMunicipio);
     setIndPorMunicipio(datos.indPorMunicipio ?? null);
     setGruposPorMunicipio(datos.gruposPorMunicipio ?? null);
+    setControlesSync(datos.controlesPorMes ? { mes: datos.controlesPorMes, visita: datos.controlesPorVisita ?? [] } : null);
     setDatosRestaurados(false);
     guardarDatos(meta, datos.grupos, datos.indicadores);
     if (datos.indPorMunicipio) guardarIndPorMunicipio(datos.indPorMunicipio, datos.colMunicipio);
@@ -617,7 +619,11 @@ export default function PrimeraInfanciaDashboard() {
               <MunicipioFilter seleccionados={municipiosSel} onChange={setMunicipiosSel} ipsSel={ipsSel} onIpsChange={setIpsSel} />
               <div className="space-y-4">
                 <AgeRangeSelector valor={grupoEdad} onChange={setGrupoEdad} conteos={gruposEdadFiltrados} />
-                <ContadorControles rawRows={rawExcelRows} />
+                <ContadorControles
+                  rawRows={rawExcelRows}
+                  conteosMesPrecalc={controlesSync?.mes ?? null}
+                  conteosVisitaPrecalc={controlesSync?.visita ?? null}
+                />
               </div>
             </div>
             <GeneradorInformesIPSI
@@ -794,9 +800,13 @@ export default function PrimeraInfanciaDashboard() {
               </div>
             )}
 
-            {/* Controles por mes — solo cuando hay rawRows cargados en sesión */}
-            {rawExcelRows && (
-              <ContadorControles rawRows={rawExcelRows} />
+            {/* Controles por mes — desde filas cargadas o desde el sync de Drive */}
+            {(rawExcelRows || controlesSync) && (
+              <ContadorControles
+                rawRows={rawExcelRows}
+                conteosMesPrecalc={controlesSync?.mes ?? null}
+                conteosVisitaPrecalc={controlesSync?.visita ?? null}
+              />
             )}
           </div>
         )}

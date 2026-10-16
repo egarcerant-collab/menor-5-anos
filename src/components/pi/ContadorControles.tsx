@@ -7,31 +7,35 @@ import {
 } from "@/lib/contadorControles";
 
 interface ContadorControlesProps {
-  rawRows: Record<string, unknown>[] | null;
+  /** Filas crudas del Excel (si se cargó uno en el navegador). */
+  rawRows?: Record<string, unknown>[] | null;
+  /** Conteos ya calculados por el job de sincronización con Drive. */
+  conteosMesPrecalc?: ConteoMes[] | null;
+  conteosVisitaPrecalc?: ConteoVisita[] | null;
 }
 
-export function ContadorControles({ rawRows }: ContadorControlesProps) {
+export function ContadorControles({ rawRows = null, conteosMesPrecalc = null, conteosVisitaPrecalc = null }: ContadorControlesProps) {
   const [expandido, setExpandido] = useState(false);
 
   const conteosMes: ConteoMes[] = useMemo(() => {
-    if (!rawRows || rawRows.length === 0) return [];
-    return contarControlesPorMes(rawRows, 4, 2026);
-  }, [rawRows]);
+    if (rawRows && rawRows.length > 0) return contarControlesPorMes(rawRows, 4, 2026);
+    return conteosMesPrecalc ?? [];
+  }, [rawRows, conteosMesPrecalc]);
 
   const conteosVisita: ConteoVisita[] = useMemo(() => {
-    if (!rawRows || rawRows.length === 0) return [];
-    return contarControlesPorVisita(rawRows, 4);
-  }, [rawRows]);
+    if (rawRows && rawRows.length > 0) return contarControlesPorVisita(rawRows, 4);
+    return conteosVisitaPrecalc ?? [];
+  }, [rawRows, conteosVisitaPrecalc]);
 
   const conDatos = conteosMes.filter(c => c.conteo > 0);
   const totalMes  = conteosMes.reduce((s, c) => s + c.conteo, 0);
   const totalVis  = conteosVisita.reduce((s, c) => s + c.conteo, 0);
 
-  if (!rawRows) {
+  if (!rawRows && !conteosMesPrecalc) {
     return (
       <div className="flex items-center gap-2 px-3 py-2 bg-muted/40 rounded-xl border border-border">
         <Calendar className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-        <span className="text-xs text-muted-foreground">Controles por mes — cargue el Excel</span>
+        <span className="text-xs text-muted-foreground">Controles por mes — esperando datos de Drive</span>
       </div>
     );
   }
