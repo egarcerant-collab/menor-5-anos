@@ -43,5 +43,9 @@ next-env.d.ts
 
 # firebase
 firebase-debug.log
-firestore-debug.logopenssh
+firestore-debug.log
+openssh
 openssh.pub
+
+# datos locales del módulo de prestadores (usuarios, reportes): nunca al repo
+/data/

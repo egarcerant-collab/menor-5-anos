@@ -39,9 +39,15 @@ function extraerCampo(raw: string, campo: "private_key" | "client_email"): strin
   return value;
 }
 
-function getClient(): JWT {
+/**
+ * Cliente JWT de la cuenta de servicio. Por defecto solo lectura (matrices
+ * mensuales); el módulo de prestadores lo pide con scope completo para
+ * escribir únicamente en su carpeta privada (GDRIVE_APP_FOLDER_ID).
+ * También acepta GOOGLE_SERVICE_ACCOUNT_JSON (el .json completo).
+ */
+export function crearClienteDrive(scopes: string[] = SCOPES): JWT {
   const emailRaw = process.env.GOOGLE_DRIVE_CLIENT_EMAIL || "";
-  const keyRaw = process.env.GOOGLE_DRIVE_PRIVATE_KEY || "";
+  const keyRaw = process.env.GOOGLE_DRIVE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_JSON || "";
 
   const email = extraerCampo(emailRaw, "client_email") || extraerCampo(keyRaw, "client_email");
   // Vercel/Next no preservan saltos de línea reales en variables de entorno;
@@ -51,8 +57,10 @@ function getClient(): JWT {
   if (!email || !key) {
     throw new Error("Credenciales de Google Drive no configuradas (GOOGLE_DRIVE_CLIENT_EMAIL / GOOGLE_DRIVE_PRIVATE_KEY).");
   }
-  return new JWT({ email, key, scopes: SCOPES });
+  return new JWT({ email, key, scopes });
 }
+
+const getClient = () => crearClienteDrive();
 
 const MESES_ORDEN = [
   "ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO",

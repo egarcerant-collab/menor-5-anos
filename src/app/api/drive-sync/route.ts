@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { esEpsi, getSesion } from "@/lib/auth/sesion";
 import fs from "fs/promises";
 import path from "path";
 
@@ -13,6 +14,10 @@ import path from "path";
  * instantáneo y no tiene ese riesgo.
  */
 export async function GET() {
+  const sesion = await getSesion();
+  if (!sesion || sesion.debeCambiarClave || !esEpsi(sesion.rol)) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
   try {
     const filePath = path.join(process.cwd(), "src", "data", "drive-sync-latest.json");
     const raw = await fs.readFile(filePath, "utf-8");
