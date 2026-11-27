@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { esEpsi, getSesion } from "@/lib/auth/sesion";
 
 const OWNER = "egarcerant-collab";
 const REPO = "menor-5-anos";
@@ -12,6 +13,11 @@ const WORKFLOW_FILE = "sync-drive.yml";
  * Read and write" sobre este repo, guardado como GITHUB_SYNC_TOKEN.
  */
 export async function POST() {
+  const sesion = await getSesion();
+  if (!sesion || sesion.debeCambiarClave || !esEpsi(sesion.rol)) {
+    return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
+  }
+
   const token = process.env.GITHUB_SYNC_TOKEN;
   if (!token) {
     return NextResponse.json(
