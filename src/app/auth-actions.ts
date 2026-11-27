@@ -17,6 +17,16 @@ async function guardarSesion(datos: Omit<Sesion, "exp">) {
 }
 
 const msg = (e: unknown) => encodeURIComponent((e as Error).message ?? "Error");
+
+/**
+ * Falla de infraestructura (Drive sin acceso, variables de entorno sin configurar):
+ * se registra completa en los logs del servidor y se muestra al usuario un motivo
+ * claro en la pantalla de ingreso en vez de la página de error genérica.
+ */
+function errorSistema(modo: "epsi" | "prestador", e: unknown): never {
+  console.error("[auth] Error de sistema en el ingreso:", e);
+  redirect(`/ingreso?modo=${modo}&error=sistema&detalle=${msg(e)}`);
+}
 const campo = (form: FormData, nombre: string) => String(form.get(nombre) ?? "");
 
 // ── Ingreso ────────────────────────────────────────────────────────────
@@ -27,11 +37,19 @@ export async function iniciarSesion(form: FormData) {
   const password = campo(form, "password");
   if (!usuario || !password) redirect("/ingreso?modo=epsi&error=credenciales");
 
-  const r = await autenticar(usuario, password);
-  if (!r.ok) redirect(`/ingreso?modo=epsi&error=${r.motivo}`);
-  const u = r.usuario;
-  await guardarSesion({ id: u.id, usuario: u.usuario, rol: u.rol, nombre: u.nombre });
-  redirect(rutaInicio(u.rol));
+  let destino: string;
+  try {
+    const r = await autenticar(usuario, password);
+    if (!r.ok) destino = `/ingreso?modo=epsi&error=${r.motivo}`;
+    else {
+      const u = r.usuario;
+      await guardarSesion({ id: u.id, usuario: u.usuario, rol: u.rol, nombre: u.nombre });
+      destino = rutaInicio(u.rol);
+    }
+  } catch (e) {
+    errorSistema("epsi", e);
+  }
+  redirect(destino);
 }
 
 /** Prestadores: eligen su IPS y entran con el NIT (primer ingreso) o su contraseña personal. */
@@ -40,18 +58,25 @@ export async function iniciarSesionPrestador(form: FormData) {
   const password = campo(form, "password");
   if (!ips || !password) redirect("/ingreso?modo=prestador&error=credenciales");
 
-  const r = await autenticarPrestador(ips, password);
-  if (!r.ok) redirect(`/ingreso?modo=prestador&error=${r.motivo}`);
-
-  await guardarSesion({
-    id: `ips:${r.prestador.ips}`,
-    usuario: r.prestador.nit,
-    rol: "prestador",
-    nombre: r.prestador.ips,
-    ips: r.prestador.ips,
-    debeCambiarClave: r.debeCambiarClave || undefined,
-  });
-  redirect(r.debeCambiarClave ? "/cambiar-clave" : "/prestador");
+  let destino: string;
+  try {
+    const r = await autenticarPrestador(ips, password);
+    if (!r.ok) destino = `/ingreso?modo=prestador&error=${r.motivo}`;
+    else {
+      await guardarSesion({
+        id: `ips:${r.prestador.ips}`,
+        usuario: r.prestador.nit,
+        rol: "prestador",
+        nombre: r.prestador.ips,
+        ips: r.prestador.ips,
+        debeCambiarClave: r.debeCambiarClave || undefined,
+      });
+      destino = r.debeCambiarClave ? "/cambiar-clave" : "/prestador";
+    }
+  } catch (e) {
+    errorSistema("prestador", e);
+  }
+  redirect(destino);
 }
 
 export async function cambiarClavePrestador(form: FormData) {

@@ -58,5 +58,6 @@ export const ERRORES_INGRESO: Record<string, string> = {
   credenciales: "Usuario o contraseña incorrectos.",
   bloqueado: "Demasiados intentos fallidos. Espera 5 minutos e inténtalo de nuevo.",
   inactivo: "Esta cuenta no está habilitada. Comunícate con el administrador de la EPSI.",
+  sistema: "No se pudo acceder al almacenamiento de usuarios. El administrador debe revisar la configuración (carpeta de Drive y variables en Vercel).",
   pendiente: "Tu solicitud de registro está pendiente de aprobación por un administrador.",
 };

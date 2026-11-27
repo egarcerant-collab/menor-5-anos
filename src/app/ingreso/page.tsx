@@ -8,11 +8,11 @@ import { iniciarSesion, iniciarSesionPrestador } from "../auth-actions";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Ingreso · Primera Infancia" };
 
-export default async function IngresoPage({ searchParams }: { searchParams: Promise<{ modo?: string; error?: string; ok?: string }> }) {
+export default async function IngresoPage({ searchParams }: { searchParams: Promise<{ modo?: string; error?: string; ok?: string; detalle?: string }> }) {
   const sesion = await getSesion();
   if (sesion && !sesion.debeCambiarClave) redirect(rutaInicio(sesion.rol));
 
-  const { modo: m, error, ok } = await searchParams;
+  const { modo: m, error, ok, detalle } = await searchParams;
   const modo = m === "prestador" ? "prestador" : "epsi";
   const textoError = error ? ERRORES_INGRESO[error] ?? "No fue posible ingresar." : null;
 
@@ -28,7 +28,12 @@ export default async function IngresoPage({ searchParams }: { searchParams: Prom
       </div>
 
       {ok === "solicitud" && <Aviso tipo="ok">Solicitud enviada. Un administrador debe aprobarla antes de que puedas ingresar.</Aviso>}
-      {textoError && <Aviso tipo="error">{textoError}</Aviso>}
+      {textoError && (
+        <Aviso tipo="error">
+          {textoError}
+          {error === "sistema" && detalle && <span className="block mt-1 text-xs opacity-80">Detalle técnico: {detalle.slice(0, 300)}</span>}
+        </Aviso>
+      )}
 
       {modo === "epsi" ? (
         <form action={iniciarSesion} className="space-y-4">
